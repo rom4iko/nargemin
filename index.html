@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.17-yibashka</title>
+  <title>Помічник взводу v3.18-yib-pill-fix</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -1132,7 +1132,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.17-yibashka';
+    var APP_VERSION = 'v3.18-yib-pill-fix';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -3303,6 +3303,15 @@
       return monthBar + copyStatBtn + groupsHtml;
     }
 
+    function setYibWorkSuggestion(idx) {
+      var list = window._yibPastWorks || [];
+      var inp = document.getElementById('yib-work');
+      if (inp && list[idx] !== undefined) {
+        inp.value = String(list[idx]);
+        inp.focus();
+      }
+    }
+
     function openYibModal(existingId) {
       var editableSquads = getEditableYibSquadIds();
       if (!editableSquads.length) return;
@@ -3341,9 +3350,10 @@
         if (item.workName) pastWorksSet[item.workName] = true;
       });
       var pastWorks = Object.keys(pastWorksSet).slice(0, 8);
+      window._yibPastWorks = pastWorks;
       var quickTagsHtml = pastWorks.length
-        ? '<div class="pills-scroll">' + pastWorks.map(function(pw) {
-            return '<button type="button" class="pill" onclick="document.getElementById(\'yib-work\').value=' + JSON.stringify(pw) + '">' + esc(pw) + '</button>';
+        ? '<div class="pills-scroll">' + pastWorks.map(function(pw, pIdx) {
+            return '<button type="button" class="pill" onclick="setYibWorkSuggestion(' + pIdx + ')">' + esc(pw) + '</button>';
           }).join('') + '</div>'
         : '';
 
