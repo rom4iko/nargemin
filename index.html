@@ -27,6 +27,7 @@
       --red: #ef4444;
       --purple: #a855f7;
       --cyan: #06b6d4;
+      --gold: #eab308;
       --radius: 14px;
       --radius-sm: 10px;
       --nav-h: 64px;
@@ -59,7 +60,7 @@
       outline: none;
     }
 
-    /* >= 16px на інпутах щоб iPhone Safari не масштабував сторінку при фокусі */
+    /* >= 16px на полях вводу, щоб Safari на iPhone не збільшував масштаб при фокусі */
     input, select, textarea {
       font-size: 16px;
     }
@@ -131,6 +132,17 @@
     .brand-sub {
       font-size: 11px;
       color: var(--muted);
+    }
+
+    .header-ver-badge {
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(94, 150, 77, 0.45);
+      color: #86efac;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
     }
 
     /* Основний контент */
@@ -251,7 +263,7 @@
       letter-spacing: 0.04em;
     }
 
-    /* Акордеон для відділень (Склад та Розхід) */
+    /* Акордеон-вкладки */
     .accordion-header {
       width: 100%;
       padding: 12px 13px;
@@ -287,7 +299,7 @@
       color: #fff;
     }
 
-    /* Підвкладки (сегментований перемикач) */
+    /* Підвкладки */
     .subtabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -314,7 +326,7 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
 
-    /* Горизонтальні вкладки-пілюлі */
+    /* Горизонтальні фільтр-пілюлі */
     .pills-row {
       display: flex;
       gap: 7px;
@@ -495,7 +507,7 @@
       justify-content: center;
     }
 
-    /* Чекбокс-картка та перемикачі */
+    /* Чекбокси та перемикачі */
     .checkbox-card {
       display: flex;
       align-items: center;
@@ -521,7 +533,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 11px;
+      padding: 8px 10px;
       border-radius: 10px;
       background: var(--bg);
       border: 1px solid var(--border);
@@ -536,6 +548,7 @@
       width: 17px;
       height: 17px;
       accent-color: #4ade80;
+      flex-shrink: 0;
     }
 
     /* Бейджі */
@@ -557,10 +570,17 @@
       border-color: rgba(245, 158, 11, 0.45);
     }
 
+    .badge-kg {
+      background: rgba(234, 179, 8, 0.22);
+      color: #fde047;
+      border-color: rgba(234, 179, 8, 0.55);
+    }
+
     .badge-status-active { background: rgba(16, 185, 129, 0.14); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
-    .badge-status-leave { background: rgba(59, 130, 246, 0.14); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
-    .badge-status-medical { background: rgba(239, 68, 68, 0.14); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
-    .badge-status-trip { background: rgba(245, 158, 11, 0.14); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+    .badge-status-absent { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.35); }
+    .badge-status-med { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
+    .badge-status-leave { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.35); }
+    .badge-status-other { background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.35); }
 
     .badge-warn {
       background: rgba(239, 68, 68, 0.16);
@@ -702,31 +722,83 @@
       gap: 6px;
     }
 
-    /* Розхід: селектор статусу бійця */
-    .rozkhid-select {
-      width: 150px;
-      max-width: 48%;
-      flex-shrink: 0;
-      padding: 8px 10px;
-      min-height: 40px;
-      border-radius: 9px;
+    /* Швидкі кнопки статусів у розгорнутій картці бійця */
+    .status-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    .status-chip-btn {
+      padding: 7px 4px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
       border: 1px solid var(--border);
       background: var(--bg);
+      color: var(--muted);
+      text-align: center;
+      min-height: 36px;
+    }
+
+    .status-chip-btn.active {
+      background: rgba(94, 150, 77, 0.22);
+      border-color: #4ade80;
       color: #fff;
-      font-size: 14px;
+    }
+
+    .status-chip-btn.active-absent {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: #f59e0b;
+      color: #fde68a;
+    }
+
+    /* Розхід: рядки категорій з лічильниками - / + та кнопкою ПІБ */
+    .rozkhid-cat-row {
+      padding: 10px 11px;
+      border-radius: 11px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .rozkhid-cat-row.has-val {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .stepper {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 17px;
       font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .rozkhid-select.is-present {
-      border-color: rgba(16, 185, 129, 0.45);
-      color: #34d399;
-      background: rgba(16, 185, 129, 0.08);
-    }
+    .step-btn:hover { background: #263342; }
 
-    .rozkhid-select.is-absent {
-      border-color: rgba(245, 158, 11, 0.55);
-      color: #fbbf24;
-      background: rgba(245, 158, 11, 0.1);
+    .step-val {
+      min-width: 24px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
     }
 
     .rozkhid-preview {
@@ -736,7 +808,7 @@
       padding: 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.55;
       color: #d7e2ec;
       white-space: pre-wrap;
       word-break: break-word;
@@ -873,7 +945,7 @@
       color: #fca5a5;
     }
 
-    /* Блок зауважень під задачею */
+    /* Зауваження під задачею */
     .note-toggle-btn {
       display: flex;
       align-items: center;
@@ -1036,22 +1108,25 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       padding: 12px 14px;
       border-radius: var(--radius);
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(94, 150, 77, 0.45);
       font-size: 13px;
-      color: var(--muted);
+      color: var(--text);
+      font-weight: 600;
     }
 
     .version-pill {
-      padding: 3px 9px;
+      padding: 3px 10px;
       border-radius: 999px;
       background: var(--accent-soft);
       border: 1px solid rgba(94, 150, 77, 0.45);
       color: #86efac;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     /* Допоміжні утиліти */
@@ -1068,7 +1143,7 @@
 </head>
 <body>
   <div class="app-shell">
-    <!-- Верхня шапка -->
+    <!-- Верхня шапка з бейджем версії -->
     <header class="app-header">
       <div class="brand">
         <div class="brand-icon" aria-hidden="true">
@@ -1079,15 +1154,16 @@
         </div>
         <div>
           <div class="brand-title">Помічник взводу</div>
-          <div class="brand-sub">Наряди • Розхід • Задачі • Склад</div>
+          <div class="brand-sub">Наряди • Задачі • Розхід • Склад</div>
         </div>
       </div>
+      <span class="header-ver-badge">v2.5</span>
     </header>
 
     <!-- Основний контент активної вкладки -->
     <main id="main-content" class="main-content"></main>
 
-    <!-- Нижня фіксована навігація (5 вкладок) -->
+    <!-- Нижня фіксована навігація (5 вкладок: Наряди, Задачі, Розхід, Склад, Налаштування) -->
     <nav class="bottom-nav" aria-label="Головна навігація">
       <div class="bottom-nav-inner">
         <button class="nav-btn" id="nav-duties" onclick="switchTab('duties')">
@@ -1100,6 +1176,15 @@
           <span class="nav-lbl">Наряди</span>
         </button>
 
+        <button class="nav-btn" id="nav-tasks" onclick="switchTab('tasks')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span class="nav-lbl">Задачі</span>
+          <span id="nav-tasks-badge" class="nav-badge hidden">0</span>
+        </button>
+
         <button class="nav-btn" id="nav-rozkhid" onclick="switchTab('rozkhid')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
@@ -1108,15 +1193,6 @@
             <line x1="8" y1="15" x2="14" y2="15"/>
           </svg>
           <span class="nav-lbl">Розхід</span>
-        </button>
-
-        <button class="nav-btn" id="nav-tasks" onclick="switchTab('tasks')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-          <span class="nav-lbl">Задачі</span>
-          <span id="nav-tasks-badge" class="nav-badge hidden">0</span>
         </button>
 
         <button class="nav-btn" id="nav-personnel" onclick="switchTab('personnel')">
@@ -1153,9 +1229,10 @@
 
   <script>
     // =========================================================================
-    // КОНСТАНТИ ТА ДОВІДНИКИ
+    // КОНСТАНТИ, ВЕРСІЯ ТА ДОВІДНИКИ
     // =========================================================================
-    const APP_VERSION = 'v3.0';
+    const APP_VERSION = 'v2.5';
+    const APP_UPDATED_DATE = '20.11.2026';
     const STORAGE_KEY = 'pomichnyk_vzvodu_v3';
 
     const MONTHS_UK = [
@@ -1184,27 +1261,33 @@
       '#ec4899'  // Рожевий
     ];
 
-    const STATUS_LIST = [
-      { id: 'active', label: 'В строю', cls: 'badge-status-active' },
-      { id: 'leave', label: 'Відпустка', cls: 'badge-status-leave' },
-      { id: 'medical', label: 'Лікування', cls: 'badge-status-medical' },
-      { id: 'trip', label: 'Відрядження', cls: 'badge-status-trip' }
+    // Постійні статуси військовослужбовця у «Складі» (автоматично підтягуються в «Розхід»)
+    const SOLDIER_STATUSES = [
+      { id: 'active', short: 'В строю', label: 'В строю', cls: 'badge-status-active' },
+      { id: 'Ш',      short: 'Ш',       label: 'Ш (Шпиталь)', cls: 'badge-status-med' },
+      { id: 'Л',      short: 'Л',       label: 'Л (Лазарет)', cls: 'badge-status-med' },
+      { id: 'Вд',     short: 'Вд',      label: 'Вд (Відрядження)', cls: 'badge-status-absent' },
+      { id: 'Вп',     short: 'Вп',      label: 'Вп (Відпустка)', cls: 'badge-status-leave' },
+      { id: 'Г',      short: 'Г',       label: 'Г (Гуртожиток)', cls: 'badge-status-other' },
+      { id: 'Пк',     short: 'Пк',      label: 'Пк (Поза казармою)', cls: 'badge-status-other' },
+      { id: 'Хв',     short: 'Хв',      label: 'Хв (Хворий)', cls: 'badge-status-med' }
     ];
 
-    // Точний порядок статусів Розходу (UI мітка + скорочення для експорту)
-    const ROZKHID_STATUSES = [
-      { code: 'Вн', uiLabel: 'Вн — В наявності' },
-      { code: 'Прийом шпиталь', uiLabel: 'Прийом шпиталь' },
-      { code: 'Прийом лазарет', uiLabel: 'Прийом лазарет' },
-      { code: 'Ш', uiLabel: 'Ш — Шпиталь' },
-      { code: 'Л', uiLabel: 'Л — Лазарет' },
-      { code: 'Вд', uiLabel: 'Вд — Відрядження' },
-      { code: 'Вп', uiLabel: 'Вп — Відпустка' },
-      { code: 'Н', uiLabel: 'Н — Наряд' },
-      { code: 'Г', uiLabel: 'Г — Гуртожиток' },
-      { code: 'Пк', uiLabel: 'Пк — Проживання поза казармою' },
-      { code: 'Хв', uiLabel: 'Хв — Хворий' },
-      { code: 'Стародобовий', uiLabel: 'Стародобовий — Стародобовий наряд' }
+    const PERMANENT_ABSENT_CODES = new Set(['Ш', 'Л', 'Вд', 'Вп', 'Г', 'Пк', 'Хв']);
+
+    // Точний порядок категорій відсутності в «Розході» (БЕЗ розшифрувань у рапорті)
+    const ROZKHID_ABSENT_CATEGORIES = [
+      { code: 'Прийом шпиталь', hint: 'Прийом шпиталь' },
+      { code: 'Прийом лазарет', hint: 'Прийом лазарет' },
+      { code: 'Ш',              hint: 'Шпиталь' },
+      { code: 'Л',              hint: 'Лазарет' },
+      { code: 'Вд',             hint: 'Відрядження' },
+      { code: 'Вп',             hint: 'Відпустка' },
+      { code: 'Н',              hint: 'Наряд (авто з графіка)' },
+      { code: 'Г',              hint: 'Гуртожиток' },
+      { code: 'Пк',             hint: 'Поза казармою' },
+      { code: 'Хв',             hint: 'Хворий' },
+      { code: 'Стародобовий',   hint: 'Вчорашній наряд (авто)' }
     ];
 
     const DEFAULT_SQUADS = [
@@ -1217,8 +1300,8 @@
     const DEFAULT_DUTY_TYPES = [
       { id: 'dt_1', name: 'Черговий' },
       { id: 'dt_2', name: 'Днювальний' },
-      { id: 'dt_3', name: 'Патруль' },
-      { id: 'dt_4', name: 'КПП' }
+      { id: 'dt_3', name: 'КПП' },
+      { id: 'dt_4', name: 'Патруль' }
     ];
 
     // =========================================================================
@@ -1226,18 +1309,18 @@
     // =========================================================================
     let state = {
       groupNumber: '223',
-      squads: [],       // [{ id, name, color }]
+      squads: [],       // [{ id, name, color, isGroupCmd? }]
       soldiers: [],     // [{ id, name, rank, squadId, isCommander, status }]
       dutyTypes: [],    // [{ id, name }]
       duties: [],       // [{ id, date: 'YYYY-MM-DD', soldierId, dutyTypeId }]
       tasks: [],        // [{ id, targetType: 'squad'|'all_commanders', targetSquadId, text, issuer, deadline, status, note, createdAt }]
-      rozkhid: {},      // { 'YYYY-MM-DD': { [soldierId]: statusCode } }
+      rozkhid: {},      // { 'YYYY-MM-DD': { overrides: { [soldierId]: code|'Вн' }, extra: { [catCode]: number } } }
       lastBackupAt: null
     };
 
     const nowDate = new Date();
     let ui = {
-      activeTab: 'duties',        // 'duties' | 'rozkhid' | 'tasks' | 'personnel' | 'settings'
+      activeTab: 'duties',        // 'duties' | 'tasks' | 'rozkhid' | 'personnel' | 'settings'
       dutiesSubTab: 'schedule',   // 'schedule' | 'stats'
       year: nowDate.getFullYear(),
       month: nowDate.getMonth(),
@@ -1246,10 +1329,11 @@
       statsSquadFilter: 'all',
       statsSort: 'month_desc',    // 'month_desc' | 'month_asc' | 'total_desc' | 'alpha'
       rozkhidDate: toISODate(nowDate),
-      rozkhidIncludeNames: false,
+      rozkhidIncludeNames: true,  // УВІМКНЕНО за замовчуванням у v2.5
       rozkhidHideZeros: false,
-      expandedRozkhidSquads: {},  // { [squadId]: true/false }
-      expandedPersonnelSquads: {},// { [squadId]: true/false } — за замовчуванням згорнуті як вкладки
+      personnelSquadFilter: 'all',
+      expandedPersonnelSquads: {},
+      expandedSoldiers: {},
       personnelSearch: '',
       tasksTargetFilter: 'all',
       tasksStatusFilter: 'all',
@@ -1257,6 +1341,7 @@
     };
 
     let assignModal = { date: '', dutyTypeId: '' };
+    let tempSquadColor = SQUAD_PALETTE[0];
 
     // =========================================================================
     // УТИЛІТИ
@@ -1357,7 +1442,7 @@
       }
     }
 
-    // Копіювання в буфер обміну (надійно працює на iOS Safari та в iFrame)
+    // Надійне копіювання в буфер обміну (працює на iOS Safari, Android Chrome та в iFrame)
     function copyToClipboard(text, successMsg = 'Скопійовано у буфер обміну') {
       try {
         const ta = document.createElement('textarea');
@@ -1389,28 +1474,41 @@
       return false;
     }
 
-    function getStatusObj(id) {
-      return STATUS_LIST.find(s => s.id === id) || STATUS_LIST[0];
+    // Отримання прізвища для рапорту (якщо є однофамільці у взводі — додає ініціал імені)
+    function getSurnameCountsMap() {
+      const counts = {};
+      for (const s of state.soldiers) {
+        const parts = (s.name || '').trim().split(/\s+/);
+        const key = (parts[0] || '').toLowerCase();
+        if (key) counts[key] = (counts[key] || 0) + 1;
+      }
+      return counts;
     }
 
-    function getSquadById(id) {
-      return state.squads.find(s => s.id === id) || { id, name: 'Без відділення', color: '#64748b' };
+    function formatReportSurname(soldier, surnameCounts) {
+      const parts = (soldier.name || '').trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return '';
+      const surname = parts[0];
+      const key = surname.toLowerCase();
+      if ((surnameCounts[key] || 0) > 1 && parts[1]) {
+        const initial = parts[1].replace(/\./g, '').charAt(0).toUpperCase();
+        return initial ? `${surname} ${initial}.` : surname;
+      }
+      return surname;
     }
 
-    function getSquadTabLabel(sq) {
-      if (!sq) return 'Відд.';
-      if (sq.id === GROUP_CMD_SQUAD_ID || sq.isGroupCmd) return 'Ком. групи';
-      const m = sq.name.match(/^(\d+)/);
-      if (m) return `${m[1]} відд.`;
-      return sq.name.length > 11 ? sq.name.slice(0, 10) + '…' : sq.name;
+    function normalizeSoldierStatus(st) {
+      if (!st || st === 'active') return 'active';
+      if (st === 'leave') return 'Вп';
+      if (st === 'medical') return 'Ш';
+      if (st === 'trip') return 'Вд';
+      if (PERMANENT_ABSENT_CODES.has(st)) return st;
+      return 'active';
     }
 
-    function formatCommanderTargetLabel(sq) {
-      if (!sq) return 'Командиру відділення';
-      if (sq.id === GROUP_CMD_SQUAD_ID || sq.isGroupCmd) return 'Командиру групи';
-      const m = sq.name.match(/^(\d+)/);
-      if (m) return `Командиру ${m[1]}-го відділення`;
-      return `Командиру (${sq.name})`;
+    function getStatusObj(statusId) {
+      const norm = normalizeSoldierStatus(statusId);
+      return SOLDIER_STATUSES.find(s => s.id === norm) || SOLDIER_STATUSES[0];
     }
 
     function isGroupCmdSquad(sq) {
@@ -1427,12 +1525,21 @@
       return [...cmd, ...rest];
     }
 
-    function getGroupCommanderSoldier() {
-      return state.soldiers.find(s => s.squadId === GROUP_CMD_SQUAD_ID) || null;
+    function getSquadById(id) {
+      return state.squads.find(s => s.id === id) || { id, name: 'Без відділення', color: '#64748b' };
+    }
+
+    function getSquadTabLabel(sq) {
+      if (!sq) return 'Відд.';
+      if (isGroupCmdSquad(sq)) return 'Ком. групи';
+      const m = sq.name.match(/^(\d+)/);
+      if (m) return `${m[1]} відд.`;
+      return sq.name.length > 11 ? sq.name.slice(0, 10) + '…' : sq.name;
     }
 
     function formatCommanderTargetLabel(sq) {
       if (!sq) return 'Командиру відділення';
+      if (isGroupCmdSquad(sq)) return 'Командиру групи';
       const m = sq.name.match(/^(\d+)/);
       if (m) return `Командиру ${m[1]}-го відділення`;
       return `Командиру (${sq.name})`;
@@ -1448,6 +1555,10 @@
 
     function getSquadCommander(squadId) {
       return state.soldiers.find(s => s.squadId === squadId && s.isCommander) || null;
+    }
+
+    function getGroupCommanderSoldier() {
+      return state.soldiers.find(s => s.squadId === GROUP_CMD_SQUAD_ID) || null;
     }
 
     // Командир відділення завжди зверху, решта — за алфавітом
@@ -1477,14 +1588,13 @@
     }
 
     // =========================================================================
-    // ІНІЦІАЛІЗАЦІЯ ТА ЗБЕРЕЖЕННЯ (ПОРОЖНІЙ СТАРТ БЕЗ ДЕМО-ЗАПИСІВ + МІГРАЦІЯ)
+    // ІНІЦІАЛІЗАЦІЯ, МІГРАЦІЯ ТА ЗБЕРЕЖЕННЯ (БЕЗ ДЕМО-ЗАПИСІВ)
     // =========================================================================
-    const APP_VERSION = 'v2.4';
-    const APP_UPDATED_DATE = '20.11.2026';
-
     function ensureGroupCmdSquad(squadsList) {
       const list = Array.isArray(squadsList) ? [...squadsList] : [];
-      const existingIdx = list.findIndex(sq => sq && (sq.id === GROUP_CMD_SQUAD_ID || sq.isGroupCmd || (sq.name && sq.name.trim().toLowerCase() === 'командир групи')));
+      const existingIdx = list.findIndex(sq =>
+        sq && (sq.id === GROUP_CMD_SQUAD_ID || sq.isGroupCmd || (sq.name && sq.name.trim().toLowerCase() === 'командир групи'))
+      );
       if (existingIdx === -1) {
         list.unshift({ id: GROUP_CMD_SQUAD_ID, name: 'Командир групи', color: '#eab308', isGroupCmd: true });
       } else {
@@ -1494,6 +1604,28 @@
         list.unshift(item);
       }
       return list;
+    }
+
+    // Міграція формату rozkhid з попередніх версій ({ [date]: { [soldierId]: code } } -> { [date]: { overrides: {}, extra: {} } })
+    function migrateRozkhidMap(rawRozkhid) {
+      const res = {};
+      if (!rawRozkhid || typeof rawRozkhid !== 'object') return res;
+      for (const [dateKey, val] of Object.entries(rawRozkhid)) {
+        if (!val || typeof val !== 'object') continue;
+        if (val.overrides && typeof val.overrides === 'object') {
+          res[dateKey] = {
+            overrides: { ...val.overrides },
+            extra: val.extra && typeof val.extra === 'object' ? { ...val.extra } : {}
+          };
+        } else {
+          // Старий плаский формат: { [soldierId]: statusCode }
+          res[dateKey] = {
+            overrides: { ...val },
+            extra: {}
+          };
+        }
+      }
+      return res;
     }
 
     function createEmptyInitialState() {
@@ -1511,7 +1643,6 @@
 
     function loadState() {
       try {
-        // Підтримка міграції зі старого ключа STORAGE_KEY та можливих попередніх ключів
         let raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
           for (const legacyKey of ['pomichnyk_vzvodu_v2', 'pomichnyk_vzvodu_v1', 'platoon_duty_tracker_v1']) {
@@ -1533,16 +1664,20 @@
             ? parsed.squads
             : JSON.parse(JSON.stringify(DEFAULT_SQUADS))
         );
+        const migratedSoldiers = (Array.isArray(parsed.soldiers) ? parsed.soldiers : []).map(s => ({
+          ...s,
+          status: normalizeSoldierStatus(s.status)
+        }));
         state = {
           groupNumber: typeof parsed.groupNumber === 'string' && parsed.groupNumber.trim() ? parsed.groupNumber : '223',
           squads: migratedSquads,
-          soldiers: Array.isArray(parsed.soldiers) ? parsed.soldiers : [],
+          soldiers: migratedSoldiers,
           dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
             ? parsed.dutyTypes
             : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
           duties: Array.isArray(parsed.duties) ? parsed.duties : [],
           tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
-          rozkhid: parsed.rozkhid && typeof parsed.rozkhid === 'object' ? parsed.rozkhid : {},
+          rozkhid: migrateRozkhidMap(parsed.rozkhid),
           lastBackupAt: parsed.lastBackupAt || null
         };
         saveState();
@@ -1661,6 +1796,7 @@
         </div>
       `;
     }
+
     function renderSquadPills(activeId, handlerName, excludeGroupCmd = false) {
       const allBtn = `
         <button class="pill-btn ${activeId === 'all' ? 'active' : ''}" style="--pill-color:#4ade80" onclick="${handlerName}('all')">
@@ -1764,7 +1900,7 @@
                     <div class="soldier-name-line">
                       <span class="badge" style="background:${sq.color}22; color:${sq.color}; border-color:${sq.color}55">${esc(dt.name)}</span>
                       <span class="soldier-name">${esc(s.name)}</span>
-                      ${isKG ? `<span class="badge badge-kv">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
+                      ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
                     </div>
                     <div class="soldier-meta">
                       <span>${esc(sq.name)}</span>
@@ -1869,10 +2005,10 @@
         return { ...s, stats, isToday, isYesterday, restDays };
       });
 
-      const eligible = enriched.filter(c => c.status === 'active' && !c.isToday && !c.isYesterday);
+      const eligible = enriched.filter(c => normalizeSoldierStatus(c.status) === 'active' && !c.isToday && !c.isYesterday);
       const bestMonthCount = eligible.length ? Math.min(...eligible.map(c => c.stats.monthCount)) : -1;
 
-      // Групування та сортування по відділеннях: спочатку «Командир групи», далі 1-ше, 2-ге, 3-тє відділення (КВ зверху)
+      // Групування та сортування по відділеннях: Командир групи → 1-ше → 2-ге → 3-тє (КВ зверху)
       const orderedSquads = getOrderedSquads();
       const groupsHtml = orderedSquads.map(sq => {
         const isKG = isGroupCmdSquad(sq);
@@ -1883,8 +2019,8 @@
               if (a.isCommander && !b.isCommander) return -1;
               if (!a.isCommander && b.isCommander) return 1;
             }
-            const aActive = a.status === 'active';
-            const bActive = b.status === 'active';
+            const aActive = normalizeSoldierStatus(a.status) === 'active';
+            const bActive = normalizeSoldierStatus(b.status) === 'active';
             if (aActive !== bActive) return aActive ? -1 : 1;
             if (a.isToday !== b.isToday) return a.isToday ? 1 : -1;
             if (a.isYesterday !== b.isYesterday) return a.isYesterday ? 1 : -1;
@@ -1897,18 +2033,19 @@
 
         const rows = members.map(c => {
           const stObj = getStatusObj(c.status);
-          const isRec = c.status === 'active' && !c.isToday && !c.isYesterday && c.stats.monthCount === bestMonthCount;
+          const isActive = stObj.id === 'active';
+          const isRec = isActive && !c.isToday && !c.isYesterday && c.stats.monthCount === bestMonthCount;
 
           return `
-            <button class="soldier-row ${c.isCommander || isKG ? 'is-kv' : ''}" onclick="confirmAssignDuty('${c.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left; border-radius:10px; border:1px solid ${isRec ? 'rgba(16,185,129,0.45)' : 'var(--border)'}; border-left:4px solid ${sq.color}; opacity:${c.status !== 'active' ? '0.6' : '1'}">
+            <button class="soldier-row ${c.isCommander || isKG ? 'is-kv' : ''}" onclick="confirmAssignDuty('${c.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left; border-radius:10px; border:1px solid ${isRec ? 'rgba(16,185,129,0.45)' : 'var(--border)'}; border-left:4px solid ${sq.color}; opacity:${!isActive ? '0.6' : '1'}">
               <div class="soldier-info">
                 <div class="soldier-name-line">
                   <span class="soldier-name">${esc(c.name)}</span>
-                  ${isKG ? `<span class="badge badge-kv">★ КГ</span>` : (c.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
+                  ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (c.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
                   ${isRec ? `<span class="badge badge-rec">Рекомендовано</span>` : ''}
                   ${c.isToday ? `<span class="badge badge-warn">Вже сьогодні</span>` : ''}
                   ${!c.isToday && c.isYesterday ? `<span class="badge badge-warn">Був учора</span>` : ''}
-                  ${c.status !== 'active' ? `<span class="badge ${stObj.cls}">${stObj.label}</span>` : ''}
+                  ${!isActive ? `<span class="badge ${stObj.cls}">${stObj.short}</span>` : ''}
                 </div>
                 <div class="soldier-meta">
                   ${c.rank ? `<span>${esc(c.rank)} •</span>` : ''}
@@ -2083,8 +2220,8 @@
             <div class="soldier-name-line">
               <span class="pill-dot" style="background:${sq.color}"></span>
               <span class="soldier-name">${esc(s.name)}</span>
-              ${isKG ? `<span class="badge badge-kv">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
-              ${s.status !== 'active' ? `<span class="badge ${st.cls}">${st.label}</span>` : ''}
+              ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
+              ${st.id !== 'active' ? `<span class="badge ${st.cls}">${st.short}</span>` : ''}
             </div>
             <div class="soldier-meta">
               <span>Останній: ${formatDateShort(s.stats.lastDate)}</span>
@@ -2149,7 +2286,7 @@
                         <div class="text-sm" style="font-weight:600;color:#fff">${formatDateHuman(d.date)}</div>
                         <span class="badge" style="margin-top:4px;background:${sq.color}22;color:${sq.color};border-color:${sq.color}55">${esc(dt.name)}</span>
                       </div>
-                      <button class="btn-icon danger" onclick="removeDuty('${d.id}', '${s.id}')" title="Видалити помилковий запис">
+                      <button class="btn-icon danger" onclick="removeDuty('${d.id}', '${s.id}')" title="Видалити запис">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                       </button>
                     </div>
@@ -2162,379 +2299,7 @@
     }
 
     // =========================================================================
-    // ВКЛАДКА 2: РОЗХІД (ЩОДЕННИЙ ОБЛІК О/С ТА ШАБЛОН ДЛЯ МЕСЕНДЖЕРІВ)
-    // =========================================================================
-    function changeRozkhidDate(delta) {
-      ui.rozkhidDate = addDaysISO(ui.rozkhidDate, delta);
-      render();
-    }
-
-    function setRozkhidToday() {
-      ui.rozkhidDate = toISODate(new Date());
-      render();
-    }
-
-    function updateGroupNumber(val) {
-      state.groupNumber = val.trim();
-      saveState();
-      const previewEl = document.getElementById('rozkhid-preview-box');
-      if (previewEl) previewEl.textContent = generateRozkhidText();
-    }
-
-    function getRozkhidStatus(dateISO, soldierId) {
-      const dayMap = state.rozkhid[dateISO];
-      if (!dayMap || !dayMap[soldierId]) return 'Вн';
-      return dayMap[soldierId];
-    }
-
-    function setRozkhidStatus(soldierId, statusCode) {
-      if (!state.rozkhid[ui.rozkhidDate]) {
-        state.rozkhid[ui.rozkhidDate] = {};
-      }
-      if (statusCode === 'Вн') {
-        delete state.rozkhid[ui.rozkhidDate][soldierId];
-      } else {
-        state.rozkhid[ui.rozkhidDate][soldierId] = statusCode;
-      }
-      saveState();
-      render();
-    }
-
-    function toggleRozkhidSquad(squadId) {
-      ui.expandedRozkhidSquads[squadId] = !ui.expandedRozkhidSquads[squadId];
-      render();
-    }
-
-    function toggleAllRozkhidSquads() {
-      const allOpen = state.squads.length > 0 && state.squads.every(sq => ui.expandedRozkhidSquads[sq.id]);
-      state.squads.forEach(sq => {
-        ui.expandedRozkhidSquads[sq.id] = !allOpen;
-      });
-      render();
-    }
-
-    function toggleRozkhidOption(opt, checked) {
-      if (opt === 'names') ui.rozkhidIncludeNames = checked;
-      if (opt === 'hideZeros') ui.rozkhidHideZeros = checked;
-      const previewEl = document.getElementById('rozkhid-preview-box');
-      if (previewEl) previewEl.textContent = generateRozkhidText();
-    }
-
-    // Підтягнути статуси «Н» (сьогодні в наряді) та «Стародобовий» (був у наряді вчора)
-    function syncRozkhidFromDuties() {
-      if (state.soldiers.length === 0) {
-        showToast('Список особового складу порожній', 'error');
-        return;
-      }
-      const dateISO = ui.rozkhidDate;
-      const yestISO = addDaysISO(dateISO, -1);
-
-      const todayDutyIds = new Set(state.duties.filter(d => d.date === dateISO).map(d => d.soldierId));
-      const yestDutyIds = new Set(state.duties.filter(d => d.date === yestISO).map(d => d.soldierId));
-
-      if (!state.rozkhid[dateISO]) state.rozkhid[dateISO] = {};
-
-      let countN = 0;
-      let countStaro = 0;
-
-      state.soldiers.forEach(s => {
-        const cur = getRozkhidStatus(dateISO, s.id);
-        // Оновлюємо якщо статус Вн або вже Н/Стародобовий (не затираємо шпиталь/відпустку тощо)
-        const canOverwrite = (cur === 'Вн' || cur === 'Н' || cur === 'Стародобовий');
-        if (!canOverwrite) return;
-
-        if (todayDutyIds.has(s.id)) {
-          state.rozkhid[dateISO][s.id] = 'Н';
-          countN++;
-        } else if (yestDutyIds.has(s.id)) {
-          state.rozkhid[dateISO][s.id] = 'Стародобовий';
-          countStaro++;
-        }
-      });
-
-      saveState();
-      render();
-      if (countN === 0 && countStaro === 0) {
-        showToast('На цю дату нарядів у графіку не знайдено');
-      } else {
-        showToast(`Оновлено: Н — ${countN}, Стародобовий — ${countStaro}`);
-      }
-    }
-
-    // Копіювати статуси з попереднього дня
-    function copyRozkhidFromYesterday() {
-      const yestISO = addDaysISO(ui.rozkhidDate, -1);
-      const prevMap = state.rozkhid[yestISO];
-      if (!prevMap || Object.keys(prevMap).length === 0) {
-        showToast('За вчора немає збережених відміток', 'error');
-        return;
-      }
-      state.rozkhid[ui.rozkhidDate] = { ...prevMap };
-      saveState();
-      render();
-      showToast('Статуси скопійовано з учорашнього дня');
-    }
-    // Підрахунок розходу за вибрану дату (зі збереженням порядку по відділеннях)
-    function computeRozkhidSummary(dateISO) {
-      const total = state.soldiers.length;
-      const buckets = {};
-      ROZKHID_STATUSES.forEach(st => { buckets[st.code] = []; });
-
-      const orderedSoldiers = [];
-      for (const sq of getOrderedSquads()) {
-        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
-        orderedSoldiers.push(...members);
-      }
-
-      for (const s of orderedSoldiers) {
-        const code = getRozkhidStatus(dateISO, s.id);
-        if (buckets[code]) {
-          buckets[code].push(s.name);
-        } else {
-          buckets['Вн'].push(s.name);
-        }
-      }
-
-      const presentCount = buckets['Вн'].length;
-      return { total, presentCount, buckets };
-    }
-    function openRozkhidCategoryModal(statusCode) {
-      const stObj = ROZKHID_STATUSES.find(x => x.code === statusCode) || { code: statusCode, uiLabel: statusCode };
-      const dateISO = ui.rozkhidDate;
-      const orderedSquads = getOrderedSquads();
-
-      const groupsHtml = orderedSquads.map(sq => {
-        const isKG = isGroupCmdSquad(sq);
-        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
-        if (members.length === 0) return '';
-
-        const rows = members.map(s => {
-          const curStatus = getRozkhidStatus(dateISO, s.id);
-          const isChecked = curStatus === statusCode;
-          return `
-            <label class="checkbox-card" style="border-left:4px solid ${sq.color}; padding:9px 11px;">
-              <div class="soldier-info">
-                <div class="soldier-name-line">
-                  <span class="soldier-name">${esc(s.name)}</span>
-                  ${isKG ? `<span class="badge badge-kv">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
-                </div>
-                <div class="soldier-meta">
-                  <span>Поточний статус: <strong style="color:${curStatus === 'Вн' ? '#34d399' : '#fbbf24'}">${esc(curStatus)}</strong></span>
-                </div>
-              </div>
-              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSoldierInRozkhidCategory('${s.id}', '${esc(statusCode)}', this.checked)" />
-            </label>
-          `;
-        }).join('');
-
-        return `
-          <div class="stack" style="gap:6px">
-            <div class="row-gap" style="padding:4px 2px 0">
-              <span class="pill-dot" style="background:${sq.color}"></span>
-              <span class="section-title" style="color:${sq.color}">${esc(sq.name)}</span>
-            </div>
-            ${rows}
-          </div>
-        `;
-      }).join('');
-
-      openModal(`
-        <div class="modal-header">
-          <div>
-            <div class="modal-title">${esc(stObj.uiLabel)}</div>
-            <div class="text-xs text-muted">${formatDateHuman(dateISO)} • Відмітьте о/с по відділеннях</div>
-          </div>
-          <button class="btn-icon" onclick="closeModal()">✕</button>
-        </div>
-        <div class="modal-body">
-          ${state.soldiers.length === 0
-            ? `<div class="empty-state">Немає особового складу.</div>`
-            : `<div class="stack" style="gap:12px">${groupsHtml}</div>`
-          }
-          <button class="btn btn-primary btn-full" onclick="closeModal()">Готово</button>
-        </div>
-      `);
-    }
-
-    function toggleSoldierInRozkhidCategory(soldierId, targetStatus, checked) {
-      if (!state.rozkhid[ui.rozkhidDate]) state.rozkhid[ui.rozkhidDate] = {};
-      if (checked) {
-        if (targetStatus === 'Вн') delete state.rozkhid[ui.rozkhidDate][soldierId];
-        else state.rozkhid[ui.rozkhidDate][soldierId] = targetStatus;
-      } else {
-        delete state.rozkhid[ui.rozkhidDate][soldierId];
-      }
-      saveState();
-      render();
-      openRozkhidCategoryModal(targetStatus);
-    }
-
-    function renderRozkhidTab() {
-      const { total, presentCount, buckets } = computeRozkhidSummary(ui.rozkhidDate);
-      const absentCount = total - presentCount;
-      const orderedSquads = getOrderedSquads();
-      const allOpen = orderedSquads.length > 0 && orderedSquads.every(sq => ui.expandedRozkhidSquads[sq.id]);
-      const previewText = generateRozkhidText();
-
-      const categoryCountersHtml = ROZKHID_STATUSES.filter(st => st.code !== 'Вн').map(st => {
-        const cnt = (buckets[st.code] || []).length;
-        return `
-          <div class="row-between" style="padding:8px 11px;border-radius:10px;background:var(--bg);border:1px solid ${cnt > 0 ? 'rgba(245,158,11,0.45)' : 'var(--border)'}">
-            <div style="min-width:0">
-              <div class="text-sm" style="font-weight:700;color:${cnt > 0 ? '#fbbf24' : '#fff'}">${esc(st.uiLabel)}</div>
-              ${cnt > 0 ? `<div class="text-xs text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(buckets[st.code].join(', '))}</div>` : ''}
-            </div>
-            <div class="row-gap" style="flex-shrink:0">
-              <span class="badge" style="background:${cnt > 0 ? 'rgba(245,158,11,0.18)' : 'rgba(255,255,255,0.06)'};color:${cnt > 0 ? '#fbbf24' : 'var(--muted)'};font-size:13px;padding:3px 9px">${cnt}</span>
-              <button class="btn btn-sm btn-secondary" onclick="openRozkhidCategoryModal('${esc(st.code)}')">ПІБ</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      let squadsHtml = '';
-      if (state.soldiers.length === 0) {
-        squadsHtml = `
-          <div class="card empty-state stack" style="align-items:center">
-            <div>Особовий склад ще не заповнений. Додайте бійців у розділі «Склад», щоб вести щоденний розхід.</div>
-            <button class="btn btn-sm btn-primary" onclick="switchTab('personnel')">Перейти у «Склад»</button>
-          </div>
-        `;
-      } else {
-        squadsHtml = orderedSquads.map(sq => {
-          const isKG = isGroupCmdSquad(sq);
-          const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
-          if (members.length === 0) return '';
-          const isOpen = Boolean(ui.expandedRozkhidSquads[sq.id]);
-          const sqPresent = members.filter(s => getRozkhidStatus(ui.rozkhidDate, s.id) === 'Вн').length;
-
-          return `
-            <div class="card-flush">
-              <div class="accordion-header ${isOpen ? 'open' : ''}" style="border-left:4px solid ${sq.color}" onclick="toggleRozkhidSquad('${sq.id}')">
-                <div class="row-gap" style="min-width:0">
-                  <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                  <span class="pill-dot" style="background:${sq.color}"></span>
-                  <div style="min-width:0">
-                    <div class="section-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</div>
-                    <div class="text-xs text-muted">Вн: ${sqPresent} з ${members.length}</div>
-                  </div>
-                </div>
-                <span class="badge" style="background:${sqPresent === members.length ? 'rgba(16,185,129,0.14)' : 'rgba(245,158,11,0.16)'}; color:${sqPresent === members.length ? '#34d399' : '#fbbf24'}; border-color:${sqPresent === members.length ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.4)'}">
-                  ${sqPresent}/${members.length}
-                </span>
-              </div>
-              ${isOpen ? `
-                <div>
-                  ${members.map(s => {
-                    const curStatus = getRozkhidStatus(ui.rozkhidDate, s.id);
-                    const isPresent = curStatus === 'Вн';
-                    return `
-                      <div class="soldier-row ${s.isCommander || isKG ? 'is-kv' : ''}" style="--sq-color:${sq.color}">
-                        <div class="soldier-info">
-                          <div class="soldier-name-line">
-                            <span class="soldier-name">${esc(s.name)}</span>
-                            ${isKG ? `<span class="badge badge-kv">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
-                          </div>
-                          ${s.rank ? `<div class="soldier-meta">${esc(s.rank)}</div>` : ''}
-                        </div>
-                        <select class="rozkhid-select ${isPresent ? 'is-present' : 'is-absent'}" onchange="setRozkhidStatus('${s.id}', this.value)" aria-label="Статус ${esc(s.name)}">
-                          ${ROZKHID_STATUSES.map(st => `
-                            <option value="${esc(st.code)}" ${curStatus === st.code ? 'selected' : ''}>${esc(st.uiLabel)}</option>
-                          `).join('')}
-                        </select>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              ` : ''}
-            </div>
-          `;
-        }).join('');
-      }
-
-      return `
-        <!-- Дата розходу -->
-        <div class="date-bar">
-          <button class="btn-icon" onclick="changeRozkhidDate(-1)" aria-label="Попередній день">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <div class="date-bar-title">${formatDateHuman(ui.rozkhidDate)}</div>
-          <button class="btn btn-sm btn-secondary" onclick="setRozkhidToday()">Сьогодні</button>
-          <button class="btn-icon" onclick="changeRozkhidDate(1)" aria-label="Наступний день">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-
-        <!-- Номер групи та швидкі дії -->
-        <div class="card stack">
-          <div class="row-between">
-            <label for="rozkhid-group-input" class="field-label" style="white-space:nowrap">Номер групи:</label>
-            <input id="rozkhid-group-input" class="input" style="max-width:160px;min-height:40px;padding:7px 11px;text-align:center;font-weight:700" type="text" value="${esc(state.groupNumber)}" placeholder="223" oninput="updateGroupNumber(this.value)" />
-          </div>
-          <div class="grid-2">
-            <button class="btn btn-sm btn-secondary" onclick="syncRozkhidFromDuties()">Підтягнути з нарядів</button>
-            <button class="btn btn-sm btn-secondary" onclick="copyRozkhidFromYesterday()">Як учора</button>
-          </div>
-        </div>
-
-        <!-- Зведення З/с та Вн -->
-        <div class="kpi-grid-2">
-          <div class="kpi-card">
-            <div class="kpi-val">${total}</div>
-            <div class="kpi-label">З/с (За списком)</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-val" style="color:#4ade80">${presentCount}</div>
-            <div class="kpi-label">Вн (Відсутні: ${absentCount})</div>
-          </div>
-        </div>
-
-        <!-- Швидкий поіменний вибір по категоріях розходу -->
-        ${state.soldiers.length > 0 ? `
-          <div class="card stack">
-            <span class="section-title" style="color:var(--muted)">Поіменно по категоріях (ПІБ)</span>
-            <div class="stack" style="gap:6px">${categoryCountersHtml}</div>
-          </div>
-        ` : ''}
-
-        <!-- Заголовок списку відділень -->
-        ${state.soldiers.length > 0 ? `
-          <div class="row-between">
-            <span class="section-title" style="color:var(--muted)">Відмітки по відділеннях</span>
-            <button class="btn btn-sm btn-secondary" onclick="toggleAllRozkhidSquads()">
-              ${allOpen ? 'Згорнути всі' : 'Розгорнути всі'}
-            </button>
-          </div>
-        ` : ''}
-
-        <div class="stack">${squadsHtml}</div>
-
-        <!-- Попередній перегляд та кнопка копіювання -->
-        <div class="card stack" style="border-color:rgba(94,150,77,0.45)">
-          <div class="row-between">
-            <span class="section-title" style="color:#4ade80">Готовий розхід для месенджера</span>
-          </div>
-          <div class="grid-2">
-            <label class="toggle-pill">
-              <input type="checkbox" ${ui.rozkhidIncludeNames ? 'checked' : ''} onchange="toggleRozkhidOption('names', this.checked)" />
-              <span>Додавати прізвища</span>
-            </label>
-            <label class="toggle-pill">
-              <input type="checkbox" ${ui.rozkhidHideZeros ? 'checked' : ''} onchange="toggleRozkhidOption('hideZeros', this.checked)" />
-              <span>Приховувати нулі</span>
-            </label>
-          </div>
-          <pre id="rozkhid-preview-box" class="rozkhid-preview">${esc(previewText)}</pre>
-          <button class="btn btn-primary btn-full" onclick="copyRozkhid()">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span>Скопіювати розхід</span>
-          </button>
-        </div>
-      `;
-    }
-
-    // =========================================================================
-    // ВКЛАДКА 3: ЗАДАЧІ
+    // ВКЛАДКА 2: ЗАДАЧІ
     // =========================================================================
     function setTasksTargetFilter(val) {
       ui.tasksTargetFilter = val;
@@ -2649,7 +2414,7 @@
       return `
         <div class="grid-2">
           <button class="btn btn-primary" onclick="openTaskModal()">+ Нова задача</button>
-          <button class="btn btn-secondary" onclick="copyActiveTasks()">Скопіювати активні задачі</button>
+          <button class="btn btn-secondary" onclick="copyActiveTasks()">Скопіювати активні</button>
         </div>
 
         ${targetPills}
@@ -2833,21 +2598,336 @@
     }
 
     // =========================================================================
-    // ВКЛАДКА 4: СКЛАД (РОЗГОРТУВАНІ ВКЛАДКИ-АКОРДЕОНИ ПО ВІДДІЛЕННЯХ + БІЙЦЯХ)
+    // ВКЛАДКА 3: РОЗХІД (КЛЮЧОВЕ ОНОВЛЕННЯ v2.5 — АВТОПІДТЯГУВАННЯ + ПРІЗВИЩА В ДУЖКАХ)
     // =========================================================================
-    ui.personnelSquadFilter = 'all';
-    ui.expandedSoldiers = {};
-
-    function setPersonnelSquadFilter(id) {
-      ui.personnelSquadFilter = id;
-      if (id !== 'all') {
-        ui.expandedPersonnelSquads[id] = true;
+    function ensureRozkhidDay(dateISO) {
+      if (!state.rozkhid[dateISO] || typeof state.rozkhid[dateISO] !== 'object') {
+        state.rozkhid[dateISO] = { overrides: {}, extra: {} };
       }
+      if (!state.rozkhid[dateISO].overrides) state.rozkhid[dateISO].overrides = {};
+      if (!state.rozkhid[dateISO].extra) state.rozkhid[dateISO].extra = {};
+      return state.rozkhid[dateISO];
+    }
+
+    function changeRozkhidDate(delta) {
+      ui.rozkhidDate = addDaysISO(ui.rozkhidDate, delta);
       render();
     }
 
-    function toggleSoldierCard(soldierId) {
-      ui.expandedSoldiers[soldierId] = !ui.expandedSoldiers[soldierId];
+    function setRozkhidToday() {
+      ui.rozkhidDate = toISODate(new Date());
+      render();
+    }
+
+    function updateGroupNumber(val) {
+      state.groupNumber = val.trim();
+      saveState();
+      const previewEl = document.getElementById('rozkhid-preview-box');
+      if (previewEl) previewEl.textContent = generateRozkhidText();
+    }
+
+    function toggleRozkhidOption(opt, checked) {
+      if (opt === 'names') ui.rozkhidIncludeNames = checked;
+      if (opt === 'hideZeros') ui.rozkhidHideZeros = checked;
+      const previewEl = document.getElementById('rozkhid-preview-box');
+      if (previewEl) previewEl.textContent = generateRozkhidText();
+    }
+
+    // Ефективний статус бійця на конкретну дату:
+    // 1) Ручна правка за день (overrides)
+    // 2) Авто: наряд на цю дату -> 'Н'
+    // 3) Авто: постійний статус у «Складі» (Ш, Л, Вд, Вп, Г, Пк, Хв)
+    // 4) Авто: наряд попередньої доби -> 'Стародобовий'
+    // 5) Інакше -> 'Вн'
+    function getEffectiveRozkhidStatus(dateISO, soldier, todayDutySet, yestDutySet) {
+      const dayData = state.rozkhid[dateISO];
+      if (dayData && dayData.overrides && dayData.overrides[soldier.id]) {
+        return dayData.overrides[soldier.id];
+      }
+      if (todayDutySet.has(soldier.id)) return 'Н';
+      const perm = normalizeSoldierStatus(soldier.status);
+      if (PERMANENT_ABSENT_CODES.has(perm)) return perm;
+      if (yestDutySet.has(soldier.id)) return 'Стародобовий';
+      return 'Вн';
+    }
+
+    // Повний розрахунок розходу за вибрану дату (зі збереженням порядку відділень)
+    function computeRozkhidData(dateISO) {
+      const yestISO = addDaysISO(dateISO, -1);
+      const todayDutySet = new Set(state.duties.filter(d => d.date === dateISO).map(d => d.soldierId));
+      const yestDutySet = new Set(state.duties.filter(d => d.date === yestISO).map(d => d.soldierId));
+      const dayData = state.rozkhid[dateISO] || { overrides: {}, extra: {} };
+      const surnameCounts = getSurnameCountsMap();
+
+      const buckets = {};
+      ROZKHID_ABSENT_CATEGORIES.forEach(cat => {
+        buckets[cat.code] = { soldiers: [], extra: Number(dayData.extra?.[cat.code] || 0) };
+      });
+
+      const orderedSoldiers = [];
+      for (const sq of getOrderedSquads()) {
+        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
+        orderedSoldiers.push(...members);
+      }
+
+      const statusBySoldier = {};
+      for (const s of orderedSoldiers) {
+        const code = getEffectiveRozkhidStatus(dateISO, s, todayDutySet, yestDutySet);
+        statusBySoldier[s.id] = code;
+        if (buckets[code]) {
+          buckets[code].soldiers.push({
+            id: s.id,
+            fullName: s.name,
+            reportName: formatReportSurname(s, surnameCounts)
+          });
+        }
+      }
+
+      const totalList = state.soldiers.length;
+      let totalAbsent = 0;
+      const categories = ROZKHID_ABSENT_CATEGORIES.map(cat => {
+        const b = buckets[cat.code];
+        const count = Math.max(0, b.soldiers.length + b.extra);
+        totalAbsent += count;
+        return {
+          code: cat.code,
+          hint: cat.hint,
+          soldiers: b.soldiers,
+          extra: b.extra,
+          count
+        };
+      });
+
+      const presentCount = Math.max(0, totalList - totalAbsent);
+      return { totalList, presentCount, totalAbsent, categories, statusBySoldier };
+    }
+
+    // Генерація готового тексту рапорту за точним шаблоном v2.5 (з прізвищами в дужках)
+    function generateRozkhidText() {
+      const data = computeRozkhidData(ui.rozkhidDate);
+      const groupNum = (state.groupNumber || '223').trim() || '223';
+      const lines = [
+        groupNum,
+        `З/с - ${data.totalList}`,
+        `Вн - ${data.presentCount}`
+      ];
+
+      for (const cat of data.categories) {
+        if (ui.rozkhidHideZeros && cat.count === 0) continue;
+        let line = `${cat.code} - ${cat.count}`;
+        if (ui.rozkhidIncludeNames && cat.count > 0 && cat.soldiers.length > 0) {
+          const namesStr = cat.soldiers.map(x => x.reportName).join(', ');
+          line += ` (${namesStr})`;
+        }
+        lines.push(line);
+      }
+
+      return lines.join('\n');
+    }
+
+    function copyRozkhid() {
+      copyToClipboard(generateRozkhidText(), 'Розхід скопійовано у буфер обміну');
+    }
+
+    // Коригування кількості кнопками «-» та «+»
+    function adjustRozkhidCount(catCode, delta) {
+      const dayData = ensureRozkhidDay(ui.rozkhidDate);
+      const data = computeRozkhidData(ui.rozkhidDate);
+      const cat = data.categories.find(c => c.code === catCode);
+      if (!cat) return;
+
+      if (delta > 0) {
+        dayData.extra[catCode] = (Number(dayData.extra[catCode] || 0)) + 1;
+      } else if (delta < 0) {
+        const curExtra = Number(dayData.extra[catCode] || 0);
+        if (curExtra > 0) {
+          dayData.extra[catCode] = curExtra - 1;
+        } else if (cat.soldiers.length > 0) {
+          // Знімаємо останнього бійця з цієї категорії на сьогодні
+          const lastSoldier = cat.soldiers[cat.soldiers.length - 1];
+          dayData.overrides[lastSoldier.id] = 'Вн';
+        }
+      }
+      saveState();
+      render();
+    }
+
+    function resetRozkhidDayOverrides() {
+      delete state.rozkhid[ui.rozkhidDate];
+      saveState();
+      render();
+      showToast('Відновлено автоматичний розрахунок з нарядів та складу');
+    }
+
+    // Модальне вікно «ПІБ» для поіменного вибору бійців (згруповано по відділеннях)
+    function openRozkhidCategoryModal(catCode) {
+      const catMeta = ROZKHID_ABSENT_CATEGORIES.find(x => x.code === catCode) || { code: catCode, hint: '' };
+      const dateISO = ui.rozkhidDate;
+      const data = computeRozkhidData(dateISO);
+      const orderedSquads = getOrderedSquads();
+
+      const groupsHtml = orderedSquads.map(sq => {
+        const isKG = isGroupCmdSquad(sq);
+        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
+        if (members.length === 0) return '';
+
+        const rows = members.map(s => {
+          const curStatus = data.statusBySoldier[s.id] || 'Вн';
+          const isChecked = curStatus === catCode;
+          return `
+            <label class="checkbox-card" style="border-left:4px solid ${sq.color}; padding:9px 11px;">
+              <div class="soldier-info">
+                <div class="soldier-name-line">
+                  <span class="soldier-name">${esc(s.name)}</span>
+                  ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
+                </div>
+                <div class="soldier-meta">
+                  <span>Статус: <strong style="color:${curStatus === 'Вн' ? '#34d399' : '#fbbf24'}">${esc(curStatus)}</strong></span>
+                </div>
+              </div>
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSoldierInRozkhidCategory('${s.id}', '${esc(catCode)}', this.checked)" />
+            </label>
+          `;
+        }).join('');
+
+        return `
+          <div class="stack" style="gap:6px">
+            <div class="row-gap" style="padding:4px 2px 0">
+              <span class="pill-dot" style="background:${sq.color}"></span>
+              <span class="section-title" style="color:${sq.color}">${esc(sq.name)}</span>
+            </div>
+            ${rows}
+          </div>
+        `;
+      }).join('');
+
+      openModal(`
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">${esc(catMeta.code)}</div>
+            <div class="text-xs text-muted">${formatDateHuman(dateISO)} • Поіменний вибір по відділеннях</div>
+          </div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          ${state.soldiers.length === 0
+            ? `<div class="empty-state">Немає особового складу. Додайте бійців у розділі «Склад».</div>`
+            : `<div class="stack" style="gap:12px">${groupsHtml}</div>`
+          }
+          <button class="btn btn-primary btn-full" onclick="closeModal()">Готово</button>
+        </div>
+      `);
+    }
+
+    function toggleSoldierInRozkhidCategory(soldierId, catCode, checked) {
+      const dayData = ensureRozkhidDay(ui.rozkhidDate);
+      if (checked) {
+        dayData.overrides[soldierId] = catCode;
+      } else {
+        dayData.overrides[soldierId] = 'Вн';
+      }
+      saveState();
+      render();
+      openRozkhidCategoryModal(catCode);
+    }
+
+    function renderRozkhidTab() {
+      const data = computeRozkhidData(ui.rozkhidDate);
+      const previewText = generateRozkhidText();
+      const hasManualEdits = Boolean(
+        state.rozkhid[ui.rozkhidDate] &&
+        (Object.keys(state.rozkhid[ui.rozkhidDate].overrides || {}).length > 0 ||
+         Object.values(state.rozkhid[ui.rozkhidDate].extra || {}).some(v => v > 0))
+      );
+
+      const categoriesHtml = data.categories.map(cat => {
+        const namesPreview = cat.soldiers.map(x => x.reportName).join(', ');
+        return `
+          <div class="rozkhid-cat-row ${cat.count > 0 ? 'has-val' : ''}">
+            <div style="min-width:0;flex:1">
+              <div class="text-sm" style="font-weight:700;color:${cat.count > 0 ? '#fbbf24' : '#fff'}">${esc(cat.code)}</div>
+              <div class="text-xs text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                ${namesPreview ? esc(namesPreview) : esc(cat.hint)}
+              </div>
+            </div>
+            <div class="stepper">
+              <button class="step-btn" onclick="adjustRozkhidCount('${esc(cat.code)}', -1)" aria-label="Зменшити">−</button>
+              <span class="step-val" style="color:${cat.count > 0 ? '#fbbf24' : 'var(--muted)'}">${cat.count}</span>
+              <button class="step-btn" onclick="adjustRozkhidCount('${esc(cat.code)}', 1)" aria-label="Збільшити">+</button>
+              <button class="btn btn-sm btn-secondary" style="margin-left:4px;min-height:34px;padding:4px 9px" onclick="openRozkhidCategoryModal('${esc(cat.code)}')">ПІБ</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <!-- Вибір дати розходу -->
+        <div class="date-bar">
+          <button class="btn-icon" onclick="changeRozkhidDate(-1)" aria-label="Попередній день">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="date-bar-title">${formatDateHuman(ui.rozkhidDate)}</div>
+          <button class="btn btn-sm btn-secondary" onclick="setRozkhidToday()">Сьогодні</button>
+          <button class="btn-icon" onclick="changeRozkhidDate(1)" aria-label="Наступний день">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- Номер групи та зведення З/с і Вн -->
+        <div class="card stack">
+          <div class="row-between">
+            <label for="rozkhid-group-input" class="field-label" style="white-space:nowrap">Номер групи:</label>
+            <input id="rozkhid-group-input" class="input" style="max-width:150px;min-height:40px;padding:7px 11px;text-align:center;font-weight:800" type="text" value="${esc(state.groupNumber)}" placeholder="223" oninput="updateGroupNumber(this.value)" />
+          </div>
+          <div class="kpi-grid-2">
+            <div class="kpi-card" style="background:var(--bg)">
+              <div class="kpi-val">${data.totalList}</div>
+              <div class="kpi-label">З/с (За списком)</div>
+            </div>
+            <div class="kpi-card" style="background:var(--bg)">
+              <div class="kpi-val" style="color:#4ade80">${data.presentCount}</div>
+              <div class="kpi-label">Вн (Відсутні: ${data.totalAbsent})</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Позиції відсутності (автопідтягування + ручні лічильники + вибір ПІБ) -->
+        <div class="card stack">
+          <div class="row-between">
+            <span class="section-title" style="color:var(--muted)">Розподіл відсутніх</span>
+            ${hasManualEdits ? `<button class="btn btn-sm btn-secondary" onclick="resetRozkhidDayOverrides()">Авто-синхр.</button>` : `<span class="text-xs text-muted">Авто з нарядів і складу</span>`}
+          </div>
+          <div class="stack" style="gap:6px">${categoriesHtml}</div>
+        </div>
+
+        <!-- Попередній перегляд рапорту та копіювання -->
+        <div class="card stack" style="border-color:rgba(94,150,77,0.45)">
+          <span class="section-title" style="color:#4ade80">Рапорт для месенджера</span>
+          <div class="grid-2">
+            <label class="toggle-pill">
+              <input type="checkbox" ${ui.rozkhidIncludeNames ? 'checked' : ''} onchange="toggleRozkhidOption('names', this.checked)" />
+              <span>Прізвища в дужках</span>
+            </label>
+            <label class="toggle-pill">
+              <input type="checkbox" ${ui.rozkhidHideZeros ? 'checked' : ''} onchange="toggleRozkhidOption('hideZeros', this.checked)" />
+              <span>Приховати нулі</span>
+            </label>
+          </div>
+          <pre id="rozkhid-preview-box" class="rozkhid-preview">${esc(previewText)}</pre>
+          <button class="btn btn-primary btn-full" onclick="copyRozkhid()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Скопіювати розхід</span>
+          </button>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 4: СКЛАД (КОМАНДИР ГРУПИ ПЕРШИЙ + ВІДДІЛЕННЯ + АКОРДЕОН ПРІЗВИЩ)
+    // =========================================================================
+    function setPersonnelSquadFilter(id) {
+      ui.personnelSquadFilter = id;
+      if (id !== 'all') ui.expandedPersonnelSquads[id] = true;
       render();
     }
 
@@ -2856,12 +2936,25 @@
       render();
     }
 
+    function toggleSoldierCard(soldierId) {
+      ui.expandedSoldiers[soldierId] = !ui.expandedSoldiers[soldierId];
+      render();
+    }
+
+    function quickSetSoldierStatus(soldierId, newStatus) {
+      const s = getSoldierById(soldierId);
+      if (!s) return;
+      s.status = newStatus;
+      saveState();
+      render();
+      const st = getStatusObj(newStatus);
+      showToast(`${s.name}: ${st.label}`);
+    }
+
     function toggleAllPersonnelSquads() {
       const ordered = getOrderedSquads();
       const allOpen = ordered.length > 0 && ordered.every(sq => ui.expandedPersonnelSquads[sq.id]);
-      ordered.forEach(sq => {
-        ui.expandedPersonnelSquads[sq.id] = !allOpen;
-      });
+      ordered.forEach(sq => { ui.expandedPersonnelSquads[sq.id] = !allOpen; });
       render();
     }
 
@@ -2907,7 +3000,7 @@
         <div class="row-gap">
           <div class="search-wrap">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input id="personnel-search-input" class="input" type="text" value="${esc(ui.personnelSearch)}" placeholder="Пошук бійця..." oninput="onPersonnelSearchInput(this.value)" />
+            <input id="personnel-search-input" class="input" type="text" value="${esc(ui.personnelSearch)}" placeholder="Пошук по ПІБ..." oninput="onPersonnelSearchInput(this.value)" />
             <button id="personnel-search-clear" class="search-clear ${ui.personnelSearch ? '' : 'hidden'}" onclick="clearPersonnelSearch()" aria-label="Очистити">✕</button>
           </div>
           <button class="btn btn-sm btn-secondary" style="flex-shrink:0;min-height:44px" onclick="toggleAllPersonnelSquads()">
@@ -2916,7 +3009,7 @@
         </div>
 
         <div class="text-xs text-muted" style="padding:0 2px">
-          Всього у взводі: <strong style="color:#fff">${state.soldiers.length}</strong> • Натисніть на блок або прізвище, щоб розгорнути
+          Всього у складі: <strong style="color:#fff">${state.soldiers.length}</strong> • Натисніть на відділення або прізвище, щоб розгорнути
         </div>
 
         <div id="personnel-list-container" class="stack">
@@ -2956,10 +3049,10 @@
                 <span class="pill-dot" style="background:${sq.color}"></span>
                 <div style="min-width:0">
                   <div class="section-title" style="color:${isKG ? '#fde047' : '#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</div>
-                  <div class="text-xs text-muted">${isKG ? (allMembers.length ? 'Призначено: ' + esc(allMembers[0].name) : 'Не призначено') : 'Особового складу: ' + allMembers.length}</div>
+                  <div class="text-xs text-muted">${isKG ? (allMembers.length ? esc(allMembers[0].name) : 'Не призначено') : 'Особового складу: ' + allMembers.length}</div>
                 </div>
               </div>
-              <button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="event.stopPropagation(); openSoldierModal(null, '${sq.id}')">+ Додати</button>
+              <button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="event.stopPropagation(); openSoldierModal(null, '${sq.id}')">${isKG ? '+ Додати' : '+ Додати бійця'}</button>
             </div>
 
             ${isOpen ? `
@@ -2970,32 +3063,43 @@
                       const st = getStatusObj(s.status);
                       const isCardOpen = Boolean(ui.expandedSoldiers[s.id]);
                       const stats = getSoldierStats(s.id, ui.year, ui.month);
-                      const curRozkhid = getRozkhidStatus(ui.rozkhidDate, s.id);
                       return `
                         <div style="border-bottom:1px solid rgba(39,50,64,0.65); border-left:4px solid ${sq.color}; background:${s.isCommander || isKG ? 'linear-gradient(90deg, rgba(245,158,11,0.09) 0%, rgba(21,28,36,1) 72%)' : 'var(--card)'}">
                           <button type="button" onclick="toggleSoldierCard('${s.id}')" style="width:100%; text-align:left; padding:11px 13px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
                             <div class="soldier-info">
                               <div class="soldier-name-line">
                                 <span class="soldier-name">${esc(s.name)}</span>
-                                ${isKG ? `<span class="badge badge-kv">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
-                                <span class="badge ${st.cls}">${st.label}</span>
+                                ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
+                                <span class="badge ${st.cls}">${st.short}</span>
                               </div>
                               ${s.rank ? `<div class="soldier-meta">${esc(s.rank)}</div>` : ''}
                             </div>
                             <span style="color:var(--muted);font-size:12px;flex-shrink:0">${isCardOpen ? '▲' : '▼'}</span>
                           </button>
                           ${isCardOpen ? `
-                            <div style="padding:0 13px 12px 13px; display:flex; flex-direction:column; gap:10px;">
+                            <div style="padding:0 13px 13px 13px; display:flex; flex-direction:column; gap:10px;">
                               <div class="grid-2">
                                 <div style="padding:8px 10px;border-radius:9px;background:var(--bg);border:1px solid var(--border)">
-                                  <div class="text-xs text-muted">Нарядів (міс / всього)</div>
+                                  <div class="text-xs text-muted">Нарядів (${MONTHS_UK[ui.month]} / всього)</div>
                                   <div style="font-size:14px;font-weight:800;color:#fff;margin-top:2px">${stats.monthCount} / <span style="color:#4ade80">${stats.totalCount}</span></div>
                                 </div>
                                 <div style="padding:8px 10px;border-radius:9px;background:var(--bg);border:1px solid var(--border)">
-                                  <div class="text-xs text-muted">Розхід на сьогодні</div>
-                                  <div style="font-size:14px;font-weight:800;color:${curRozkhid === 'Вн' ? '#34d399' : '#fbbf24'};margin-top:2px">${esc(curRozkhid)}</div>
+                                  <div class="text-xs text-muted">Останній наряд</div>
+                                  <div style="font-size:13px;font-weight:700;color:#fff;margin-top:2px">${formatDateShort(stats.lastDate)}</div>
                                 </div>
                               </div>
+
+                              <div>
+                                <div class="text-xs text-muted" style="margin-bottom:5px;font-weight:600">Швидкий статус для розходу:</div>
+                                <div class="status-chips-grid">
+                                  ${SOLDIER_STATUSES.map(opt => {
+                                    const active = st.id === opt.id;
+                                    const cls = active ? (opt.id === 'active' ? 'active' : 'active-absent') : '';
+                                    return `<button type="button" class="status-chip-btn ${cls}" onclick="quickSetSoldierStatus('${s.id}', '${opt.id}')">${esc(opt.short)}</button>`;
+                                  }).join('')}
+                                </div>
+                              </div>
+
                               <div class="grid-2">
                                 <button type="button" class="btn btn-sm btn-secondary" onclick="openSoldierModal('${s.id}')">Редагувати</button>
                                 <button type="button" class="btn btn-sm btn-danger" onclick="promptDeleteSoldier('${s.id}')">Видалити</button>
@@ -3027,6 +3131,7 @@
       const existing = soldierId ? state.soldiers.find(s => s.id === soldierId) : null;
       const defaultSquad = existing?.squadId || preselectedSquadId || orderedSquads[0].id;
       const isInitialKG = defaultSquad === GROUP_CMD_SQUAD_ID;
+      const curStatus = normalizeSoldierStatus(existing?.status);
 
       openModal(`
         <div class="modal-header">
@@ -3041,7 +3146,7 @@
 
           <div class="field">
             <label class="field-label" for="s-rank">Звання / Посада (необов'язково)</label>
-            <input id="s-rank" class="input" type="text" value="${esc(existing?.rank || '')}" placeholder="Наприклад: сержант, командир групи" />
+            <input id="s-rank" class="input" type="text" value="${esc(existing?.rank || '')}" placeholder="Наприклад: солдат, стрілець" />
           </div>
 
           <div class="field">
@@ -3060,9 +3165,9 @@
           </label>
 
           <div class="field">
-            <label class="field-label" for="s-status">Статус</label>
+            <label class="field-label" for="s-status">Постійний статус (підтягується в «Розхід»)</label>
             <select id="s-status" class="select">
-              ${STATUS_LIST.map(st => `<option value="${st.id}" ${(existing?.status || 'active') === st.id ? 'selected' : ''}>${st.label}</option>`).join('')}
+              ${SOLDIER_STATUSES.map(st => `<option value="${st.id}" ${curStatus === st.id ? 'selected' : ''}>${esc(st.label)}</option>`).join('')}
             </select>
           </div>
 
@@ -3108,161 +3213,6 @@
       showToast(soldierId ? 'Дані оновлено' : 'Додано до складу');
     }
 
-    function buildPersonnelAccordionHtml() {
-      if (state.squads.length === 0) {
-        return `<div class="card empty-state">Немає відділень. Натисніть кнопку нижче, щоб створити відділення.</div>`;
-      }
-
-      const query = ui.personnelSearch.trim().toLowerCase();
-      let totalShown = 0;
-
-      const html = state.squads.map(sq => {
-        const allMembers = state.soldiers.filter(s => s.squadId === sq.id);
-        const filteredMembers = sortSquadMembers(
-          allMembers.filter(s => !query || s.name.toLowerCase().includes(query) || (s.rank && s.rank.toLowerCase().includes(query)))
-        );
-
-        if (query && filteredMembers.length === 0) return '';
-        totalShown += filteredMembers.length;
-
-        // При пошуку збіги автоматично розгортаються
-        const isOpen = query ? true : Boolean(ui.expandedPersonnelSquads[sq.id]);
-
-        return `
-          <div class="card-flush">
-            <div class="accordion-header ${isOpen ? 'open' : ''}" style="border-left:4px solid ${sq.color}" onclick="togglePersonnelSquad('${sq.id}')">
-              <div class="row-gap" style="min-width:0;flex:1">
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                <span class="pill-dot" style="background:${sq.color}"></span>
-                <div style="min-width:0">
-                  <div class="section-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</div>
-                  <div class="text-xs text-muted">Особового складу: ${allMembers.length}</div>
-                </div>
-              </div>
-              <button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="event.stopPropagation(); openSoldierModal(null, '${sq.id}')">+ Додати бійця</button>
-            </div>
-
-            ${isOpen ? `
-              <div>
-                ${filteredMembers.length === 0
-                  ? `<div class="empty-state" style="padding:18px">У відділенні поки немає бійців</div>`
-                  : filteredMembers.map(s => {
-                      const st = getStatusObj(s.status);
-                      return `
-                        <button class="soldier-row ${s.isCommander ? 'is-kv' : ''}" style="--sq-color:${sq.color}; width:100%; text-align:left;" onclick="openSoldierModal('${s.id}')">
-                          <div class="soldier-info">
-                            <div class="soldier-name-line">
-                              <span class="soldier-name">${esc(s.name)}</span>
-                              ${s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
-                              <span class="badge ${st.cls}">${st.label}</span>
-                            </div>
-                            ${s.rank ? `<div class="soldier-meta">${esc(s.rank)}</div>` : ''}
-                          </div>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" style="flex-shrink:0"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </button>
-                      `;
-                    }).join('')
-                }
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-
-      if (query && totalShown === 0) {
-        return `<div class="card empty-state">За запитом «${esc(ui.personnelSearch)}» нікого не знайдено.</div>`;
-      }
-      return html;
-    }
-
-    function openSoldierModal(soldierId = null, preselectedSquadId = null) {
-      if (state.squads.length === 0) {
-        showToast('Спочатку створіть відділення', 'error');
-        return;
-      }
-      const existing = soldierId ? state.soldiers.find(s => s.id === soldierId) : null;
-      const defaultSquad = existing?.squadId || preselectedSquadId || state.squads[0].id;
-
-      openModal(`
-        <div class="modal-header">
-          <div class="modal-title">${existing ? 'Редагувати бійця' : 'Додати військовослужбовця'}</div>
-          <button class="btn-icon" onclick="closeModal()">✕</button>
-        </div>
-        <form class="modal-body" onsubmit="saveSoldier(event, '${soldierId || ''}')">
-          <div class="field">
-            <label class="field-label" for="s-name">ПІБ (перша літера кожного слова — автоматично велика)</label>
-            <input id="s-name" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Прізвище Ім'я" oninput="capitalizeLive(this)" onblur="this.value = formatFullName(this.value)" />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="s-rank">Звання / Посада (необов'язково)</label>
-            <input id="s-rank" class="input" type="text" value="${esc(existing?.rank || '')}" placeholder="Наприклад: солдат, стрілець" />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="s-squad">Відділення</label>
-            <select id="s-squad" class="select">
-              ${state.squads.map(sq => `<option value="${sq.id}" ${defaultSquad === sq.id ? 'selected' : ''}>${esc(sq.name)}</option>`).join('')}
-            </select>
-          </div>
-
-          <label class="checkbox-card" for="s-kv">
-            <div>
-              <div style="font-size:14px;font-weight:700;color:#fbbf24">★ Командир відділення</div>
-              <div class="text-xs text-muted">Закріплюється зверху списку відділення</div>
-            </div>
-            <input id="s-kv" type="checkbox" ${existing?.isCommander ? 'checked' : ''} />
-          </label>
-
-          <div class="field">
-            <label class="field-label" for="s-status">Статус</label>
-            <select id="s-status" class="select">
-              ${STATUS_LIST.map(st => `<option value="${st.id}" ${(existing?.status || 'active') === st.id ? 'selected' : ''}>${st.label}</option>`).join('')}
-            </select>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-full">Зберегти</button>
-          ${existing ? `<button type="button" class="btn btn-danger btn-full" onclick="promptDeleteSoldier('${existing.id}')">Видалити бійця</button>` : ''}
-        </form>
-      `);
-      setTimeout(() => document.getElementById('s-name')?.focus(), 50);
-    }
-
-    function saveSoldier(e, soldierId) {
-      e.preventDefault();
-      const name = formatFullName(document.getElementById('s-name').value);
-      const rank = document.getElementById('s-rank').value.trim();
-      const squadId = document.getElementById('s-squad').value;
-      const isCommander = document.getElementById('s-kv').checked;
-      const status = document.getElementById('s-status').value;
-      if (!name) return;
-
-      if (isCommander) {
-        state.soldiers.forEach(s => {
-          if (s.squadId === squadId && s.id !== soldierId) s.isCommander = false;
-        });
-      }
-
-      if (soldierId) {
-        const s = state.soldiers.find(x => x.id === soldierId);
-        if (s) {
-          s.name = name;
-          s.rank = rank;
-          s.squadId = squadId;
-          s.isCommander = isCommander;
-          s.status = status;
-        }
-      } else {
-        state.soldiers.push({ id: genId('s'), name, rank, squadId, isCommander, status });
-        // Розгортаємо відділення, щоб одразу було видно доданого бійця
-        ui.expandedPersonnelSquads[squadId] = true;
-      }
-      saveState();
-      closeModal();
-      render();
-      showToast(soldierId ? 'Дані бійця оновлено' : 'Бійця додано');
-    }
-
     function promptDeleteSoldier(soldierId) {
       const s = getSoldierById(soldierId);
       if (!s) return;
@@ -3274,7 +3224,7 @@
           state.soldiers = state.soldiers.filter(x => x.id !== soldierId);
           state.duties = state.duties.filter(d => d.soldierId !== soldierId);
           Object.keys(state.rozkhid).forEach(dt => {
-            if (state.rozkhid[dt]) delete state.rozkhid[dt][soldierId];
+            if (state.rozkhid[dt]?.overrides) delete state.rozkhid[dt].overrides[soldierId];
           });
           saveState();
           render();
@@ -3294,13 +3244,13 @@
       const orderedSquads = getOrderedSquads();
 
       return `
-        <!-- 0. Версія застосунку -->
+        <!-- 1. Версія застосунку -->
         <div class="version-row">
           <span>Версія застосунку:</span>
           <span class="version-pill">${APP_VERSION} (оновлено ${APP_UPDATED_DATE})</span>
         </div>
 
-        <!-- 1. Збереження даних та резервна копія -->
+        <!-- 2. Збереження даних та резервна копія -->
         <div class="card stack" style="border-color:rgba(94,150,77,0.45)">
           <span class="section-title" style="color:#4ade80">Збереження даних та резервна копія</span>
           <div class="text-xs text-muted" style="line-height:1.5">
@@ -3322,41 +3272,29 @@
           </button>
         </div>
 
-        <!-- 2. Номер групи для Розходу -->
-        <div class="card stack">
-          <span class="section-title">Параметри розходу</span>
-          <div class="row-between">
-            <label class="field-label" for="settings-group-num">Номер групи (підрозділу):</label>
-            <input id="settings-group-num" class="input" style="max-width:150px;min-height:40px;padding:7px 11px;text-align:center;font-weight:700" type="text" value="${esc(state.groupNumber)}" placeholder="223" onchange="saveGroupNumberFromSettings(this.value)" />
-          </div>
-        </div>
-
-        <!-- 3. Керування відділеннями -->
+        <!-- 3. Підрозділи та кольори -->
         <div class="card stack">
           <div class="row-between">
             <span class="section-title">Підрозділи та кольори</span>
             <button class="btn btn-sm btn-primary" onclick="openSquadModal()">+ Додати</button>
           </div>
-          ${orderedSquads.length === 0
-            ? `<div class="text-sm text-muted">Відділень немає.</div>`
-            : `<div class="stack">
-                ${orderedSquads.map(sq => {
-                  const isKG = isGroupCmdSquad(sq);
-                  return `
-                    <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);border-left:4px solid ${sq.color}">
-                      <div class="row-gap" style="min-width:0">
-                        <span class="pill-dot" style="background:${sq.color}"></span>
-                        <span class="text-sm" style="font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</span>
-                      </div>
-                      <div class="row-gap" style="flex-shrink:0">
-                        <button class="btn btn-sm btn-secondary" onclick="openSquadModal('${sq.id}')">Змінити</button>
-                        ${!isKG ? `<button class="btn-icon danger" style="width:36px;height:36px" onclick="promptDeleteSquad('${sq.id}')" title="Видалити">✕</button>` : ''}
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>`
-          }
+          <div class="stack">
+            ${orderedSquads.map(sq => {
+              const isKG = isGroupCmdSquad(sq);
+              return `
+                <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);border-left:4px solid ${sq.color}">
+                  <div class="row-gap" style="min-width:0">
+                    <span class="pill-dot" style="background:${sq.color}"></span>
+                    <span class="text-sm" style="font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</span>
+                  </div>
+                  <div class="row-gap" style="flex-shrink:0">
+                    <button class="btn btn-sm btn-secondary" onclick="openSquadModal('${sq.id}')">Змінити</button>
+                    ${!isKG ? `<button class="btn-icon danger" style="width:36px;height:36px" onclick="promptDeleteSquad('${sq.id}')" title="Видалити">✕</button>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
         </div>
 
         <!-- 4. Види нарядів -->
@@ -3386,31 +3324,23 @@
       `;
     }
 
-    function saveGroupNumberFromSettings(val) {
-      state.groupNumber = val.trim() || '223';
-      saveState();
-      showToast('Номер групи збережено');
-    }
-
     // --- Керування відділеннями ---
-    let tempSquadColor = SQUAD_PALETTE[0];
-
     function openSquadModal(squadId = null) {
       const existing = squadId ? state.squads.find(s => s.id === squadId) : null;
       tempSquadColor = existing?.color || SQUAD_PALETTE[state.squads.length % SQUAD_PALETTE.length];
 
       openModal(`
         <div class="modal-header">
-          <div class="modal-title">${existing ? 'Редагувати відділення' : 'Нове відділення'}</div>
+          <div class="modal-title">${existing ? 'Редагувати підрозділ' : 'Нове відділення'}</div>
           <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
         <form class="modal-body" onsubmit="saveSquad(event, '${squadId || ''}')">
           <div class="field">
-            <label class="field-label" for="squad-name-input">Назва відділення</label>
+            <label class="field-label" for="squad-name-input">Назва</label>
             <input id="squad-name-input" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Наприклад: 4-те відділення" />
           </div>
           <div class="field">
-            <div class="field-label">Колір відділення</div>
+            <div class="field-label">Колір</div>
             <div class="color-palette" id="squad-color-palette">
               ${SQUAD_PALETTE.map(c => `
                 <button type="button" class="color-swatch ${c === tempSquadColor ? 'selected' : ''}" style="background:${c}" onclick="pickSquadColor('${c}', this)" aria-label="Колір"></button>
@@ -3442,7 +3372,7 @@
       saveState();
       closeModal();
       render();
-      showToast(squadId ? 'Відділення оновлено' : 'Відділення додано');
+      showToast(squadId ? 'Підрозділ оновлено' : 'Відділення додано');
     }
 
     function promptDeleteSquad(squadId) {
@@ -3461,11 +3391,12 @@
           state.duties = state.duties.filter(d => !sIds.has(d.soldierId));
           state.tasks = state.tasks.filter(t => !(t.targetType === 'squad' && t.targetSquadId === squadId));
           Object.keys(state.rozkhid).forEach(dt => {
-            sIds.forEach(sid => { if (state.rozkhid[dt]) delete state.rozkhid[dt][sid]; });
+            sIds.forEach(sid => { if (state.rozkhid[dt]?.overrides) delete state.rozkhid[dt].overrides[sid]; });
           });
           if (ui.scheduleSquadFilter === squadId) ui.scheduleSquadFilter = 'all';
           if (ui.statsSquadFilter === squadId) ui.statsSquadFilter = 'all';
           if (ui.tasksTargetFilter === squadId) ui.tasksTargetFilter = 'all';
+          if (ui.personnelSquadFilter === squadId) ui.personnelSquadFilter = 'all';
           saveState();
           render();
           showToast('Відділення видалено');
@@ -3565,13 +3496,13 @@
       return {
         groupNumber: typeof parsed.groupNumber === 'string' && parsed.groupNumber.trim() ? parsed.groupNumber : '223',
         squads: ensureGroupCmdSquad(parsed.squads),
-        soldiers: parsed.soldiers,
+        soldiers: parsed.soldiers.map(s => ({ ...s, status: normalizeSoldierStatus(s.status) })),
         dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
           ? parsed.dutyTypes
           : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
         duties: parsed.duties,
         tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
-        rozkhid: parsed.rozkhid && typeof parsed.rozkhid === 'object' ? parsed.rozkhid : {},
+        rozkhid: migrateRozkhidMap(parsed.rozkhid),
         lastBackupAt: state.lastBackupAt
       };
     }
@@ -3579,7 +3510,7 @@
     function confirmApplyBackup(validatedState) {
       showConfirm(
         'Відновити дані з резервної копії?',
-        `Поточні дані будуть замінені. У копії: відділень — ${validatedState.squads.length}, бійців — ${validatedState.soldiers.length}, нарядів — ${validatedState.duties.length}, задач — ${validatedState.tasks.length}.`,
+        `Поточні дані будуть замінені. У копії: підрозділів — ${validatedState.squads.length}, о/с — ${validatedState.soldiers.length}, нарядів — ${validatedState.duties.length}, задач — ${validatedState.tasks.length}.`,
         'Відновити',
         () => {
           state = validatedState;
@@ -3678,7 +3609,7 @@
     function promptResetAllStep2() {
       showConfirm(
         'Точно видалити все? (Крок 2 з 2)',
-        'Цю дію неможливо скасувати. Залишаться лише 3 базові порожні відділення, види нарядів та номер групи 223.',
+        'Цю дію неможливо скасувати. Залишаться лише базові порожні підрозділи, види нарядів та номер групи 223.',
         'Так, очистити все',
         () => {
           state = createEmptyInitialState();
@@ -3710,10 +3641,10 @@
       const main = document.getElementById('main-content');
       if (ui.activeTab === 'duties') {
         main.innerHTML = renderDutiesTab();
-      } else if (ui.activeTab === 'rozkhid') {
-        main.innerHTML = renderRozkhidTab();
       } else if (ui.activeTab === 'tasks') {
         main.innerHTML = renderTasksTab();
+      } else if (ui.activeTab === 'rozkhid') {
+        main.innerHTML = renderRozkhidTab();
       } else if (ui.activeTab === 'personnel') {
         main.innerHTML = renderPersonnelTab();
       } else if (ui.activeTab === 'settings') {
@@ -3721,7 +3652,7 @@
       }
     }
 
-    // Ініціалізація при старті
+    // Ініціалізація при завантаженні
     loadState();
     render();
   </script>
