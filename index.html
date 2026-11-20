@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1015" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Помічник взводу v3.0</title>
+  <title>Помічник взводу v3.0.1</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА ТА БАЗОВІ СТИЛІ (БЕЗ ЗОВНІШНІХ ЗАЛЕЖНОСТЕЙ)
@@ -450,7 +450,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, ДОВІДНИКИ ТА СХЕМА ДАНИХ
     // =========================================================================
-    const APP_VERSION = 'v3.0';
+    const APP_VERSION = 'v3.0.1';
     const APP_UPDATED = '20.11.2026';
     const STORAGE_KEY = 'pomichnyk_vzvodu_v30';
     const FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -519,7 +519,9 @@
     let fbEventSource = null;
     let fbPollTimer = null;
     let fbPullDebounce = null;
+    let fbPushDebounce = null;
     let lastSyncAt = null;
+    let lastSyncError = '';
 
     let ui = {
       activeTab: 'duties',
@@ -664,7 +666,8 @@
         rozkhidNumeric: {},
         rozkhidCleared: {},
         pins: Object.assign({}, DEFAULT_PINS),
-        lastBackupAt: null
+        lastBackupAt: null,
+        updatedAt: Date.now()
       };
     }
 
@@ -808,7 +811,8 @@
         rozkhidNumeric: rozkhidNumeric,
         rozkhidCleared: rozkhidCleared,
         pins: pins,
-        lastBackupAt: parsed.lastBackupAt || null
+        lastBackupAt: parsed.lastBackupAt || null,
+        updatedAt: Number(parsed.updatedAt) || Date.now()
       };
     }
 
@@ -838,16 +842,62 @@
     }
 
     // =========================================================================
-    // 4. FIREBASE REALTIME DATABASE REST API + SSE СИНХРОНІЗАЦІЯ
+    // 4. FIREBASE REALTIME DATABASE REST API + AUTO-POLLING (v3.0.1)
     // =========================================================================
     function cleanFbUrl(url) {
-      return String(url || '').trim().replace(/\/+$/, '');
+      let s = String(url || '').trim();
+      if (!s) return '';
+      // Видаляємо можливий дубль або markdown-хвіст, якщо посилання скопійовано криво
+      if (s.indexOf('](') !== -1) s = s.split('](')[0];
+      s = s.replace(/\s+/g, '');
+      // Нижній регістр для протоколу (Https:// -> https://)
+      s = s.replace(/^https?:\/\//i, function(m) { return m.toLowerCase(); });
+      // Прибираємо випадковий суфікс /platoon_data.json або .json та кінцеві слеші
+      s = s.replace(/\/platoon_data\.json$/i, '');
+      s = s.replace(/\.json$/i, '');
+      s = s.replace(/\/+$/, '');
+      return s;
+    }
+
+    function getPlatoonEndpoint(baseUrl) {
+      const clean = cleanFbUrl(baseUrl || getFirebaseUrl());
+      return clean ? (clean + '/platoon_data.json') : '';
+    }
+
+    // Рекурсивне очищення ключів від заборонених у Firebase символів (. $ # [ ] /) та undefined -> null
+    function sanitizeForFirebase(val) {
+      if (val === undefined) return null;
+      if (val === null || typeof val !== 'object') return val;
+      if (Array.isArray(val)) {
+        return val.map(function(item) { return sanitizeForFirebase(item); });
+      }
+      const out = {};
+      Object.keys(val).forEach(function(k) {
+        const safeKey = String(k).replace(/[.#$\[\]\/]/g, '_') || '_';
+        out[safeKey] = sanitizeForFirebase(val[k]);
+      });
+      return out;
+    }
+
+    function parseFirebaseError(res) {
+      return res.text().then(function(txt) {
+        let msg = '';
+        try {
+          const parsed = JSON.parse(txt);
+          if (parsed && parsed.error) msg = String(parsed.error);
+        } catch (e) {
+          msg = txt ? txt.slice(0, 140) : '';
+        }
+        return 'Помилка ' + res.status + (msg ? ': ' + msg : '');
+      }).catch(function() {
+        return 'Помилка ' + res.status;
+      });
     }
 
     function initFirebaseUrlFromQuery() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const qDb = cleanFbUrl(params.get('db'));
+        const qDb = cleanFbUrl(params.get('fb') || params.get('db'));
         if (qDb && qDb.indexOf('https://') === 0) {
           localStorage.setItem(FB_URL_STORAGE_KEY, qDb);
         }
@@ -894,24 +944,193 @@
       return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
     }
 
-    // Гранулярний запис у Firebase без перезапису чужих даних
-    function fbWrite(path, method, payload) {
-      const base = getFirebaseUrl();
-      if (!base) { setSyncStatus('local'); return Promise.resolve(false); }
-      setSyncStatus('syncing');
-      const opts = { method: method, headers: { 'Content-Type': 'application/json' } };
-      if (method !== 'DELETE') opts.body = JSON.stringify(payload);
-      return fetch(base + path + '.json', opts)
+    function buildCloudPayload() {
+      state.updatedAt = Date.now();
+      saveLocalState();
+      return sanitizeForFirebase({
+        updatedAt: state.updatedAt,
+        meta: {
+          groupNumber: state.groupNumber,
+          squads: state.squads,
+          dutyTypes: state.dutyTypes,
+          updatedAt: state.updatedAt
+        },
+        pins: state.pins,
+        personnel: arrayToObjMap(state.personnel),
+        duties: arrayToObjMap(state.duties),
+        tasks: arrayToObjMap(state.tasks),
+        scheduledAbsences: arrayToObjMap(state.scheduledAbsences),
+        rozkhidManual: state.rozkhidManual,
+        rozkhidNumeric: state.rozkhidNumeric,
+        rozkhidCleared: state.rozkhidCleared
+      });
+    }
+
+    // Відкладений авто-запис у хмару при змінах (debounced PUT)
+    function scheduleCloudPush() {
+      if (!getFirebaseUrl()) { setSyncStatus('local'); return; }
+      clearTimeout(fbPushDebounce);
+      fbPushDebounce = setTimeout(function() { fbPushAll(true); }, 600);
+    }
+
+    function fbWrite() {
+      scheduleCloudPush();
+      return Promise.resolve(true);
+    }
+
+    function fbSyncMeta() {
+      scheduleCloudPush();
+      return Promise.resolve(true);
+    }
+
+    function objMapToArray(obj) {
+      if (!obj || typeof obj !== 'object') return [];
+      return Object.keys(obj).map(function(k) {
+        const v = obj[k];
+        if (!v || typeof v !== 'object') return null;
+        return Object.assign({ id: k }, v);
+      }).filter(Boolean);
+    }
+
+    function arrayToObjMap(arr) {
+      const out = {};
+      (arr || []).forEach(function(item) { if (item && item.id) out[item.id] = item; });
+      return out;
+    }
+
+    function applyRemoteSnapshot(remote, forceApply) {
+      if (!remote || typeof remote !== 'object') return false;
+      const hasData = remote.meta || remote.personnel || remote.duties || remote.tasks || remote.pins || remote.rozkhidManual;
+      if (!hasData) return false;
+
+      const remoteTs = Number(remote.updatedAt || (remote.meta && remote.meta.updatedAt) || 0);
+      if (!forceApply && remoteTs && state.updatedAt && remoteTs <= state.updatedAt) {
+        return false;
+      }
+
+      const meta = remote.meta || {};
+      const next = {
+        groupNumber: meta.groupNumber || state.groupNumber || '223',
+        squads: Array.isArray(meta.squads) && meta.squads.length ? meta.squads : state.squads,
+        dutyTypes: Array.isArray(meta.dutyTypes) && meta.dutyTypes.length ? meta.dutyTypes : state.dutyTypes,
+        pins: remote.pins ? Object.assign({}, DEFAULT_PINS, remote.pins) : state.pins,
+        personnel: remote.personnel ? objMapToArray(remote.personnel) : [],
+        duties: remote.duties ? objMapToArray(remote.duties) : [],
+        tasks: remote.tasks ? objMapToArray(remote.tasks).sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); }) : [],
+        scheduledAbsences: remote.scheduledAbsences ? objMapToArray(remote.scheduledAbsences) : [],
+        rozkhidManual: (remote.rozkhidManual && typeof remote.rozkhidManual === 'object') ? remote.rozkhidManual : {},
+        rozkhidNumeric: (remote.rozkhidNumeric && typeof remote.rozkhidNumeric === 'object') ? remote.rozkhidNumeric : {},
+        rozkhidCleared: (remote.rozkhidCleared && typeof remote.rozkhidCleared === 'object') ? remote.rozkhidCleared : {},
+        lastBackupAt: state.lastBackupAt,
+        updatedAt: remoteTs || Date.now()
+      };
+      state = normalizeState(next);
+      saveLocalState();
+      return true;
+    }
+
+    function fbPullAll(silent, forceApply) {
+      const endpoint = getPlatoonEndpoint();
+      if (!endpoint) { setSyncStatus('local'); return Promise.resolve({ ok: false, error: 'Не вказано URL Firebase' }); }
+      if (!silent) setSyncStatus('syncing');
+      return fetch(endpoint)
         .then(function(res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          lastSyncAt = formatDateTimeNow();
-          setSyncStatus('online');
-          return true;
+          if (!res.ok) return parseFirebaseError(res).then(function(errMsg) { throw new Error(errMsg); });
+          return res.json();
         })
-        .catch(function() {
+        .then(function(data) {
+          lastSyncAt = formatDateTimeNow();
+          lastSyncError = '';
+          setSyncStatus('online');
+          const updated = applyRemoteSnapshot(data, Boolean(forceApply));
+          if (updated && sessionRole && !isUserActivelyEditing()) render();
+          return { ok: true, data: data };
+        })
+        .catch(function(err) {
+          lastSyncError = (err && err.message) ? err.message : 'Помилка мережі';
           setSyncStatus('offline');
-          return false;
+          if (!silent && sessionRole && ui.activeTab === 'settings') render();
+          return { ok: false, error: lastSyncError };
         });
+    }
+
+    function fbPushAll(silent) {
+      const endpoint = getPlatoonEndpoint();
+      if (!endpoint) {
+        if (!silent) showToast('Спочатку вкажіть посилання на базу Firebase', 'error');
+        return Promise.resolve({ ok: false, error: 'Не вказано URL Firebase' });
+      }
+      if (!silent) setSyncStatus('syncing');
+      const payload = buildCloudPayload();
+      return fetch(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(function(res) {
+          if (!res.ok) return parseFirebaseError(res).then(function(errMsg) { throw new Error(errMsg); });
+          return res.json();
+        })
+        .then(function() {
+          lastSyncAt = formatDateTimeNow();
+          lastSyncError = '';
+          setSyncStatus('online');
+          if (!silent && sessionRole && ui.activeTab === 'settings') render();
+          return { ok: true };
+        })
+        .catch(function(err) {
+          lastSyncError = (err && err.message) ? err.message : 'Помилка мережі при записі';
+          setSyncStatus('offline');
+          if (sessionRole && ui.activeTab === 'settings') render();
+          return { ok: false, error: lastSyncError };
+        });
+    }
+
+    function fbFetchPinsQuick() {
+      const endpoint = getPlatoonEndpoint();
+      if (!endpoint) return Promise.resolve();
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(function() { ctrl.abort(); }, 2500) : null;
+      return fetch(endpoint, ctrl ? { signal: ctrl.signal } : {})
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+          if (timer) clearTimeout(timer);
+          if (data && data.pins && typeof data.pins === 'object') {
+            state.pins = Object.assign({}, DEFAULT_PINS, data.pins);
+            saveLocalState();
+          }
+        })
+        .catch(function() { if (timer) clearTimeout(timer); });
+    }
+
+    function startLiveSync() {
+      stopLiveSync();
+      const endpoint = getPlatoonEndpoint();
+      if (!endpoint) { setSyncStatus('local'); return; }
+
+      fbPullAll(false, false);
+
+      // Автоматичний фоновий поллінг кожні 15 секунд при активній вкладці
+      fbPollTimer = setInterval(function() {
+        if (document.visibilityState === 'visible') fbPullAll(true, false);
+      }, 15000);
+    }
+
+    function stopLiveSync() {
+      if (fbEventSource) { try { fbEventSource.close(); } catch (e) {} fbEventSource = null; }
+      if (fbPollTimer) { clearInterval(fbPollTimer); fbPollTimer = null; }
+      clearTimeout(fbPullDebounce);
+      clearTimeout(fbPushDebounce);
+    }
+
+    function manualSyncFromHeader() {
+      if (!getFirebaseUrl()) {
+        showToast('Локальний режим. Підключіть Firebase у Налаштуваннях');
+        return;
+      }
+      fbPullAll(false, true).then(function(res) {
+        showToast(res.ok ? 'Дані оновлено з хмари' : (res.error || 'Немає зв\'язку з Firebase'), res.ok ? 'success' : 'error');
+      });
     }
 
     function fbSyncMeta() {
@@ -2232,6 +2451,7 @@
           '<div class="fw-800" style="color:#fff">Версія сайту: ' + APP_VERSION + ' (оновлено ' + APP_UPDATED + ')</div>' +
           '<div class="text-xs text-muted" style="margin-top:3px">Активна роль: <strong style="color:#fff">' + esc(getRoleLabel(sessionRole)) + '</strong>' +
             (lastSyncAt ? ' • Синхронізовано: ' + esc(lastSyncAt) : '') + '</div>' +
+          (lastSyncError ? '<div class="text-xs" style="margin-top:6px;padding:7px 9px;border-radius:8px;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.45);color:#fecaca">' + esc(lastSyncError) + '</div>' : '') +
         '</div>';
 
       // Спрощене меню для Командира відділення
@@ -2324,8 +2544,10 @@
     function connectFirebaseFromInput() {
       const inp = document.getElementById('fb-url-input');
       const url = cleanFbUrl(inp ? inp.value : '');
+      if (inp) inp.value = url;
       if (!url) {
         setFirebaseUrl('');
+        lastSyncError = '';
         stopLiveSync();
         setSyncStatus('local');
         showToast('Перемкнуто на локальний режим');
@@ -2337,17 +2559,19 @@
         return;
       }
       setSyncStatus('syncing');
-      fetch(url + '/.json')
+      const endpoint = getPlatoonEndpoint(url);
+      fetch(endpoint)
         .then(function(r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
+          if (!r.ok) return parseFirebaseError(r).then(function(errMsg) { throw new Error(errMsg); });
           return r.json();
         })
         .then(function(data) {
           setFirebaseUrl(url);
           lastSyncAt = formatDateTimeNow();
+          lastSyncError = '';
           setSyncStatus('online');
           if (data && typeof data === 'object' && (data.meta || data.personnel)) {
-            applyRemoteSnapshot(data);
+            applyRemoteSnapshot(data, true);
             showToast('Підключено! Дані завантажено з хмари');
           } else {
             showToast('Підключено! Натисніть «Завантажити мої дані в хмару»');
@@ -2355,9 +2579,11 @@
           startLiveSync();
           render();
         })
-        .catch(function() {
+        .catch(function(err) {
+          lastSyncError = (err && err.message) ? err.message : 'Помилка підключення до Firebase';
           setSyncStatus('offline');
-          showToast('Помилка підключення. Перевірте URL та правила доступу Firebase', 'error');
+          showToast(lastSyncError, 'error');
+          render();
         });
     }
 
@@ -2368,8 +2594,8 @@
         'Усі поточні бійці, графік нарядів, задачі, розхід і PIN-коди з цього телефону будуть записані в хмарну базу.',
         'Завантажити в хмару',
         function() {
-          fbPushAll().then(function(ok) {
-            showToast(ok ? 'Усі дані завантажено в Firebase!' : 'Помилка завантаження', ok ? 'success' : 'error');
+          fbPushAll(false).then(function(res) {
+            showToast(res.ok ? 'Усі дані завантажено в Firebase!' : (res.error || 'Помилка завантаження'), res.ok ? 'success' : 'error');
             render();
           });
         },
@@ -2379,8 +2605,8 @@
 
     function pullCloudToLocal() {
       if (!getFirebaseUrl()) { showToast('Спочатку підключіть посилання Firebase', 'error'); return; }
-      fbPullAll(false).then(function(ok) {
-        showToast(ok ? 'Дані завантажено з хмари' : 'Не вдалося завантажити', ok ? 'success' : 'error');
+      fbPullAll(false, true).then(function(res) {
+        showToast(res.ok ? 'Дані завантажено з хмари' : (res.error || 'Не вдалося завантажити'), res.ok ? 'success' : 'error');
         render();
       });
     }
@@ -2389,7 +2615,7 @@
       const fbUrl = getFirebaseUrl();
       if (!fbUrl) { showToast('Спочатку підключіть базу Firebase', 'error'); return; }
       const base = window.location.origin + window.location.pathname;
-      const link = base + '?db=' + encodeURIComponent(fbUrl);
+      const link = base + '?fb=' + encodeURIComponent(fbUrl);
       copyText(link, 'Посилання для КВ скопійовано!');
     }
 
