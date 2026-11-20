@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#0b1015" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Помічник взводу v3.0.3</title>
+  <title>Помічник взводу v3.1</title>
   <style>
     /* =========================================================================
-       ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI, БЕЗ ЗОВНІШНІХ CDN)
+       ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
        ========================================================================= */
     :root {
       --bg: #0b1015;
@@ -45,7 +45,7 @@
     button { cursor: pointer; border: none; background: none; padding: 0; }
     input[type="date"] { color-scheme: dark; }
 
-    /* Банер аварійної діагностики (щоб ніколи не було мовчазного білого екрану) */
+    /* Банер аварійної діагностики (захист від білого екрану) */
     #fatal-error-box {
       display: none; position: fixed; inset: 12px; z-index: 9999;
       background: #2b1115; border: 2px solid #ef4444; border-radius: 14px;
@@ -82,7 +82,7 @@
     /* Головна оболонка */
     .app {
       max-width: 600px; margin: 0 auto; min-height: 100vh;
-      display: flex; flex-direction: column; padding-bottom: calc(82px + var(--safe-bottom));
+      display: flex; flex-direction: column; padding-bottom: calc(84px + var(--safe-bottom));
     }
     .header {
       position: sticky; top: 0; z-index: 30;
@@ -102,13 +102,14 @@
     .header-meta { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
     .role-pill {
       font-size: 10.5px; font-weight: 800; padding: 1px 7px; border-radius: 999px;
-      background: rgba(234, 179, 8, 0.16); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.35); white-space: nowrap;
+      background: rgba(74, 222, 128, 0.16); color: #86efac; border: 1px solid rgba(74, 222, 128, 0.35); white-space: nowrap;
     }
+    .role-pill.kg { background: rgba(234, 179, 8, 0.16); color: #fde047; border-color: rgba(234, 179, 8, 0.35); }
     .role-pill.kv { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; border-color: rgba(56, 189, 248, 0.35); }
     .sync-pill {
       font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 999px;
       background: var(--card); border: 1px solid var(--border); color: var(--text);
-      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; min-height: 32px;
+      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; min-height: 34px;
     }
     .sync-pill.online { border-color: rgba(74, 222, 128, 0.4); color: #86efac; }
     .sync-pill.offline { border-color: rgba(239, 68, 68, 0.45); color: #fca5a5; }
@@ -138,6 +139,7 @@
     .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .wrap { flex-wrap: wrap; }
     .min0 { min-width: 0; flex: 1; }
     .text-xs { font-size: 12px; }
@@ -169,11 +171,11 @@
     .btn-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
 
     .btn-icon {
-      width: 42px; height: 42px; border-radius: 10px; background: var(--bg-elev);
+      width: 44px; height: 44px; border-radius: 10px; background: var(--bg-elev);
       border: 1px solid var(--border); color: var(--text);
       display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px;
     }
-    .btn-icon-sm { width: 34px; height: 34px; border-radius: 9px; font-size: 13px; }
+    .btn-icon-sm { width: 36px; height: 36px; border-radius: 9px; font-size: 13px; }
     .btn-icon.danger { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
@@ -191,7 +193,9 @@
       display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
       background: var(--card); border: 1px solid var(--border); padding: 4px; border-radius: 12px;
     }
-    .seg-btn { min-height: 38px; border-radius: 9px; font-size: 13px; font-weight: 700; color: var(--muted); }
+    .seg-control-3 { grid-template-columns: repeat(3, 1fr); }
+    .seg-control-4 { grid-template-columns: repeat(4, 1fr); }
+    .seg-btn { min-height: 38px; padding: 4px 6px; border-radius: 9px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
     .seg-btn.active { background: var(--olive); color: #fff; }
 
     .pills-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
@@ -300,15 +304,22 @@
       font-size: 13px; white-space: pre-wrap; word-break: break-word; line-height: 1.48;
     }
     .toggle-pill {
-      display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 10px;
-      background: var(--bg); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 10px; font-size: 12.5px; font-weight: 600; cursor: pointer;
     }
-    .toggle-pill input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
+    .toggle-pill input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
     .checkbox-row {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
       min-height: 48px; padding: 10px 12px; background: var(--bg); border-bottom: 1px solid var(--border); cursor: pointer;
     }
+    .checkbox-row.locked { opacity: 0.48; cursor: not-allowed; }
     .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); flex-shrink: 0; }
+
+    /* Матриця прав доступу */
+    .perm-block {
+      padding: 10px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 8px;
+    }
 
     /* Діагностика Firebase */
     .diag-box {
@@ -355,13 +366,13 @@
   </style>
 </head>
 <body>
-  <!-- Видимий блок критичних помилок (захист від білого екрану) -->
+  <!-- Аварійний блок відображення помилок -->
   <div id="fatal-error-box"></div>
 
   <!-- Екран входу за PIN-кодом -->
   <div id="pin-screen" class="pin-screen hidden"></div>
 
-  <!-- Основний інтерфейс застосунку -->
+  <!-- Основна оболонка застосунку -->
   <div id="app-shell" class="app hidden">
     <header class="header">
       <div class="brand">
@@ -373,17 +384,13 @@
         <div class="min0">
           <div class="brand-title">Помічник взводу</div>
           <div class="header-meta">
-            <span id="header-role-pill" class="role-pill">★ Адмін</span>
+            <span id="header-role-pill" class="role-pill">🛡️ Адмін</span>
           </div>
         </div>
       </div>
       <div class="row" style="gap:6px;flex-shrink:0">
         <button id="header-sync-pill" class="sync-pill" onclick="manualSyncFromHeader()" title="Оновити з хмари">⚪ Локально</button>
-        <button class="btn-icon btn-icon-sm" onclick="logoutSession()" title="Вийти / Змінити PIN" aria-label="Вийти">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-        </button>
+        <button class="btn-icon btn-icon-sm" onclick="logoutSession()" title="Вийти / Змінити PIN" aria-label="Вийти">🚪</button>
       </div>
     </header>
 
@@ -425,7 +432,7 @@
     </nav>
   </div>
 
-  <!-- Модальне вікно, сповіщення, імпорт файлу -->
+  <!-- Модальне вікно, Toast, імпорт файлу -->
   <div id="modal-root" class="modal-backdrop" onclick="if(event.target.id==='modal-root') closeModal()">
     <div id="modal-box" class="modal-box"></div>
   </div>
@@ -441,9 +448,9 @@
       if (!box) return;
       box.style.display = 'block';
       box.innerHTML =
-        '<div style="font-size:16px;font-weight:800;margin-bottom:8px">Помилка запуску Помічника взводу</div>' +
+        '<div style="font-size:16px;font-weight:800;margin-bottom:8px">Помилка запуску «Помічника взводу»</div>' +
         '<div style="font-size:13px;font-family:monospace;white-space:pre-wrap;margin-bottom:14px">' + String(msg || 'Невідома помилка') + '</div>' +
-        '<button type="button" onclick="location.reload()" style="padding:10px 14px;border-radius:10px;background:#ef4444;color:#fff;font-weight:700">Перезавантажити сторінку</button>';
+        '<button type="button" onclick="location.reload()" style="padding:10px 14px;border-radius:10px;background:#ef4444;color:#fff;font-weight:700">Перезавантажити</button>';
     }
     window.onerror = function(message, source, lineno, colno) {
       showFatalError(message + (lineno ? (' (рядок ' + lineno + ':' + colno + ')') : ''));
@@ -455,16 +462,17 @@
     };
 
     // =========================================================================
-    // 1. КОНСТАНТИ ТА ДОВІДНИКИ
+    // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.0.3';
+    var APP_VERSION = 'v3.1';
     var APP_UPDATED = '20.11.2026';
-    var STORAGE_KEY = 'pomichnyk_vzvodu_v30';
+    var STORAGE_KEY = 'pomichnyk_vzvodu_v31';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
-    var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role';
+    var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role_v31';
     var LEGACY_KEYS = [
-      'pomichnyk_vzvodu_v27', 'pomichnyk_vzvodu_v3', 'pomichnyk_vzvodu_data',
-      'pomichnyk_vzvodu_v2', 'pomichnyk_vzvodu_v1', 'platoon_helper_state', 'platoon_duty_tracker_v1'
+      'pomichnyk_vzvodu_v30', 'pomichnyk_vzvodu_v27', 'pomichnyk_vzvodu_v3',
+      'pomichnyk_vzvodu_data', 'pomichnyk_vzvodu_v2', 'pomichnyk_vzvodu_v1',
+      'platoon_helper_state', 'platoon_duty_tracker_v1'
     ];
 
     var MONTHS_UK = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
@@ -485,20 +493,33 @@
       { id: 'dn', shortName: 'Дн', name: 'Днювальні курсу', maxCount: 3, color: '#38bdf8' }
     ];
 
-    var DEFAULT_PINS = { admin: '1111', sq1: '1001', sq2: '2002', sq3: '3003' };
+    var DEFAULT_PINS = {
+      admin: '1111',
+      kg: '1222',
+      kv1: '1001',
+      kv2: '2002',
+      kv3: '3003'
+    };
+
+    var DEFAULT_ROLE_PERMISSIONS = {
+      kg:  { dutiesEdit: true,  tasksCreate: true,  tasksStatus: true, tasksViewAll: true,  rozkhidMode: 'all', skladMode: 'all_edit' },
+      kv1: { dutiesEdit: false, tasksCreate: false, tasksStatus: true, tasksViewAll: false, rozkhidMode: 'own', skladMode: 'own_status' },
+      kv2: { dutiesEdit: false, tasksCreate: false, tasksStatus: true, tasksViewAll: false, rozkhidMode: 'own', skladMode: 'own_status' },
+      kv3: { dutiesEdit: false, tasksCreate: false, tasksStatus: true, tasksViewAll: false, rozkhidMode: 'own', skladMode: 'own_status' }
+    };
 
     var ROZKHID_CATS = [
-      { key: 'priyom_shpytal', label: 'Прийом шпиталь', hint: 'Прийом у шпиталі', schedulable: true, kvEditable: true },
-      { key: 'priyom_lazaret', label: 'Прийом лазарет', hint: 'Прийом у лазареті', schedulable: true, kvEditable: true },
-      { key: 'sh', label: 'Ш', hint: 'Шпиталь', schedulable: true, kvEditable: true },
-      { key: 'l', label: 'Л', hint: 'Лазарет', schedulable: true, kvEditable: true },
-      { key: 'vd', label: 'Вд', hint: 'Відрядження', schedulable: true, kvEditable: true },
-      { key: 'vp', label: 'Вп', hint: 'Відпустка', schedulable: true, kvEditable: true },
-      { key: 'n', label: 'Н', hint: 'Наряд (авто)', schedulable: false, kvEditable: false },
-      { key: 'g', label: 'Г', hint: 'Гуртожиток', schedulable: true, kvEditable: true },
-      { key: 'pk', label: 'Пк', hint: 'Поза казармою', schedulable: true, kvEditable: true },
-      { key: 'hv', label: 'Хв', hint: 'Хворий', schedulable: true, kvEditable: true },
-      { key: 'starodobovyi', label: 'Стародобовий', hint: 'Вчорашній наряд (авто)', schedulable: false, kvEditable: false }
+      { key: 'priyom_shpytal', label: 'Прийом шпиталь', hint: 'Прийом у шпиталі', schedulable: true, ownEditable: true },
+      { key: 'priyom_lazaret', label: 'Прийом лазарет', hint: 'Прийом у лазареті', schedulable: true, ownEditable: true },
+      { key: 'sh', label: 'Ш', hint: 'Шпиталь', schedulable: true, ownEditable: true },
+      { key: 'l', label: 'Л', hint: 'Лазарет', schedulable: true, ownEditable: true },
+      { key: 'vd', label: 'Вд', hint: 'Відрядження', schedulable: true, ownEditable: true },
+      { key: 'vp', label: 'Вп', hint: 'Відпустка', schedulable: true, ownEditable: true },
+      { key: 'n', label: 'Н', hint: 'Наряд (авто)', schedulable: false, ownEditable: false },
+      { key: 'g', label: 'Г', hint: 'Гуртожиток', schedulable: true, ownEditable: true },
+      { key: 'pk', label: 'Пк', hint: 'Поза казармою', schedulable: true, ownEditable: true },
+      { key: 'hv', label: 'Хв', hint: 'Хворий', schedulable: true, ownEditable: true },
+      { key: 'starodobovyi', label: 'Стародобовий', hint: 'Вчорашній наряд (авто)', schedulable: false, ownEditable: false }
     ];
 
     var PRESENCE_STATUSES = [
@@ -514,7 +535,7 @@
     var PERM_ABSENT_KEYS = { sh: true, l: true, vd: true, vp: true, g: true, pk: true, hv: true };
 
     // =========================================================================
-    // 2. БАЗОВІ УТИЛІТИ ДАТ, ТЕКСТУ, РОЛЕЙ ТА СХОВИЩА
+    // 2. УТИЛІТИ ДАТ, ТЕКСТУ, НОРМАЛІЗАЦІЇ ТА СХОВИЩА
     // =========================================================================
     function pad2(n) { return String(n).padStart(2, '0'); }
     function toISO(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
@@ -550,7 +571,7 @@
       return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
     }
 
-    function esc(s) {
+    function escHtml(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -570,12 +591,22 @@
       return arr.map(function(item) { return Object.assign({}, item); });
     }
 
+    function cloneDefaultPerms() {
+      return {
+        kg:  Object.assign({}, DEFAULT_ROLE_PERMISSIONS.kg),
+        kv1: Object.assign({}, DEFAULT_ROLE_PERMISSIONS.kv1),
+        kv2: Object.assign({}, DEFAULT_ROLE_PERMISSIONS.kv2),
+        kv3: Object.assign({}, DEFAULT_ROLE_PERMISSIONS.kv3)
+      };
+    }
+
     function createFreshState() {
       return {
         groupNumber: '223',
         squads: cloneDefaults(DEFAULT_SQUADS),
         dutyTypes: cloneDefaults(DEFAULT_DUTY_TYPES),
         pins: Object.assign({}, DEFAULT_PINS),
+        rolePermissions: cloneDefaultPerms(),
         personnel: [],
         duties: [],
         tasks: [],
@@ -588,11 +619,53 @@
       };
     }
 
+    function normalizePins(rawPins) {
+      var p = Object.assign({}, DEFAULT_PINS);
+      if (rawPins && typeof rawPins === 'object') {
+        if (rawPins.admin) p.admin = String(rawPins.admin);
+        if (rawPins.kg) p.kg = String(rawPins.kg);
+        if (rawPins.kv1) p.kv1 = String(rawPins.kv1);
+        else if (rawPins.sq1) p.kv1 = String(rawPins.sq1);
+        if (rawPins.kv2) p.kv2 = String(rawPins.kv2);
+        else if (rawPins.sq2) p.kv2 = String(rawPins.sq2);
+        if (rawPins.kv3) p.kv3 = String(rawPins.kv3);
+        else if (rawPins.sq3) p.kv3 = String(rawPins.sq3);
+      }
+      return p;
+    }
+
+    function normalizeRolePermissions(raw) {
+      var res = cloneDefaultPerms();
+      if (!raw || typeof raw !== 'object') return res;
+      ['kg', 'kv1', 'kv2', 'kv3'].forEach(function(r) {
+        if (raw[r] && typeof raw[r] === 'object') {
+          var src = raw[r];
+          res[r] = {
+            dutiesEdit: Boolean(src.dutiesEdit),
+            tasksCreate: Boolean(src.tasksCreate),
+            tasksStatus: src.tasksStatus !== undefined ? Boolean(src.tasksStatus) : res[r].tasksStatus,
+            tasksViewAll: Boolean(src.tasksViewAll),
+            rozkhidMode: (src.rozkhidMode === 'view' || src.rozkhidMode === 'own' || src.rozkhidMode === 'all') ? src.rozkhidMode : res[r].rozkhidMode,
+            skladMode: (src.skladMode === 'view' || src.skladMode === 'own_status' || src.skladMode === 'all_edit') ? src.skladMode : res[r].skladMode
+          };
+        }
+      });
+      return res;
+    }
+
     function normalizeState(raw) {
       var base = createFreshState();
       if (!raw || typeof raw !== 'object') return base;
       base.groupNumber = String(raw.groupNumber || '223').trim() || '223';
-      base.squads = (Array.isArray(raw.squads) && raw.squads.length) ? raw.squads : cloneDefaults(DEFAULT_SQUADS);
+      base.squads = (Array.isArray(raw.squads) && raw.squads.length) ? raw.squads.map(function(sq) {
+        return {
+          id: String(sq.id || genId('sq')),
+          name: String(sq.name || 'Відділення'),
+          color: String(sq.color || '#3b82f6'),
+          isCmdGroup: Boolean(sq.isCmdGroup || sq.id === 'cmd' || /командир\s+групи/i.test(sq.name || ''))
+        };
+      }) : cloneDefaults(DEFAULT_SQUADS);
+
       base.dutyTypes = (Array.isArray(raw.dutyTypes) && raw.dutyTypes.length) ? raw.dutyTypes.map(function(dt) {
         return {
           id: String(dt.id || genId('dt')),
@@ -602,7 +675,10 @@
           color: String(dt.color || '#38bdf8')
         };
       }) : cloneDefaults(DEFAULT_DUTY_TYPES);
-      base.pins = (raw.pins && typeof raw.pins === 'object') ? Object.assign({}, DEFAULT_PINS, raw.pins) : Object.assign({}, DEFAULT_PINS);
+
+      base.pins = normalizePins(raw.pins);
+      base.rolePermissions = normalizeRolePermissions(raw.rolePermissions);
+
       base.personnel = Array.isArray(raw.personnel) ? raw.personnel.filter(function(p) { return p && p.id && p.fullName; }).map(function(p) {
         return {
           id: String(p.id),
@@ -613,6 +689,7 @@
           presenceStatus: String(p.presenceStatus || 'in_service')
         };
       }) : [];
+
       base.duties = Array.isArray(raw.duties) ? raw.duties.filter(function(d) { return d && d.date && d.soldierId; }).map(function(d) {
         return {
           id: String(d.id || genId('d')),
@@ -621,11 +698,26 @@
           dutyTypeId: String(d.dutyTypeId || (base.dutyTypes[0] ? base.dutyTypes[0].id : 'chk'))
         };
       }) : [];
+
       base.tasks = Array.isArray(raw.tasks) ? raw.tasks.filter(function(t) { return t && t.text; }).map(function(t) {
+        var target = String(t.target || t.targetRole || '');
+        var targetSquadId = String(t.targetSquadId || t.squadId || '');
+        if (!target) {
+          if (t.recipientType === 'all_leaders' || t.recipient === 'all') target = 'all';
+          else if (targetSquadId === 'sq1') target = 'kv1';
+          else if (targetSquadId === 'sq2') target = 'kv2';
+          else if (targetSquadId === 'sq3') target = 'kv3';
+          else if (targetSquadId === 'cmd') target = 'kg';
+          else if (targetSquadId) target = targetSquadId;
+          else target = 'all';
+        }
         return {
           id: String(t.id || genId('task')),
-          recipientType: t.recipientType === 'all_leaders' ? 'all_leaders' : 'squad',
-          squadId: String(t.squadId || ''),
+          target: target,
+          targetRole: String(t.targetRole || target),
+          targetSquadId: targetSquadId,
+          recipientType: target === 'all' ? 'all_leaders' : 'squad',
+          squadId: targetSquadId,
           text: String(t.text),
           author: String(t.author || ''),
           status: (t.status === 'done' || t.status === 'failed') ? t.status : 'received',
@@ -633,6 +725,7 @@
           createdAt: String(t.createdAt || '')
         };
       }) : [];
+
       base.scheduledAbsences = Array.isArray(raw.scheduledAbsences) ? raw.scheduledAbsences.filter(function(a) { return a && a.soldierId && a.startDate; }).map(function(a) {
         return {
           id: String(a.id || genId('sched')),
@@ -643,6 +736,7 @@
           note: String(a.note || '')
         };
       }) : [];
+
       base.rozkhidManual = (raw.rozkhidManual && typeof raw.rozkhidManual === 'object') ? raw.rozkhidManual : {};
       base.rozkhidNumeric = (raw.rozkhidNumeric && typeof raw.rozkhidNumeric === 'object') ? raw.rozkhidNumeric : {};
       base.rozkhidCleared = (raw.rozkhidCleared && typeof raw.rozkhidCleared === 'object') ? raw.rozkhidCleared : {};
@@ -658,11 +752,7 @@
     function loadLocalState() {
       try {
         var raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          state = normalizeState(JSON.parse(raw));
-          return;
-        }
-        // Безпечна міграція зі старих версій
+        if (raw) { state = normalizeState(JSON.parse(raw)); return; }
         for (var i = 0; i < LEGACY_KEYS.length; i++) {
           var legacy = localStorage.getItem(LEGACY_KEYS[i]);
           if (legacy) {
@@ -676,11 +766,11 @@
     }
 
     // =========================================================================
-    // 3. ГЛОБАЛЬНИЙ СТАН ТА ФУНКЦІЇ ПОШУКУ / СОРТУВАННЯ
+    // 3. ГЛОБАЛЬНИЙ СТАН, РОЛІ ТА МАТРИЦЯ ПРАВ ДОСТУПУ
     // =========================================================================
     var nowInit = new Date();
     var state = createFreshState();
-    var sessionRole = null; // 'admin' | 'sq1' | 'sq2' | 'sq3' | null
+    var currentRole = null; // 'admin' | 'kg' | 'kv1' | 'kv2' | 'kv3' | null
     var pinEntry = '';
     var pinRemember = true;
     var pinError = false;
@@ -689,7 +779,7 @@
     var fbPollTimer = null;
     var fbPushDebounce = null;
     var lastSyncAt = '';
-    var lastSyncDiag = null; // { type: 'ok' | 'err' | 'info', text: string }
+    var lastSyncDiag = null;
 
     var ui = {
       activeTab: 'duties',
@@ -711,25 +801,14 @@
       personnelSearch: '',
       personnelSquadFilter: 'all',
       openPersonnelSquads: { cmd: true, sq1: true, sq2: true, sq3: true },
-      openSoldiers: {}
+      openSoldiers: {},
+      permEditRole: 'kg'
     };
 
     var assignModal = { date: '', dutyTypeId: '', selectedIds: [] };
     var tempColor = '#3b82f6';
 
-    function isAdmin() { return sessionRole === 'admin'; }
-    function mySquadId() { return isAdmin() ? null : sessionRole; }
-    function getRoleLabel(role) {
-      if (role === 'admin') return '★ Адмін';
-      if (role === 'sq1') return 'КВ 1-го відд.';
-      if (role === 'sq2') return 'КВ 2-го відд.';
-      if (role === 'sq3') return 'КВ 3-го відд.';
-      return 'Гість';
-    }
-    function canEditSoldier(s) {
-      if (!s) return false;
-      return isAdmin() || s.squadId === mySquadId();
-    }
+    function isAdmin() { return currentRole === 'admin'; }
 
     function isCmdGroup(sq) {
       return Boolean(sq && (sq.isCmdGroup || sq.id === 'cmd' || /командир\s+групи/i.test(sq.name || '')));
@@ -745,22 +824,141 @@
       });
     }
 
+    function getNonCmdSquads() {
+      return getOrderedSquads().filter(function(sq) { return !isCmdGroup(sq); });
+    }
+
+    function getCmdSquad() {
+      return getOrderedSquads().find(function(sq) { return isCmdGroup(sq); }) || null;
+    }
+
+    function getSquadForRole(role) {
+      var nonCmd = getNonCmdSquads();
+      if (role === 'kv1') return nonCmd[0] || null;
+      if (role === 'kv2') return nonCmd[1] || null;
+      if (role === 'kv3') return nonCmd[2] || null;
+      if (role === 'kg') return getCmdSquad();
+      return null;
+    }
+
+    function getMySquadId() {
+      var sq = getSquadForRole(currentRole);
+      return sq ? sq.id : null;
+    }
+
+    function getRoleLabel(role) {
+      if (role === 'admin') return '🛡️ Адмін';
+      if (role === 'kg') return '⭐ КГ';
+      if (role === 'kv1') return 'КВ 1-го відд.';
+      if (role === 'kv2') return 'КВ 2-го відд.';
+      if (role === 'kv3') return 'КВ 3-го відд.';
+      return 'Гість';
+    }
+
+    function getRolePillClass(role) {
+      if (role === 'admin') return 'role-pill';
+      if (role === 'kg') return 'role-pill kg';
+      return 'role-pill kv';
+    }
+
+    function hasPerm(permKey) {
+      if (currentRole === 'admin') {
+        if (permKey === 'rozkhidMode') return 'all';
+        if (permKey === 'skladMode') return 'all_edit';
+        return true;
+      }
+      var perms = (state.rolePermissions && state.rolePermissions[currentRole]) || DEFAULT_ROLE_PERMISSIONS[currentRole];
+      if (!perms) return false;
+      return perms[permKey];
+    }
+
+    function canEditSoldierRozkhid(s) {
+      if (!s) return false;
+      var mode = hasPerm('rozkhidMode');
+      if (mode === 'all') return true;
+      if (mode === 'own') {
+        if (currentRole === 'kg') return true;
+        return s.squadId === getMySquadId();
+      }
+      return false;
+    }
+
+    function canEditSoldierStatus(s) {
+      if (!s) return false;
+      var mode = hasPerm('skladMode');
+      if (mode === 'all_edit') return true;
+      if (mode === 'own_status') {
+        if (currentRole === 'kg') return true;
+        return s.squadId === getMySquadId();
+      }
+      return false;
+    }
+
+    // Бронебійна перевірка видимості задачі для будь-якої ролі
+    function isTaskVisibleForRole(task, role) {
+      if (!task) return false;
+      if (role === 'admin' || hasPerm('tasksViewAll')) return true;
+
+      var vals = [task.targetRole, task.target, task.recipient, task.recipientType, task.squadId, task.targetSquadId]
+        .filter(Boolean)
+        .map(function(v) { return String(v).trim(); });
+
+      if (vals.indexOf('all') !== -1 || vals.indexOf('all_kv') !== -1 || vals.indexOf('all_leaders') !== -1) {
+        return true;
+      }
+
+      if (role === 'kg') {
+        var cmdSq = getCmdSquad();
+        return vals.indexOf('kg') !== -1 || vals.indexOf('cmd') !== -1 || (cmdSq && vals.indexOf(cmdSq.id) !== -1);
+      }
+
+      if (role === 'kv1' || role === 'kv2' || role === 'kv3') {
+        var idx = role === 'kv1' ? 0 : (role === 'kv2' ? 1 : 2);
+        var mySquad = getNonCmdSquads()[idx];
+        var sqNum = String(idx + 1);
+        var legacySqId = 'sq' + sqNum;
+        for (var i = 0; i < vals.length; i++) {
+          var v = vals[i];
+          if (v === role || v === legacySqId || v === sqNum || (mySquad && v === mySquad.id)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function getTaskTargetMeta(task) {
+      var t = String(task.targetRole || task.target || '');
+      var nonCmd = getNonCmdSquads();
+      if (t === 'all' || t === 'all_kv' || t === 'all_leaders' || task.recipientType === 'all_leaders') {
+        return { label: 'Усім командирам відділень', color: '#eab308', key: 'all' };
+      }
+      if (t === 'kg' || t === 'cmd' || task.targetSquadId === 'cmd') {
+        return { label: 'Командиру групи (КГ)', color: '#eab308', key: 'kg' };
+      }
+      if (t === 'kv1' || t === 'sq1' || (nonCmd[0] && (t === nonCmd[0].id || task.targetSquadId === nonCmd[0].id))) {
+        return { label: 'Командиру 1-го відділення', color: (nonCmd[0] ? nonCmd[0].color : '#3b82f6'), key: 'kv1' };
+      }
+      if (t === 'kv2' || t === 'sq2' || (nonCmd[1] && (t === nonCmd[1].id || task.targetSquadId === nonCmd[1].id))) {
+        return { label: 'Командиру 2-го відділення', color: (nonCmd[1] ? nonCmd[1].color : '#10b981'), key: 'kv2' };
+      }
+      if (t === 'kv3' || t === 'sq3' || (nonCmd[2] && (t === nonCmd[2].id || task.targetSquadId === nonCmd[2].id))) {
+        return { label: 'Командиру 3-го відділення', color: (nonCmd[2] ? nonCmd[2].color : '#f97316'), key: 'kv3' };
+      }
+      var sq = getSquadById(task.targetSquadId || task.squadId || t);
+      return { label: 'Командиру (' + sq.name + ')', color: sq.color || '#38bdf8', key: sq.id };
+    }
+
     function getSquadById(id) {
       return state.squads.find(function(sq) { return sq.id === id; }) || { id: id || '', name: 'Без відділення', color: '#8b9bb0', isCmdGroup: false };
     }
-
-    function getSoldierById(id) {
-      return state.personnel.find(function(p) { return p.id === id; }) || null;
-    }
-
+    function getSoldierById(id) { return state.personnel.find(function(p) { return p.id === id; }) || null; }
     function getDutyTypeById(id) {
       return state.dutyTypes.find(function(dt) { return dt.id === id; }) || { id: id || '', shortName: 'Н', name: 'Наряд', maxCount: 1, color: '#38bdf8' };
     }
-
     function getRozkhidCat(key) {
-      return ROZKHID_CATS.find(function(c) { return c.key === key; }) || { key: key, label: key, hint: '', schedulable: true, kvEditable: true };
+      return ROZKHID_CATS.find(function(c) { return c.key === key; }) || { key: key, label: key, hint: '', schedulable: true, ownEditable: true };
     }
-
     function getPresenceMeta(key) {
       return PRESENCE_STATUSES.find(function(p) { return p.key === key; }) || PRESENCE_STATUSES[0];
     }
@@ -770,14 +968,6 @@
         if (Boolean(a.isLeader) !== Boolean(b.isLeader)) return a.isLeader ? -1 : 1;
         return String(a.fullName || '').localeCompare(String(b.fullName || ''), 'uk');
       });
-    }
-
-    function formatSquadRecipient(sq) {
-      if (!sq) return 'Командиру відділення';
-      if (sq.id === 'sq1' || /^1/.test(sq.name)) return 'Командиру 1-го відділення';
-      if (sq.id === 'sq2' || /^2/.test(sq.name)) return 'Командиру 2-го відділення';
-      if (sq.id === 'sq3' || /^3/.test(sq.name)) return 'Командиру 3-го відділення';
-      return 'Командиру (' + sq.name + ')';
     }
 
     function formatSquadShortTab(sq) {
@@ -814,7 +1004,6 @@
     function normalizeFbUrl(raw) {
       var s = String(raw || '').trim();
       if (!s) return '';
-      // Витягуємо перше коректне посилання Firebase (захист від дублів, Https://, ](, .json, пробілів)
       var match = s.match(/https?:\/\/[a-z0-9\-._]+\.(?:firebasedatabase\.app|firebaseio\.com)/i);
       if (match && match[0]) {
         return match[0].replace(/^https?:\/\//i, 'https://').replace(/\/+$/, '');
@@ -870,7 +1059,6 @@
       else el.textContent = '⚪ Локально';
     }
 
-    // Глибоке очищення ключів та значень під суворі правила Firebase
     function sanitizeForFirebase(val) {
       if (val === undefined) return null;
       if (typeof val === 'number' && isNaN(val)) return null;
@@ -894,7 +1082,7 @@
         } catch (e) {
           msg = txt ? txt.slice(0, 140) : '';
         }
-        var hint = (res.status === 401 || res.status === 403) ? ' — відкрийте Rules у Firebase і натисніть Publish' : '';
+        var hint = (res.status === 401 || res.status === 403) ? ' — перевірте Rules у Firebase та натисніть Publish' : '';
         return 'HTTP ' + res.status + (msg ? ': ' + msg : '') + hint;
       }).catch(function() { return 'HTTP ' + res.status; });
     }
@@ -926,6 +1114,7 @@
           updatedAt: state.updatedAt
         },
         pins: state.pins,
+        rolePermissions: state.rolePermissions,
         personnel: arrayToObjMap(state.personnel),
         duties: arrayToObjMap(state.duties),
         tasks: arrayToObjMap(state.tasks),
@@ -938,7 +1127,7 @@
 
     function applyRemoteSnapshot(remote, forceApply) {
       if (!remote || typeof remote !== 'object') return false;
-      var hasData = remote.meta || remote.personnel || remote.duties || remote.tasks || remote.pins || remote.rozkhidManual;
+      var hasData = remote.meta || remote.personnel || remote.duties || remote.tasks || remote.pins || remote.rolePermissions || remote.rozkhidManual;
       if (!hasData) return false;
 
       var remoteTs = Number(remote.updatedAt || (remote.meta && remote.meta.updatedAt) || 0);
@@ -949,7 +1138,8 @@
         groupNumber: meta.groupNumber || state.groupNumber || '223',
         squads: (Array.isArray(meta.squads) && meta.squads.length) ? meta.squads : state.squads,
         dutyTypes: (Array.isArray(meta.dutyTypes) && meta.dutyTypes.length) ? meta.dutyTypes : state.dutyTypes,
-        pins: remote.pins ? Object.assign({}, DEFAULT_PINS, remote.pins) : state.pins,
+        pins: remote.pins ? normalizePins(remote.pins) : state.pins,
+        rolePermissions: remote.rolePermissions ? normalizeRolePermissions(remote.rolePermissions) : state.rolePermissions,
         personnel: objMapToArray(remote.personnel),
         duties: objMapToArray(remote.duties),
         tasks: objMapToArray(remote.tasks).sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); }),
@@ -973,17 +1163,21 @@
       return ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT';
     }
 
-    function scheduleCloudPush() {
+    function saveState(immediatePush) {
       state.updatedAt = Date.now();
       saveLocalState();
       if (!getFirebaseUrl()) { setSyncStatus('local'); return; }
       clearTimeout(fbPushDebounce);
-      fbPushDebounce = setTimeout(function() { fbPushAll(true); }, 800);
+      if (immediatePush) {
+        fbPushAll(true);
+      } else {
+        fbPushDebounce = setTimeout(function() { fbPushAll(true); }, 600);
+      }
     }
 
-    function fbPullAll(silent, forceApply) {
+    function fbPull(silent, forceApply) {
       var endpoint = getPlatoonEndpoint();
-      if (!endpoint) { setSyncStatus('local'); return Promise.resolve({ ok: false, error: 'Не вказано посилання Firebase' }); }
+      if (!endpoint) { setSyncStatus('local'); return Promise.resolve({ ok: false, status: 0, message: 'Не вказано посилання Firebase' }); }
       if (!silent) setSyncStatus('syncing');
       return fetch(endpoint)
         .then(function(res) {
@@ -993,19 +1187,19 @@
         .then(function(result) {
           lastSyncAt = formatDateTimeNow();
           setSyncStatus('online');
-          if (!silent) setDiag('ok', '✅ Отримано з хмари (HTTP ' + result.status + ')');
+          if (!silent) setDiag('ok', '✅ Дані оновлено з хмари (HTTP ' + result.status + ')');
           var updated = applyRemoteSnapshot(result.data, Boolean(forceApply));
-          if (updated && sessionRole && !isUserActivelyEditing()) render();
-          return { ok: true, status: result.status, data: result.data };
+          if (updated && currentRole && !isUserActivelyEditing()) render();
+          return { ok: true, status: result.status, message: 'OK', data: result.data };
         })
         .catch(function(err) {
           var msg = (err && err.message) ? err.message : 'Помилка мережі (Failed to fetch)';
           setSyncStatus('offline');
           if (!silent) {
             setDiag('err', '❌ Помилка читання: ' + msg);
-            if (sessionRole && ui.activeTab === 'settings') render();
+            if (currentRole && ui.activeTab === 'settings') render();
           }
-          return { ok: false, error: msg };
+          return { ok: false, status: 0, message: msg };
         });
     }
 
@@ -1014,7 +1208,7 @@
       if (!endpoint) {
         var msg = 'Спочатку вставте посилання Firebase';
         if (!silent) { setDiag('err', '❌ ' + msg); showToast(msg, 'error'); }
-        return Promise.resolve({ ok: false, error: msg });
+        return Promise.resolve({ ok: false, status: 0, message: msg });
       }
       if (!silent) setSyncStatus('syncing');
       var payload = buildCloudPayload();
@@ -1031,15 +1225,15 @@
           lastSyncAt = formatDateTimeNow();
           setSyncStatus('online');
           setDiag('ok', '✅ Завантажено в хмару (HTTP ' + status + ')');
-          if (!silent && sessionRole && ui.activeTab === 'settings') render();
-          return { ok: true, status: status };
+          if (!silent && currentRole && ui.activeTab === 'settings') render();
+          return { ok: true, status: status, message: 'OK' };
         })
         .catch(function(err) {
           var msg = (err && err.message) ? err.message : 'Помилка мережі при записі (Failed to fetch)';
           setSyncStatus('offline');
           setDiag('err', '❌ Помилка запису (' + msg + ')');
-          if (sessionRole && ui.activeTab === 'settings') render();
-          return { ok: false, error: msg };
+          if (currentRole && ui.activeTab === 'settings') render();
+          return { ok: false, status: 0, message: msg };
         });
     }
 
@@ -1050,12 +1244,12 @@
         setDiag('err', '❌ ' + msg);
         showToast(msg, 'error');
         render();
-        return;
+        return Promise.resolve({ ok: false, status: 0, message: msg });
       }
       setSyncStatus('syncing');
       setDiag('info', '⏳ Тестування запису у /test_ping.json...');
       render();
-      fetch(base + '/test_ping.json', {
+      return fetch(base + '/test_ping.json', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ok: true, ts: Date.now() })
@@ -1070,6 +1264,7 @@
           setDiag('ok', '✅ Тест запису пройдено (HTTP ' + status + ') — запис у базу відкритий!');
           showToast('Тест запису пройдено (HTTP ' + status + ')');
           render();
+          return { ok: true, status: status, message: 'OK' };
         })
         .catch(function(err) {
           var msg = (err && err.message) ? err.message : 'Помилка мережі (Failed to fetch)';
@@ -1077,6 +1272,7 @@
           setDiag('err', '❌ Помилка тесту запису (' + msg + ')');
           showToast('Тест запису: ' + msg, 'error');
           render();
+          return { ok: false, status: 0, message: msg };
         });
     }
 
@@ -1094,9 +1290,9 @@
     function startLiveSync() {
       stopLiveSync();
       if (!getFirebaseUrl()) { setSyncStatus('local'); return; }
-      fbPullAll(true, false);
+      fbPull(true, false);
       fbPollTimer = setInterval(function() {
-        if (document.visibilityState === 'visible') fbPullAll(true, false);
+        if (document.visibilityState === 'visible') fbPull(true, false);
       }, 15000);
     }
 
@@ -1107,20 +1303,27 @@
 
     function manualSyncFromHeader() {
       if (!getFirebaseUrl()) { showToast('Локальний режим. Підключіть Firebase у Налаштуваннях'); return; }
-      fbPullAll(false, true).then(function(res) {
-        showToast(res.ok ? 'Дані оновлено з хмари' : (res.error || 'Помилка оновлення'), res.ok ? 'success' : 'error');
+      fbPull(false, true).then(function(res) {
+        showToast(res.ok ? 'Дані оновлено з хмари' : (res.message || 'Помилка оновлення'), res.ok ? 'success' : 'error');
       });
     }
 
     // =========================================================================
-    // 5. ЕКРАН ВХОДУ ЗА PIN-КОДОМ ТА СЕСІЯ
+    // 5. ЕКРАН ВХОДУ ЗА PIN-КОДОМ ТА СЕСІЯ (5 РОЛЕЙ)
     // =========================================================================
     function getSavedSessionRole() {
-      try { return localStorage.getItem(SESSION_ROLE_KEY) || sessionStorage.getItem(SESSION_ROLE_KEY) || null; } catch (e) { return null; }
+      try {
+        var r = localStorage.getItem(SESSION_ROLE_KEY) || sessionStorage.getItem(SESSION_ROLE_KEY) || null;
+        if (r === 'sq1') return 'kv1';
+        if (r === 'sq2') return 'kv2';
+        if (r === 'sq3') return 'kv3';
+        if (r === 'admin' || r === 'kg' || r === 'kv1' || r === 'kv2' || r === 'kv3') return r;
+      } catch (e) {}
+      return null;
     }
 
     function saveSessionRole(role, remember) {
-      sessionRole = role;
+      currentRole = role;
       try {
         localStorage.removeItem(SESSION_ROLE_KEY);
         sessionStorage.removeItem(SESSION_ROLE_KEY);
@@ -1139,17 +1342,19 @@
       document.getElementById('app-shell').classList.add('hidden');
       document.getElementById('pin-screen').classList.remove('hidden');
       renderPinScreen();
+      fbPreloadBeforeLogin().then(function() { renderPinScreen(); });
     }
 
     function enterAppWithRole(role) {
-      sessionRole = role;
+      currentRole = role;
       document.getElementById('pin-screen').classList.add('hidden');
       document.getElementById('app-shell').classList.remove('hidden');
 
-      if (!isAdmin()) {
+      var mySqId = getMySquadId();
+      if (role === 'kv1' || role === 'kv2' || role === 'kv3') {
         ui.openPersonnelSquads = {};
-        ui.openPersonnelSquads[role] = true;
-        ui.personnelSquadFilter = role;
+        if (mySqId) ui.openPersonnelSquads[mySqId] = true;
+        ui.personnelSquadFilter = mySqId || 'all';
       } else {
         ui.personnelSquadFilter = 'all';
         state.squads.forEach(function(sq) { ui.openPersonnelSquads[sq.id] = true; });
@@ -1158,7 +1363,7 @@
       var rolePill = document.getElementById('header-role-pill');
       if (rolePill) {
         rolePill.textContent = getRoleLabel(role);
-        rolePill.className = 'role-pill' + (isAdmin() ? '' : ' kv');
+        rolePill.className = getRolePillClass(role);
       }
 
       render();
@@ -1176,7 +1381,7 @@
       root.innerHTML =
         '<div class="pin-logo"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>' +
         '<div style="text-align:center">' +
-          '<div style="font-size:20px;font-weight:800;color:#fff">Помічник взводу</div>' +
+          '<div style="font-size:20px;font-weight:800;color:#fff">Помічник взводу <span class="text-xs text-muted">' + APP_VERSION + '</span></div>' +
           '<div class="text-xs text-muted" style="margin-top:4px">Введіть 4-значний PIN-код доступу</div>' +
         '</div>' +
         '<div class="pin-dots">' + dots + '</div>' +
@@ -1207,8 +1412,8 @@
     function pinClear() { pinError = false; pinEntry = ''; renderPinScreen(); }
 
     function verifyPin() {
-      var pins = state.pins || DEFAULT_PINS;
-      var roles = ['admin', 'sq1', 'sq2', 'sq3'];
+      var pins = normalizePins(state.pins);
+      var roles = ['admin', 'kg', 'kv1', 'kv2', 'kv3'];
       var matched = null;
       for (var i = 0; i < roles.length; i++) {
         if (String(pins[roles[i]]) === pinEntry) { matched = roles[i]; break; }
@@ -1250,11 +1455,11 @@
 
     function showConfirm(title, message, btnText, onConfirm, isDanger) {
       openModal(
-        '<div class="modal-header"><div class="modal-title">' + esc(title) + '</div>' +
+        '<div class="modal-header"><div class="modal-title">' + escHtml(title) + '</div>' +
         '<button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
-        '<div class="modal-body"><div class="text-sm text-muted">' + esc(message) + '</div>' +
+        '<div class="modal-body"><div class="text-sm text-muted">' + escHtml(message) + '</div>' +
         '<div class="grid-2"><button class="btn btn-secondary" onclick="closeModal()">Скасувати</button>' +
-        '<button id="confirm-ok-btn" class="btn ' + (isDanger ? 'btn-danger' : 'btn-primary') + '">' + esc(btnText) + '</button></div></div>'
+        '<button id="confirm-ok-btn" class="btn ' + (isDanger ? 'btn-danger' : 'btn-primary') + '">' + escHtml(btnText) + '</button></div></div>'
       );
       document.getElementById('confirm-ok-btn').onclick = function() { closeModal(); onConfirm(); };
     }
@@ -1311,14 +1516,16 @@
     }
 
     function renderDutiesTab() {
+      var canEdit = hasPerm('dutiesEdit');
       var seg = '<div class="seg-control">' +
         '<button class="seg-btn ' + (ui.dutiesSubTab === 'schedule' ? 'active' : '') + '" onclick="setDutiesSubTab(\'schedule\')">Графік</button>' +
         '<button class="seg-btn ' + (ui.dutiesSubTab === 'stats' ? 'active' : '') + '" onclick="setDutiesSubTab(\'stats\')">Облік</button></div>';
-      var roNote = !isAdmin() ? '<div class="info-banner">Режим перегляду для командира відділення. Призначення нарядів доступне лише Командиру групи.</div>' : '';
+      var roNote = !canEdit ? '<div class="info-banner">Режим перегляду графіка нарядів. Право призначення налаштовується Адміном.</div>' : '';
       return seg + roNote + (ui.dutiesSubTab === 'schedule' ? renderScheduleView() : renderStatsView());
     }
 
     function renderScheduleView() {
+      var canEdit = hasPerm('dutiesEdit');
       var y = ui.year, m = ui.month, pref = monthPrefix(y, m), td = todayISO();
       var firstDay = new Date(y, m, 1), daysInMonth = new Date(y, m + 1, 0).getDate();
       var offset = firstDay.getDay() - 1; if (offset < 0) offset = 6;
@@ -1326,7 +1533,7 @@
       var filterPills = '<div class="pills-scroll">' +
         [{ id: 'all', name: 'Усі', color: '#4ade80' }].concat(getOrderedSquads()).map(function(sq) {
           return '<button class="pill ' + (ui.scheduleSquadFilter === sq.id ? 'active' : '') + '" onclick="setScheduleSquadFilter(\'' + sq.id + '\')">' +
-            '<span class="dot" style="background:' + sq.color + '"></span><span>' + esc(sq.name) + '</span></button>';
+            '<span class="dot" style="background:' + sq.color + '"></span><span>' + escHtml(sq.name) + '</span></button>';
         }).join('') + '</div>';
 
       var byDate = {};
@@ -1373,15 +1580,15 @@
         : '<div class="stack">' + grouped.map(function(g) {
             return '<div class="stack-sm">' +
               '<div class="row-between"><div class="row"><span class="dot" style="background:' + g.dt.color + '"></span>' +
-              '<span class="section-title" style="color:' + g.dt.color + '">' + esc(g.dt.shortName) + (g.dt.name && g.dt.name !== g.dt.shortName ? ' — ' + esc(g.dt.name) : '') + '</span></div>' +
+              '<span class="section-title" style="color:' + g.dt.color + '">' + escHtml(g.dt.shortName) + (g.dt.name && g.dt.name !== g.dt.shortName ? ' — ' + escHtml(g.dt.name) : '') + '</span></div>' +
               '<span class="text-xs text-muted">' + g.items.length + (g.dt.maxCount > 1 ? ' / ' + g.dt.maxCount : '') + ' ос.</span></div>' +
               g.items.map(function(d) {
                 var s = getSoldierById(d.soldierId), sq = getSquadById(s.squadId);
                 return '<div class="soldier-row" style="border-radius:10px;border:1px solid var(--border);border-left:4px solid ' + sq.color + '">' +
-                  '<div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
+                  '<div class="min0"><div class="row wrap"><span class="soldier-name">' + escHtml(s.fullName) + '</span>' +
                   (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) + '</div>' +
-                  '<div class="text-xs text-muted">' + esc(sq.name) + (s.rank ? ' • ' + esc(s.rank) : '') + '</div></div>' +
-                  (isAdmin() ? '<button class="btn-icon btn-icon-sm danger" onclick="removeDuty(\'' + d.id + '\')">✕</button>' : '') + '</div>';
+                  '<div class="text-xs text-muted">' + escHtml(sq.name) + (s.rank ? ' • ' + escHtml(s.rank) : '') + '</div></div>' +
+                  (canEdit ? '<button class="btn-icon btn-icon-sm danger" onclick="removeDuty(\'' + d.id + '\')">✕</button>' : '') + '</div>';
               }).join('') + '</div>';
           }).join('') + '</div>';
 
@@ -1391,7 +1598,7 @@
         '</div><div class="cal-grid">' + cells + '</div></div>' +
         '<div class="card stack"><div class="row-between"><div><div class="fw-800" style="color:#fff">' + formatHumanDate(ui.selectedDate) + '</div>' +
         '<div class="text-xs text-muted">Призначено: ' + dayDuties.length + '</div></div>' +
-        (isAdmin() ? '<button class="btn btn-sm btn-primary" onclick="openAssignDutyModal(\'' + ui.selectedDate + '\')">+ Призначити наряд</button>' : '') + '</div>' +
+        (canEdit ? '<button class="btn btn-sm btn-primary" onclick="openAssignDutyModal(\'' + ui.selectedDate + '\')">+ Призначити наряд</button>' : '') + '</div>' +
         dayListHtml +
         (dayDuties.length ? '<div class="grid-2"><button class="btn btn-secondary" onclick="openDayDutiesPreview(\'' + ui.selectedDate + '\')">Перегляд тексту</button>' +
           '<button class="btn btn-primary" onclick="copyDayDuties(\'' + ui.selectedDate + '\')">Скопіювати наряд</button></div>' : '') + '</div>';
@@ -1405,8 +1612,7 @@
       });
       if (!dayDuties.length) return '';
       var grp = (state.groupNumber || '223').trim() || '223';
-      var order = state.dutyTypes.slice();
-      var known = {};
+      var order = state.dutyTypes.slice(), known = {};
       order.forEach(function(dt) { known[dt.id] = true; });
       dayDuties.forEach(function(d) {
         if (!known[d.dutyTypeId]) { order.push(getDutyTypeById(d.dutyTypeId)); known[d.dutyTypeId] = true; }
@@ -1429,7 +1635,7 @@
       var txt = generateDayDutiesText(isoDate); if (!txt) return;
       openModal(
         '<div class="modal-header"><div class="modal-title">Наряд на ' + formatDotDate(isoDate) + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
-        '<div class="modal-body"><pre class="preview-pre">' + esc(txt) + '</pre>' +
+        '<div class="modal-body"><pre class="preview-pre">' + escHtml(txt) + '</pre>' +
         '<button class="btn btn-primary btn-full" onclick="copyDayDuties(\'' + isoDate + '\'); closeModal();">Скопіювати наряд</button></div>'
       );
     }
@@ -1441,14 +1647,14 @@
     }
 
     function removeDuty(id) {
-      if (!isAdmin()) return;
+      if (!hasPerm('dutiesEdit')) return;
       state.duties = state.duties.filter(function(d) { return d.id !== id; });
-      scheduleCloudPush();
+      saveState(false);
       render(); showToast('Наряд видалено');
     }
 
     function openAssignDutyModal(isoDate) {
-      if (!isAdmin()) return;
+      if (!hasPerm('dutiesEdit')) return;
       if (!state.personnel.length) { showToast('Спочатку додайте бійців у «Склад»', 'error'); return; }
       assignModal = { date: isoDate, dutyTypeId: state.dutyTypes[0] ? state.dutyTypes[0].id : '', selectedIds: [] };
       renderAssignDutyModal();
@@ -1468,13 +1674,13 @@
     }
 
     function confirmAssignDuties() {
-      if (!isAdmin()) return;
+      if (!hasPerm('dutiesEdit')) return;
       if (!assignModal.dutyTypeId || !assignModal.selectedIds.length) { showToast('Оберіть військовослужбовця', 'error'); return; }
       assignModal.selectedIds.forEach(function(sid) {
         state.duties.push({ id: genId('d'), date: assignModal.date, soldierId: sid, dutyTypeId: assignModal.dutyTypeId });
       });
       var n = assignModal.selectedIds.length;
-      scheduleCloudPush();
+      saveState(false);
       closeModal(); render();
       showToast(n > 1 ? ('Призначено бійців: ' + n) : 'Наряд призначено');
     }
@@ -1494,17 +1700,17 @@
         var members = sortSquadPersonnel(state.personnel.filter(function(x) { return x.squadId === sq.id; }));
         if (!members.length) return '';
         return '<div class="stack-sm"><div class="row"><span class="dot" style="background:' + sq.color + '"></span>' +
-          '<span class="section-title" style="color:' + sq.color + '">' + esc(sq.name) + '</span></div>' +
+          '<span class="section-title" style="color:' + sq.color + '">' + escHtml(sq.name) + '</span></div>' +
           members.map(function(s) {
             var st = getSoldierDutyStats(s.id, y, m), picked = assignModal.selectedIds.indexOf(s.id) !== -1, pm = getPresenceMeta(s.presenceStatus);
             return '<button type="button" class="soldier-row" onclick="toggleAssignSoldier(\'' + s.id + '\')" style="width:100%;text-align:left;border-radius:10px;border:1px solid ' + (picked ? '#4ade80' : 'var(--border)') + ';border-left:4px solid ' + sq.color + ';background:' + (picked ? 'rgba(74,222,128,0.12)' : 'var(--bg)') + '">' +
               '<div style="width:22px;height:22px;border-radius:6px;border:2px solid ' + (picked ? '#4ade80' : 'var(--border-strong)') + ';background:' + (picked ? '#4ade80' : 'transparent') + ';color:#0b1015;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (picked ? '✓' : '') + '</div>' +
-              '<div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
+              '<div class="min0"><div class="row wrap"><span class="soldier-name">' + escHtml(s.fullName) + '</span>' +
                 (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) +
-                (!pm.isOk ? '<span class="badge badge-err">' + esc(pm.shortLabel) + '</span>' : '') +
+                (!pm.isOk ? '<span class="badge badge-err">' + escHtml(pm.shortLabel) + '</span>' : '') +
                 (busyToday[s.id] ? '<span class="badge badge-warn">Вже сьогодні</span>' : '') +
                 (busyYest[s.id] ? '<span class="badge badge-info">Вчора в наряді</span>' : '') +
-              '</div>' + (s.rank ? '<div class="text-xs text-muted">' + esc(s.rank) + '</div>' : '') + '</div>' +
+              '</div>' + (s.rank ? '<div class="text-xs text-muted">' + escHtml(s.rank) + '</div>' : '') + '</div>' +
               '<div style="text-align:right;flex-shrink:0"><div class="fw-800" style="color:#fff">' + st.monthCount + ' <span class="text-xs text-muted">міс</span></div>' +
               '<div class="text-xs text-muted">' + st.totalCount + ' всього</div></div></button>';
           }).join('') + '</div>';
@@ -1517,7 +1723,7 @@
           '<div class="field"><div class="field-label">1. Оберіть вид наряду:</div><div class="chips-wrap">' +
             state.dutyTypes.map(function(t) {
               return '<button type="button" class="btn btn-sm ' + (t.id === assignModal.dutyTypeId ? 'btn-primary' : 'btn-secondary') + '" onclick="selectAssignDutyType(\'' + t.id + '\')">' +
-                '<span class="dot" style="background:' + t.color + '"></span><span>' + esc(t.shortName) + '</span><span class="text-xs" style="opacity:0.8">(до ' + t.maxCount + ')</span></button>';
+                '<span class="dot" style="background:' + t.color + '"></span><span>' + escHtml(t.shortName) + '</span><span class="text-xs" style="opacity:0.8">(до ' + t.maxCount + ')</span></button>';
             }).join('') + '</div></div>' +
           '<div class="row-between"><span class="field-label">2. Особовий склад:</span><span class="badge badge-ok">Обрано: ' + assignModal.selectedIds.length + ' / ' + maxC + '</span></div>' +
           '<div class="stack">' + groupsHtml + '</div>' +
@@ -1535,11 +1741,11 @@
         var members = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
         if (!members.length) return '';
         return '<div class="card-flush"><div class="row-between" style="padding:10px 12px;background:rgba(11,16,21,0.55);border-left:4px solid ' + sq.color + '">' +
-          '<span class="section-title" style="color:' + sq.color + '">' + esc(sq.name) + '</span><span class="text-xs text-muted">Міс. / Всього</span></div>' +
+          '<span class="section-title" style="color:' + sq.color + '">' + escHtml(sq.name) + '</span><span class="text-xs text-muted">Міс. / Всього</span></div>' +
           members.map(function(s) {
             var st = getSoldierDutyStats(s.id, ui.year, ui.month);
             return '<button type="button" class="soldier-row" onclick="openSoldierHistoryModal(\'' + s.id + '\')" style="width:100%;text-align:left;border-bottom:1px solid var(--border)">' +
-              '<div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
+              '<div class="min0"><div class="row wrap"><span class="soldier-name">' + escHtml(s.fullName) + '</span>' +
               (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) + '</div>' +
               '<div class="text-xs text-muted">Останній: ' + (st.lastDate ? formatDotDate(st.lastDate) : 'немає') + '</div></div>' +
               '<div class="row" style="gap:14px;flex-shrink:0">' +
@@ -1560,7 +1766,7 @@
       var sq = getSquadById(s.squadId), st = getSoldierDutyStats(s.id, ui.year, ui.month);
       var hist = state.duties.filter(function(d) { return d.soldierId === s.id; }).sort(function(a, b) { return b.date.localeCompare(a.date); });
       openModal(
-        '<div class="modal-header"><div><div class="modal-title">' + esc(s.fullName) + '</div><div class="text-xs text-muted">' + esc(sq.name) + (s.rank ? ' • ' + esc(s.rank) : '') + '</div></div>' +
+        '<div class="modal-header"><div><div class="modal-title">' + escHtml(s.fullName) + '</div><div class="text-xs text-muted">' + escHtml(sq.name) + (s.rank ? ' • ' + escHtml(s.rank) : '') + '</div></div>' +
         '<button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<div class="modal-body"><div class="grid-2">' +
           '<div class="kpi-box"><div class="kpi-val">' + st.monthCount + '</div><div class="kpi-lbl">' + MONTHS_UK[ui.month] + ' ' + ui.year + '</div></div>' +
@@ -1570,41 +1776,58 @@
           var dt = getDutyTypeById(d.dutyTypeId);
           return '<div class="row-between" style="padding:9px 11px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">' +
             '<span class="text-sm fw-bold">' + formatHumanDate(d.date) + '</span>' +
-            '<span class="badge" style="background:' + dt.color + '26;color:' + dt.color + ';border:1px solid ' + dt.color + '55">' + esc(dt.shortName) + '</span></div>';
+            '<span class="badge" style="background:' + dt.color + '26;color:' + dt.color + ';border:1px solid ' + dt.color + '55">' + escHtml(dt.shortName) + '</span></div>';
         }).join('') + '</div>' : '<div class="empty-state">Історія нарядів порожня.</div>') + '</div>'
       );
     }
 
     // =========================================================================
-    // 8. ВКЛАДКА 2: ЗАДАЧІ
+    // 8. ВКЛАДКА 2: ЗАДАЧІ (ВИПРАВЛЕНА ВИДИМІСТЬ + ПРАВА ДОСТУПУ)
     // =========================================================================
     function setTaskRecipientFilter(val) { ui.taskRecipientFilter = val; render(); }
     function setTaskStatusFilter(val) { ui.taskStatusFilter = val; render(); }
 
     function renderTasksTab() {
-      var nonCmd = getOrderedSquads().filter(function(sq) { return !isCmdGroup(sq); });
-      var formCard = '', recPills = '';
+      var canCreate = hasPerm('tasksCreate');
+      var canStatus = hasPerm('tasksStatus');
+      var canViewAll = hasPerm('tasksViewAll');
 
-      if (isAdmin()) {
-        var opts = nonCmd.map(function(sq) { return '<option value="squad:' + sq.id + '">' + esc(formatSquadRecipient(sq)) + '</option>'; }).join('') +
-          '<option value="all_leaders">Усім командирам відділень</option>';
+      var formCard = '', recPills = '';
+      if (canCreate) {
         formCard =
           '<form class="card stack" onsubmit="submitNewTask(event)">' +
             '<div class="section-title" style="color:var(--accent)">Поставити задачу</div>' +
-            '<div class="field"><label class="field-label" for="task-rec">Кому</label><select id="task-rec" class="select">' + opts + '</select></div>' +
-            '<div class="field"><label class="field-label" for="task-text">Суть задачі</label><textarea id="task-text" class="textarea" required placeholder="Опишіть задачу..."></textarea></div>' +
-            '<div class="field"><label class="field-label" for="task-author">Хто поставив</label><input id="task-author" class="input" type="text" required placeholder="Введіть вручну..." /></div>' +
+            '<div class="field"><label class="field-label" for="task-rec">Кому</label>' +
+              '<select id="task-rec" class="select">' +
+                '<option value="kv1">Командиру 1-го відділення</option>' +
+                '<option value="kv2">Командиру 2-го відділення</option>' +
+                '<option value="kv3">Командиру 3-го відділення</option>' +
+                '<option value="kg">Командиру групи (КГ)</option>' +
+                '<option value="all">Усім командирам відділень</option>' +
+              '</select></div>' +
+            '<div class="field"><label class="field-label" for="task-text">Суть задачі</label>' +
+              '<textarea id="task-text" class="textarea" required placeholder="Опишіть задачу..."></textarea></div>' +
+            '<div class="field"><label class="field-label" for="task-author">Хто поставив</label>' +
+              '<input id="task-author" class="input" type="text" required placeholder="Введіть вручну..." /></div>' +
             '<button type="submit" class="btn btn-primary btn-full">Поставити задачу</button>' +
           '</form>';
-        recPills = '<div class="pills-scroll">' +
-          '<button class="pill ' + (ui.taskRecipientFilter === 'all' ? 'active' : '') + '" onclick="setTaskRecipientFilter(\'all\')">Усі</button>' +
-          nonCmd.map(function(sq) {
-            return '<button class="pill ' + (ui.taskRecipientFilter === sq.id ? 'active' : '') + '" onclick="setTaskRecipientFilter(\'' + sq.id + '\')">' +
-              '<span class="dot" style="background:' + sq.color + '"></span><span>' + esc(formatSquadShortTab(sq)) + '</span></button>';
-          }).join('') +
-          '<button class="pill ' + (ui.taskRecipientFilter === 'all_leaders' ? 'active' : '') + '" onclick="setTaskRecipientFilter(\'all_leaders\')">Усім КВ</button></div>';
+      }
+
+      if (canViewAll) {
+        var fList = [
+          { id: 'all', l: 'Усі', c: '#4ade80' },
+          { id: 'kv1', l: '1 відд.', c: '#3b82f6' },
+          { id: 'kv2', l: '2 відд.', c: '#10b981' },
+          { id: 'kv3', l: '3 відд.', c: '#f97316' },
+          { id: 'kg', l: 'КГ', c: '#eab308' },
+          { id: 'all_kv', l: 'Усім КВ', c: '#eab308' }
+        ];
+        recPills = '<div class="pills-scroll">' + fList.map(function(f) {
+          return '<button class="pill ' + (ui.taskRecipientFilter === f.id ? 'active' : '') + '" onclick="setTaskRecipientFilter(\'' + f.id + '\')">' +
+            '<span class="dot" style="background:' + f.c + '"></span><span>' + f.l + '</span></button>';
+        }).join('') + '</div>';
       } else {
-        formCard = '<div class="info-banner">Показано задачі для <strong>' + esc(formatSquadRecipient(getSquadById(mySquadId()))) + '</strong> та загальні для всіх КВ.</div>';
+        recPills = '<div class="info-banner">Показано задачі для <strong>' + escHtml(getRoleLabel(currentRole)) + '</strong> та загальні задачі для всіх КВ.</div>';
       }
 
       var stPills = '<div class="pills-scroll">' +
@@ -1613,11 +1836,11 @@
         }).join('') + '</div>';
 
       var filtered = state.tasks.filter(function(t) {
-        if (!isAdmin()) {
-          if (t.recipientType !== 'all_leaders' && !(t.recipientType === 'squad' && t.squadId === mySquadId())) return false;
-        } else {
-          if (ui.taskRecipientFilter === 'all_leaders' && t.recipientType !== 'all_leaders') return false;
-          if (ui.taskRecipientFilter !== 'all' && ui.taskRecipientFilter !== 'all_leaders' && (t.recipientType !== 'squad' || t.squadId !== ui.taskRecipientFilter)) return false;
+        if (!isTaskVisibleForRole(t, currentRole)) return false;
+        if (canViewAll && ui.taskRecipientFilter !== 'all') {
+          var meta = getTaskTargetMeta(t);
+          if (ui.taskRecipientFilter === 'all_kv' && meta.key !== 'all') return false;
+          if (ui.taskRecipientFilter !== 'all_kv' && meta.key !== ui.taskRecipientFilter) return false;
         }
         if (ui.taskStatusFilter !== 'all' && t.status !== ui.taskStatusFilter) return false;
         return true;
@@ -1626,24 +1849,28 @@
       var listHtml = !filtered.length
         ? '<div class="card empty-state">Задач за обраним фільтром немає.</div>'
         : filtered.map(function(t) {
-            var isAll = t.recipientType === 'all_leaders';
-            var sq = isAll ? { color: '#eab308' } : getSquadById(t.squadId);
-            var recLbl = isAll ? 'Усім командирам відділень' : formatSquadRecipient(sq);
+            var meta = getTaskTargetMeta(t);
             var rOpen = Boolean(ui.openTaskRemarks[t.id]), hasRem = Boolean(t.remark && t.remark.trim());
-            return '<div class="task-card" style="border-left:4px solid ' + sq.color + '">' +
+            var stBadge = t.status === 'done'
+              ? '<span class="badge badge-ok">Виконано</span>'
+              : (t.status === 'failed' ? '<span class="badge badge-err">Не виконано</span>' : '<span class="badge badge-info">Отримав задачу</span>');
+
+            return '<div class="task-card" style="border-left:4px solid ' + meta.color + '">' +
               '<div class="row-between"><div class="stack-sm" style="gap:3px">' +
-                '<span class="badge" style="background:' + sq.color + '24;color:' + sq.color + ';border:1px solid ' + sq.color + '55;align-self:flex-start">' + esc(recLbl) + '</span>' +
-                '<div class="text-xs text-muted">' + esc(t.createdAt) + ' • Поставив: <strong style="color:var(--text)">' + esc(t.author || '—') + '</strong></div></div>' +
-                (isAdmin() ? '<button class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')">✕</button>' : '') + '</div>' +
-              '<div style="font-size:14.5px;font-weight:600;color:#fff;white-space:pre-wrap">' + esc(t.text) + '</div>' +
-              '<div class="status-group">' +
-                '<button class="status-btn ' + (t.status === 'received' ? 'st-received' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'received\')">Отримав задачу</button>' +
-                '<button class="status-btn ' + (t.status === 'done' ? 'st-done' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'done\')">Виконано</button>' +
-                '<button class="status-btn ' + (t.status === 'failed' ? 'st-failed' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'failed\')">Не виконано</button></div>' +
-              '<button class="btn btn-sm btn-secondary btn-full" onclick="toggleTaskRemark(\'' + t.id + '\')">' +
-                (rOpen ? '▾ Приховати зауваження' : '▸ Зауваження') + (hasRem ? ' <span class="badge badge-warn">Є запис</span>' : '') + '</button>' +
-              (rOpen ? '<div class="stack-sm"><textarea id="rem-' + t.id + '" class="textarea" placeholder="Причина невиконання або зауваження...">' + esc(t.remark || '') + '</textarea>' +
-                '<button type="button" class="btn btn-sm btn-primary btn-full" onclick="saveTaskRemarkBtn(\'' + t.id + '\')">Зберегти зауваження</button></div>' : '') +
+                '<span class="badge" style="background:' + meta.color + '24;color:' + meta.color + ';border:1px solid ' + meta.color + '55;align-self:flex-start">' + escHtml(meta.label) + '</span>' +
+                '<div class="text-xs text-muted">' + escHtml(t.createdAt) + ' • Поставив: <strong style="color:var(--text)">' + escHtml(t.author || '—') + '</strong></div></div>' +
+                (canCreate ? '<button class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')">✕</button>' : stBadge) + '</div>' +
+              '<div style="font-size:14.5px;font-weight:600;color:#fff;white-space:pre-wrap">' + escHtml(t.text) + '</div>' +
+              (canStatus
+                ? '<div class="status-group">' +
+                    '<button class="status-btn ' + (t.status === 'received' ? 'st-received' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'received\')">Отримав задачу</button>' +
+                    '<button class="status-btn ' + (t.status === 'done' ? 'st-done' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'done\')">Виконано</button>' +
+                    '<button class="status-btn ' + (t.status === 'failed' ? 'st-failed' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'failed\')">Не виконано</button></div>' +
+                  '<button class="btn btn-sm btn-secondary btn-full" onclick="toggleTaskRemark(\'' + t.id + '\')">' +
+                    (rOpen ? '▾ Приховати зауваження' : '▸ Зауваження') + (hasRem ? ' <span class="badge badge-warn">Є запис</span>' : '') + '</button>' +
+                  (rOpen ? '<div class="stack-sm"><textarea id="rem-' + t.id + '" class="textarea" placeholder="Причина невиконання або зауваження...">' + escHtml(t.remark || '') + '</textarea>' +
+                    '<button type="button" class="btn btn-sm btn-primary btn-full" onclick="saveTaskRemarkBtn(\'' + t.id + '\')">Зберегти зауваження</button></div>' : '')
+                : (hasRem ? '<div class="text-xs text-muted" style="padding:8px;border-radius:8px;background:var(--bg);border:1px solid var(--border)"><strong>Зауваження:</strong> ' + escHtml(t.remark) + '</div>' : '')) +
             '</div>';
           }).join('');
 
@@ -1654,56 +1881,69 @@
 
     function submitNewTask(e) {
       e.preventDefault();
-      if (!isAdmin()) return;
-      var rec = document.getElementById('task-rec').value;
+      if (!hasPerm('tasksCreate')) return;
+      var targetVal = document.getElementById('task-rec').value; // 'kv1' | 'kv2' | 'kv3' | 'kg' | 'all'
       var text = document.getElementById('task-text').value.trim();
       var author = document.getElementById('task-author').value.trim();
       if (!text) return;
-      var isAll = rec === 'all_leaders';
+
+      var nonCmd = getNonCmdSquads();
+      var matchedSquadId = '';
+      if (targetVal === 'kv1') matchedSquadId = nonCmd[0] ? nonCmd[0].id : 'sq1';
+      else if (targetVal === 'kv2') matchedSquadId = nonCmd[1] ? nonCmd[1].id : 'sq2';
+      else if (targetVal === 'kv3') matchedSquadId = nonCmd[2] ? nonCmd[2].id : 'sq3';
+      else if (targetVal === 'kg') matchedSquadId = getCmdSquad() ? getCmdSquad().id : 'cmd';
+
       state.tasks.unshift({
-        id: genId('task'), recipientType: isAll ? 'all_leaders' : 'squad',
-        squadId: isAll ? '' : rec.replace('squad:', ''), text: text, author: author,
-        status: 'received', remark: '', createdAt: formatDateTimeNow()
+        id: genId('task'),
+        target: targetVal,
+        targetRole: targetVal,
+        targetSquadId: matchedSquadId,
+        recipientType: targetVal === 'all' ? 'all_leaders' : 'squad',
+        squadId: matchedSquadId,
+        text: text,
+        author: author,
+        status: 'received',
+        remark: '',
+        createdAt: formatDateTimeNow()
       });
-      scheduleCloudPush();
-      render(); showToast('Задачу поставлено');
+      saveState(true); // Миттєвий запис у Firebase
+      render(); showToast('Задачу поставлено та синхронізовано');
     }
 
     function setTaskStatus(id, st) {
+      if (!hasPerm('tasksStatus')) return;
       var t = state.tasks.find(function(x) { return x.id === id; }); if (!t) return;
       t.status = st;
       if (st === 'failed') ui.openTaskRemarks[id] = true;
-      scheduleCloudPush();
+      saveState(true);
       render();
     }
     function toggleTaskRemark(id) { ui.openTaskRemarks[id] = !ui.openTaskRemarks[id]; render(); }
     function saveTaskRemarkBtn(id) {
+      if (!hasPerm('tasksStatus')) return;
       var t = state.tasks.find(function(x) { return x.id === id; });
       var el = document.getElementById('rem-' + id);
       if (!t || !el) return;
       t.remark = el.value;
-      scheduleCloudPush();
+      saveState(true);
       showToast('Зауваження збережено'); render();
     }
     function deleteTask(id) {
-      if (!isAdmin()) return;
+      if (!hasPerm('tasksCreate')) return;
       showConfirm('Видалити задачу?', 'Задача та зауваження будуть видалені.', 'Видалити', function() {
         state.tasks = state.tasks.filter(function(x) { return x.id !== id; });
-        scheduleCloudPush();
+        saveState(true);
         render(); showToast('Задачу видалено');
       }, true);
     }
     function copyActiveTasks() {
-      var active = state.tasks.filter(function(t) {
-        if (t.status === 'done') return false;
-        if (!isAdmin()) return t.recipientType === 'all_leaders' || t.squadId === mySquadId();
-        return true;
-      });
+      var active = state.tasks.filter(function(t) { return t.status !== 'done' && isTaskVisibleForRole(t, currentRole); });
       if (!active.length) { showToast('Немає активних задач', 'error'); return; }
       var lines = ['Активні задачі (' + (state.groupNumber || '223') + '):'];
       active.forEach(function(t, i) {
-        var rec = t.recipientType === 'all_leaders' ? 'Усім командирам відділень' : formatSquadRecipient(getSquadById(t.squadId));
-        lines.push('\n' + (i + 1) + '. [' + rec + '] — ' + (t.status === 'failed' ? 'Не виконано' : 'Отримав задачу'));
+        var meta = getTaskTargetMeta(t);
+        lines.push('\n' + (i + 1) + '. [' + meta.label + '] — ' + (t.status === 'failed' ? 'Не виконано' : 'Отримав задачу'));
         lines.push(t.text);
         if (t.author) lines.push('Поставив: ' + t.author);
         if (t.remark && t.remark.trim()) lines.push('Зауваження: ' + t.remark.trim());
@@ -1776,7 +2016,7 @@
         var offset = Math.max(0, Number(dayNumeric[c.key] || 0));
         var count = list.length + offset;
         totalAbsent += count;
-        return { key: c.key, label: c.label, hint: c.hint, kvEditable: c.kvEditable, soldiers: list, offset: offset, count: count };
+        return { key: c.key, label: c.label, hint: c.hint, ownEditable: c.ownEditable, soldiers: list, offset: offset, count: count };
       });
 
       var totalList = state.personnel.length;
@@ -1800,9 +2040,9 @@
     function setRozkhidDate(iso) { if (iso) { ui.rozkhidDate = iso; render(); } }
     function shiftRozkhidDate(d) { ui.rozkhidDate = addDaysISO(ui.rozkhidDate, d); render(); }
     function updateGroupNumber(v) {
-      if (!isAdmin()) return;
+      if (hasPerm('rozkhidMode') !== 'all') return;
       state.groupNumber = v.trim();
-      scheduleCloudPush();
+      saveState(false);
       var pre = document.getElementById('rozkhid-preview'); if (pre) pre.textContent = generateRozkhidReport();
     }
     function toggleRozkhidOption(opt, checked) {
@@ -1811,32 +2051,32 @@
       var pre = document.getElementById('rozkhid-preview'); if (pre) pre.textContent = generateRozkhidReport();
     }
     function adjustRozkhidOffset(k, d) {
-      if (!isAdmin()) return;
+      if (hasPerm('rozkhidMode') !== 'all') return;
       if (!state.rozkhidNumeric[ui.rozkhidDate]) state.rozkhidNumeric[ui.rozkhidDate] = {};
       var next = Math.max(0, (Number(state.rozkhidNumeric[ui.rozkhidDate][k]) || 0) + d);
       if (next > 0) state.rozkhidNumeric[ui.rozkhidDate][k] = next;
       else delete state.rozkhidNumeric[ui.rozkhidDate][k];
-      scheduleCloudPush();
+      saveState(false);
       render();
     }
     function promptClearRozkhid() {
-      if (!isAdmin()) return;
+      if (hasPerm('rozkhidMode') !== 'all') return;
       showConfirm('Очистити розхід?', 'Усі відсутності на ' + formatHumanDate(ui.rozkhidDate) + ' будуть обнулені (Вн = З/с).', 'Очистити', function() {
         var dt = ui.rozkhidDate;
         state.rozkhidCleared[dt] = true;
         delete state.rozkhidManual[dt];
         delete state.rozkhidNumeric[dt];
-        scheduleCloudPush();
+        saveState(true);
         render(); showToast('Розхід очищено');
       }, true);
     }
     function autoSyncRozkhid() {
-      if (!isAdmin()) return;
+      if (hasPerm('rozkhidMode') !== 'all') return;
       var dt = ui.rozkhidDate;
       delete state.rozkhidCleared[dt];
       delete state.rozkhidManual[dt];
       delete state.rozkhidNumeric[dt];
-      scheduleCloudPush();
+      saveState(true);
       render(); showToast('Автопідтягнуто з нарядів, планів та складу');
     }
     function toggleUpcomingAccordion() { ui.rozkhidUpcomingOpen = !ui.rozkhidUpcomingOpen; render(); }
@@ -1844,13 +2084,15 @@
     function deleteScheduledAbsence(id) {
       var item = state.scheduledAbsences.find(function(a) { return a.id === id; });
       if (!item) return;
-      if (!canEditSoldier(getSoldierById(item.soldierId))) { showToast('Немає прав на зміну іншого відділення', 'error'); return; }
+      var s = getSoldierById(item.soldierId);
+      if (!canEditSoldierRozkhid(s) && !canEditSoldierStatus(s)) { showToast('Немає прав на зміну іншого відділення', 'error'); return; }
       state.scheduledAbsences = state.scheduledAbsences.filter(function(a) { return a.id !== id; });
-      scheduleCloudPush();
+      saveState(false);
       render(); showToast('Запланований запис видалено');
     }
 
     function renderRozkhidTab() {
+      var mode = hasPerm('rozkhidMode'); // 'view' | 'own' | 'all'
       var data = computeRozkhid(ui.rozkhidDate);
       var td = todayISO(), tmrw = addDaysISO(td, 1);
 
@@ -1867,47 +2109,57 @@
               var s = getSoldierById(a.soldierId), cat = getRozkhidCat(a.category);
               var dLbl = (a.endDate && a.endDate !== a.startDate) ? (formatDayMonth(a.startDate) + '–' + formatDayMonth(a.endDate)) : formatDayMonth(a.startDate);
               return '<div class="sched-item"><button type="button" class="min0" style="text-align:left" onclick="setRozkhidDate(\'' + a.startDate + '\')">' +
-                '<div class="text-sm fw-bold" style="color:#fff">' + esc(dLbl) + ' — ' + esc(s.fullName) + ' <span class="badge badge-info">' + esc(cat.label) + '</span></div>' +
-                (a.note ? '<div class="text-xs text-muted">' + esc(a.note) + '</div>' : '') + '</button>' +
-                (canEditSoldier(s) ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteScheduledAbsence(\'' + a.id + '\')">✕</button>' : '') + '</div>';
+                '<div class="text-sm fw-bold" style="color:#fff">' + escHtml(dLbl) + ' — ' + escHtml(s.fullName) + ' <span class="badge badge-info">' + escHtml(cat.label) + '</span></div>' +
+                (a.note ? '<div class="text-xs text-muted">' + escHtml(a.note) + '</div>' : '') + '</button>' +
+                (canEditSoldierRozkhid(s) ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteScheduledAbsence(\'' + a.id + '\')">✕</button>' : '') + '</div>';
             }).join('') + '</div>' : '') + '</div>'
       );
 
       var catRows = data.categories.map(function(c) {
-        var chips = c.soldiers.length ? '<div class="chips-wrap">' + c.soldiers.map(function(x) { return '<span class="name-chip">' + esc(x.reportName) + '</span>'; }).join('') + '</div>' : '';
-        var canPick = isAdmin() || c.kvEditable;
+        var chips = c.soldiers.length ? '<div class="chips-wrap">' + c.soldiers.map(function(x) { return '<span class="name-chip">' + escHtml(x.reportName) + '</span>'; }).join('') + '</div>' : '';
+        var canPick = mode === 'all' || (mode === 'own' && c.ownEditable);
         return '<div class="rozkhid-row ' + (c.count > 0 ? 'has-count' : '') + '">' +
           '<div class="row-between"><div class="min0">' +
-            '<div class="text-sm fw-bold" style="color:' + (c.count > 0 ? '#fbbf24' : '#fff') + '">' + esc(c.label) + '</div>' +
-            '<div class="text-xs text-muted">' + esc(c.hint) + '</div></div>' +
+            '<div class="text-sm fw-bold" style="color:' + (c.count > 0 ? '#fbbf24' : '#fff') + '">' + escHtml(c.label) + '</div>' +
+            '<div class="text-xs text-muted">' + escHtml(c.hint) + '</div></div>' +
             '<div class="stepper">' +
-              (isAdmin() ? '<button type="button" class="step-btn" onclick="adjustRozkhidOffset(\'' + c.key + '\',-1)">−</button>' : '') +
+              (mode === 'all' ? '<button type="button" class="step-btn" onclick="adjustRozkhidOffset(\'' + c.key + '\',-1)">−</button>' : '') +
               '<span class="step-val" style="color:' + (c.count > 0 ? '#fbbf24' : 'var(--muted)') + '">' + c.count + '</span>' +
-              (isAdmin() ? '<button type="button" class="step-btn" onclick="adjustRozkhidOffset(\'' + c.key + '\',1)">+</button>' : '') +
+              (mode === 'all' ? '<button type="button" class="step-btn" onclick="adjustRozkhidOffset(\'' + c.key + '\',1)">+</button>' : '') +
               (canPick ? '<button type="button" class="btn btn-xs btn-secondary" onclick="openRozkhidPicker(\'' + c.key + '\')">ПІБ</button>' : '') +
             '</div></div>' + chips + '</div>';
       }).join('');
 
-      var kvBanner = !isAdmin() ? '<div class="info-banner">Ви можете відмічати відсутності та планувати дати лише для свого відділення (<strong>' + esc(getSquadById(mySquadId()).name) + '</strong>).</div>' : '';
+      var modeBanner = '';
+      if (mode === 'view') {
+        modeBanner = '<div class="info-banner">Режим перегляду та копіювання розходу.</div>';
+      } else if (mode === 'own' && currentRole !== 'kg') {
+        var mySq = getSquadForRole(currentRole);
+        modeBanner = '<div class="info-banner">Ви можете відмічати відсутності та планувати дати для свого відділення (<strong>' + escHtml(mySq ? mySq.name : '') + '</strong>).</div>';
+      }
 
-      return kvBanner +
+      var actionBtns = '';
+      if (mode === 'all') {
+        actionBtns = '<div class="grid-3"><button class="btn btn-sm btn-info" onclick="openScheduleAbsenceModal()">📅 На дату</button>' +
+          '<button class="btn btn-sm btn-secondary" onclick="autoSyncRozkhid()">Автопідтягнути</button>' +
+          '<button class="btn btn-sm btn-danger" onclick="promptClearRozkhid()">Очистити</button></div>';
+      } else if (mode === 'own') {
+        actionBtns = '<button class="btn btn-sm btn-info btn-full" onclick="openScheduleAbsenceModal()">📅 Запланувати на майбутню дату</button>';
+      }
+
+      return modeBanner +
         '<div class="card stack">' +
           '<div class="row">' +
             '<button class="btn-icon" onclick="shiftRozkhidDate(-1)">◀</button>' +
-            '<input type="date" class="input" style="flex:1;min-height:40px;padding:6px 10px" value="' + esc(ui.rozkhidDate) + '" onchange="setRozkhidDate(this.value)" />' +
+            '<input type="date" class="input" style="flex:1;min-height:40px;padding:6px 10px" value="' + escHtml(ui.rozkhidDate) + '" onchange="setRozkhidDate(this.value)" />' +
             '<button class="btn-icon" onclick="shiftRozkhidDate(1)">▶</button></div>' +
           '<div class="row">' +
             '<button class="btn btn-sm ' + (ui.rozkhidDate === td ? 'btn-primary' : 'btn-secondary') + '" style="flex:1" onclick="setRozkhidDate(\'' + td + '\')">Сьогодні</button>' +
             '<button class="btn btn-sm ' + (ui.rozkhidDate === tmrw ? 'btn-primary' : 'btn-secondary') + '" style="flex:1" onclick="setRozkhidDate(\'' + tmrw + '\')">Завтра</button>' +
-            (isAdmin()
-              ? '<input type="text" class="input" style="width:92px;min-height:36px;padding:6px 10px;text-align:center;font-weight:800" value="' + esc(state.groupNumber) + '" placeholder="223" oninput="updateGroupNumber(this.value)" />'
-              : '<span class="badge badge-info" style="min-height:36px;padding:0 12px;font-size:13px">Гр. ' + esc(state.groupNumber) + '</span>') +
-          '</div>' +
-          (isAdmin()
-            ? '<div class="grid-3"><button class="btn btn-sm btn-info" onclick="openScheduleAbsenceModal()">📅 На дату</button>' +
-              '<button class="btn btn-sm btn-secondary" onclick="autoSyncRozkhid()">Автопідтягнути</button>' +
-              '<button class="btn btn-sm btn-danger" onclick="promptClearRozkhid()">Очистити</button></div>'
-            : '<button class="btn btn-sm btn-info btn-full" onclick="openScheduleAbsenceModal()">📅 Запланувати на майбутню дату (моє відділення)</button>') +
+            (mode === 'all'
+              ? '<input type="text" class="input" style="width:92px;min-height:36px;padding:6px 10px;text-align:center;font-weight:800" value="' + escHtml(state.groupNumber) + '" placeholder="223" oninput="updateGroupNumber(this.value)" />'
+              : '<span class="badge badge-info" style="min-height:36px;padding:0 12px;font-size:13px">Гр. ' + escHtml(state.groupNumber) + '</span>') +
+          '</div>' + actionBtns +
         '</div>' +
         upcomingHtml +
         '<div class="grid-2">' +
@@ -1919,21 +2171,22 @@
           '<div class="grid-2">' +
             '<label class="toggle-pill"><input type="checkbox" ' + (ui.rozkhidShowNames ? 'checked' : '') + ' onchange="toggleRozkhidOption(\'names\',this.checked)" /><span>Прізвища в дужках</span></label>' +
             '<label class="toggle-pill"><input type="checkbox" ' + (ui.rozkhidHideZeros ? 'checked' : '') + ' onchange="toggleRozkhidOption(\'hideZeros\',this.checked)" /><span>Приховати нулі</span></label></div>' +
-          '<pre id="rozkhid-preview" class="preview-pre">' + esc(generateRozkhidReport()) + '</pre>' +
+          '<pre id="rozkhid-preview" class="preview-pre">' + escHtml(generateRozkhidReport()) + '</pre>' +
           '<button class="btn btn-primary btn-full" onclick="copyText(generateRozkhidReport(),\'Розхід скопійовано\')">Скопіювати розхід</button>' +
         '</div>';
     }
 
     function openRozkhidPicker(catKey) {
+      if (hasPerm('rozkhidMode') === 'view') return;
       if (!state.personnel.length) { showToast('Особовий склад порожній', 'error'); return; }
       ui.rozkhidModalCat = catKey;
       ui.rozkhidModalSearch = '';
       ui.rozkhidModalOpenSquads = {};
       var data = computeRozkhid(ui.rozkhidDate);
-      var squadsList = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
-      squadsList.forEach(function(sq, idx) {
+      var mySqId = getMySquadId();
+      getOrderedSquads().forEach(function(sq, idx) {
         var hasSel = state.personnel.some(function(p) { return p.squadId === sq.id && data.statusBySoldier[p.id] === catKey; });
-        ui.rozkhidModalOpenSquads[sq.id] = hasSel || idx === 0;
+        ui.rozkhidModalOpenSquads[sq.id] = (hasPerm('rozkhidMode') === 'own' && mySqId) ? (sq.id === mySqId) : (hasSel || idx === 0);
       });
       renderRozkhidPickerModal();
     }
@@ -1949,7 +2202,7 @@
 
     function toggleSoldierInRozkhidCat(soldierId, catKey) {
       var s = getSoldierById(soldierId);
-      if (!canEditSoldier(s)) { showToast('Можна відмічати лише своє відділення', 'error'); return; }
+      if (!canEditSoldierRozkhid(s)) { showToast('Можна відмічати лише своє відділення', 'error'); return; }
       var dt = ui.rozkhidDate;
       var data = computeRozkhid(dt);
       var curCat = data.statusBySoldier[soldierId] || 'in_service';
@@ -1963,7 +2216,7 @@
           showToast((s ? s.fullName : 'Бійця') + ': перенесено з «' + getRozkhidCat(curCat).label + '» у «' + getRozkhidCat(catKey).label + '»');
         }
       }
-      scheduleCloudPush();
+      saveState(false);
       renderRozkhidPickerModal();
       render();
     }
@@ -1972,56 +2225,58 @@
       var cat = getRozkhidCat(ui.rozkhidModalCat);
       var data = computeRozkhid(ui.rozkhidDate);
       var q = ui.rozkhidModalSearch.trim().toLowerCase();
-      var squadsList = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
 
-      var accHtml = squadsList.map(function(sq) {
+      var accHtml = getOrderedSquads().map(function(sq) {
         var allM = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
         var members = q ? allM.filter(function(p) { return p.fullName.toLowerCase().indexOf(q) !== -1; }) : allM;
         if (!members.length) return '';
         var selCnt = members.filter(function(p) { return data.statusBySoldier[p.id] === cat.key; }).length;
         var isOpen = q ? true : Boolean(ui.rozkhidModalOpenSquads[sq.id]);
+        var sqEditable = hasPerm('rozkhidMode') === 'all' || currentRole === 'kg' || sq.id === getMySquadId();
 
         return '<div class="card-flush">' +
           '<div class="acc-header ' + (isOpen ? 'open' : '') + '" style="border-left:4px solid ' + sq.color + '" onclick="toggleRozkhidModalSquad(\'' + sq.id + '\')">' +
-            '<div class="row"><span class="chevron">▸</span><span class="fw-bold text-sm" style="color:' + sq.color + '">' + esc(sq.name) + '</span></div>' +
+            '<div class="row"><span class="chevron">▸</span><span class="fw-bold text-sm" style="color:' + sq.color + '">' + escHtml(sq.name) + '</span>' +
+            (!sqEditable ? '<span class="text-xs text-muted">🔒</span>' : '') + '</div>' +
             '<span class="badge ' + (selCnt ? 'badge-warn' : 'badge-ok') + '">' + selCnt + ' / ' + members.length + '</span></div>' +
           (isOpen ? '<div class="acc-body">' + members.map(function(s) {
             var cur = data.statusBySoldier[s.id] || 'in_service';
             var checked = cur === cat.key;
             var other = cur !== 'in_service' && !checked;
-            return '<label class="checkbox-row"><div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
+            var canEdit = canEditSoldierRozkhid(s);
+            return '<label class="checkbox-row' + (canEdit ? '' : ' locked') + '"><div class="min0"><div class="row wrap"><span class="soldier-name">' + escHtml(s.fullName) + '</span>' +
               (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) +
-              (other ? '<span class="badge badge-warn">Вже у: ' + esc(getRozkhidCat(cur).label) + '</span>' : '') + '</div>' +
-              (s.rank ? '<div class="text-xs text-muted">' + esc(s.rank) + '</div>' : '') + '</div>' +
-              '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="toggleSoldierInRozkhidCat(\'' + s.id + '\',\'' + cat.key + '\')" /></label>';
+              (other ? '<span class="badge badge-warn">Вже у: ' + escHtml(getRozkhidCat(cur).label) + '</span>' : '') + '</div>' +
+              (s.rank ? '<div class="text-xs text-muted">' + escHtml(s.rank) + '</div>' : '') + '</div>' +
+              '<input type="checkbox" ' + (checked ? 'checked' : '') + (canEdit ? '' : ' disabled') + ' onchange="toggleSoldierInRozkhidCat(\'' + s.id + '\',\'' + cat.key + '\')" /></label>';
           }).join('') + '</div>' : '') + '</div>';
       }).join('');
 
       openModal(
-        '<div class="modal-header"><div><div class="modal-title">' + esc(cat.label) + '</div><div class="text-xs text-muted">' + formatHumanDate(ui.rozkhidDate) + '</div></div>' +
+        '<div class="modal-header"><div><div class="modal-title">' + escHtml(cat.label) + '</div><div class="text-xs text-muted">' + formatHumanDate(ui.rozkhidDate) + '</div></div>' +
         '<button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<div class="modal-body">' +
-          '<input id="rozkhid-search-inp" class="input" type="search" placeholder="Пошук за прізвищем..." value="' + esc(ui.rozkhidModalSearch) + '" oninput="setRozkhidModalSearch(this.value)" />' +
+          '<input id="rozkhid-search-inp" class="input" type="search" placeholder="Пошук за прізвищем..." value="' + escHtml(ui.rozkhidModalSearch) + '" oninput="setRozkhidModalSearch(this.value)" />' +
           '<div class="stack-sm">' + (accHtml || '<div class="empty-state">Нікого не знайдено</div>') + '</div>' +
           '<button class="btn btn-primary btn-full" onclick="closeModal()">Готово</button></div>'
       );
     }
 
     function openScheduleAbsenceModal(preSoldierId) {
-      var allowedSquads = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
-      var allowedSoldiers = state.personnel.filter(function(p) { return isAdmin() || p.squadId === mySquadId(); });
-      if (!allowedSoldiers.length) { showToast('У відділенні немає бійців', 'error'); return; }
+      var allowedSoldiers = state.personnel.filter(function(p) { return canEditSoldierRozkhid(p) || canEditSoldierStatus(p); });
+      if (!allowedSoldiers.length) { showToast('Немає доступних бійців для планування', 'error'); return; }
 
       var defaultStart = addDaysISO(todayISO(), 1);
-      var soldierOpts = allowedSquads.map(function(sq) {
-        var members = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
+      var soldierOpts = getOrderedSquads().map(function(sq) {
+        var members = sortSquadPersonnel(allowedSoldiers.filter(function(p) { return p.squadId === sq.id; }));
         if (!members.length) return '';
-        return '<optgroup label="' + esc(sq.name) + '">' + members.map(function(s) {
-          return '<option value="' + s.id + '" ' + (preSoldierId === s.id ? 'selected' : '') + '>' + esc(s.fullName) + (s.rank ? ' (' + esc(s.rank) + ')' : '') + '</option>';
+        return '<optgroup label="' + escHtml(sq.name) + '">' + members.map(function(s) {
+          return '<option value="' + s.id + '" ' + (preSoldierId === s.id ? 'selected' : '') + '>' + escHtml(s.fullName) + (s.rank ? ' (' + escHtml(s.rank) + ')' : '') + '</option>';
         }).join('') + '</optgroup>';
       }).join('');
+
       var catOpts = ROZKHID_CATS.filter(function(c) { return c.schedulable; }).map(function(c) {
-        return '<option value="' + c.key + '">' + esc(c.label) + (c.hint && c.hint !== c.label ? ' — ' + esc(c.hint) : '') + '</option>';
+        return '<option value="' + c.key + '">' + escHtml(c.label) + (c.hint && c.hint !== c.label ? ' — ' + escHtml(c.hint) : '') + '</option>';
       }).join('');
 
       openModal(
@@ -2041,7 +2296,8 @@
     function saveScheduledAbsence(e) {
       e.preventDefault();
       var soldierId = document.getElementById('sched-soldier').value;
-      if (!canEditSoldier(getSoldierById(soldierId))) { showToast('Немає прав для цього бійця', 'error'); return; }
+      var s = getSoldierById(soldierId);
+      if (!canEditSoldierRozkhid(s) && !canEditSoldierStatus(s)) { showToast('Немає прав для цього бійця', 'error'); return; }
       var category = document.getElementById('sched-cat').value;
       var startDate = document.getElementById('sched-start').value;
       var endDate = document.getElementById('sched-end').value;
@@ -2049,7 +2305,7 @@
       if (!soldierId || !category || !startDate) return;
       if (endDate && endDate < startDate) { showToast('Дата кінця не може бути раніше початку', 'error'); return; }
       state.scheduledAbsences.push({ id: genId('sched'), soldierId: soldierId, category: category, startDate: startDate, endDate: endDate || '', note: note });
-      scheduleCloudPush();
+      saveState(false);
       closeModal(); render();
       showToast('Заплановано на ' + formatDotDate(startDate));
     }
@@ -2068,16 +2324,18 @@
 
     function setSoldierPresence(soldierId, statusKey) {
       var s = getSoldierById(soldierId);
-      if (!canEditSoldier(s)) { showToast('Можна змінювати лише своє відділення', 'error'); return; }
+      if (!canEditSoldierStatus(s)) { showToast('Немає прав на зміну статусу цього бійця', 'error'); return; }
       s.presenceStatus = statusKey;
       var td = todayISO();
       if (state.rozkhidManual[td] && state.rozkhidManual[td][soldierId]) delete state.rozkhidManual[td][soldierId];
-      scheduleCloudPush();
+      saveState(false);
       render();
       showToast(s.fullName + ': ' + getPresenceMeta(statusKey).fullLabel);
     }
 
     function renderPersonnelTab() {
+      var skladMode = hasPerm('skladMode'); // 'view' | 'own_status' | 'all_edit'
+      var canFullEdit = skladMode === 'all_edit';
       var q = ui.personnelSearch.trim().toLowerCase();
       var ordered = getOrderedSquads();
 
@@ -2086,7 +2344,7 @@
         ordered.map(function(sq) {
           var cnt = state.personnel.filter(function(p) { return p.squadId === sq.id; }).length;
           return '<button class="pill ' + (ui.personnelSquadFilter === sq.id ? 'active' : '') + '" onclick="setPersonnelSquadFilter(\'' + sq.id + '\')">' +
-            '<span class="dot" style="background:' + sq.color + '"></span><span>' + esc(formatSquadShortTab(sq)) + ' (' + cnt + ')</span></button>';
+            '<span class="dot" style="background:' + sq.color + '"></span><span>' + escHtml(formatSquadShortTab(sq)) + ' (' + cnt + ')</span></button>';
         }).join('') + '</div>';
 
       var visibleSquads = ui.personnelSquadFilter === 'all' ? ordered : ordered.filter(function(sq) { return sq.id === ui.personnelSquadFilter; });
@@ -2095,7 +2353,6 @@
         var allM = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
         var members = q ? allM.filter(function(p) { return p.fullName.toLowerCase().indexOf(q) !== -1 || (p.rank || '').toLowerCase().indexOf(q) !== -1; }) : allM;
         var isOpen = q ? true : Boolean(ui.openPersonnelSquads[sq.id]);
-        var isOwnSquad = isAdmin() || sq.id === mySquadId();
 
         var bodyHtml = !members.length
           ? '<div class="empty-state" style="padding:14px">Поки немає військовослужбовців</div>'
@@ -2104,40 +2361,41 @@
               var pm = getPresenceMeta(s.presenceStatus);
               var up = getUpcomingAbsencesForSoldier(s.id);
               var st = getSoldierDutyStats(s.id, ui.year, ui.month);
+              var canStatus = canEditSoldierStatus(s);
 
               return '<div style="border-top:1px solid var(--border)">' +
                 '<div class="soldier-row" style="cursor:pointer" onclick="toggleSoldierCard(\'' + s.id + '\')">' +
                   '<div class="min0"><div class="row wrap">' +
                     '<span class="chevron" style="transform:' + (sOpen ? 'rotate(90deg)' : 'none') + '">▸</span>' +
                     (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) +
-                    '<span class="soldier-name">' + esc(s.fullName) + '</span>' +
-                  '</div>' + (s.rank ? '<div class="text-xs text-muted" style="padding-left:18px">' + esc(s.rank) + '</div>' : '') + '</div>' +
+                    '<span class="soldier-name">' + escHtml(s.fullName) + '</span>' +
+                  '</div>' + (s.rank ? '<div class="text-xs text-muted" style="padding-left:18px">' + escHtml(s.rank) + '</div>' : '') + '</div>' +
                   '<div class="row" style="gap:5px;flex-shrink:0">' +
                     (up.length ? '<span class="badge badge-info">📅 ' + up.length + '</span>' : '') +
-                    '<span class="badge ' + (pm.isOk ? 'badge-ok' : 'badge-warn') + '">' + esc(pm.shortLabel) + '</span>' +
+                    '<span class="badge ' + (pm.isOk ? 'badge-ok' : 'badge-warn') + '">' + escHtml(pm.shortLabel) + '</span>' +
                   '</div></div>' +
                 (sOpen ? '<div style="padding:10px 12px 12px;background:var(--bg-elev);border-top:1px solid var(--border)" class="stack">' +
-                  (isOwnSquad ? (
+                  (canStatus ? (
                     '<div><div class="field-label" style="margin-bottom:6px">Статус присутності (Розхід):</div>' +
                     '<div class="presence-grid">' + PRESENCE_STATUSES.map(function(ps) {
                       var active = (s.presenceStatus || 'in_service') === ps.key;
                       var cls = active ? (ps.isOk ? 'active-ok' : 'active-warn') : '';
-                      return '<button type="button" class="presence-btn ' + cls + '" onclick="setSoldierPresence(\'' + s.id + '\',\'' + ps.key + '\')">' + esc(ps.fullLabel) + '</button>';
+                      return '<button type="button" class="presence-btn ' + cls + '" onclick="setSoldierPresence(\'' + s.id + '\',\'' + ps.key + '\')">' + escHtml(ps.fullLabel) + '</button>';
                     }).join('') + '</div></div>' +
                     '<div class="stack-sm">' +
                       '<div class="row-between"><span class="field-label">Заплановано на майбутні дати:</span>' +
                       '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(\'' + s.id + '\')">📅 Запланувати</button></div>' +
                       (up.length ? up.map(function(a) {
                         var dLbl = (a.endDate && a.endDate !== a.startDate) ? (formatDayMonth(a.startDate) + '–' + formatDayMonth(a.endDate)) : formatDayMonth(a.startDate);
-                        return '<div class="sched-item"><div class="text-xs"><strong style="color:#fff">' + esc(dLbl) + '</strong> — ' + esc(getRozkhidCat(a.category).label) + (a.note ? ' (' + esc(a.note) + ')' : '') + '</div>' +
+                        return '<div class="sched-item"><div class="text-xs"><strong style="color:#fff">' + escHtml(dLbl) + '</strong> — ' + escHtml(getRozkhidCat(a.category).label) + (a.note ? ' (' + escHtml(a.note) + ')' : '') + '</div>' +
                           '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteScheduledAbsence(\'' + a.id + '\')">✕</button></div>';
                       }).join('') : '<div class="text-xs text-muted">Немає запланованих подій</div>') + '</div>'
-                  ) : '<div class="text-xs text-muted">Режим перегляду (інше відділення).</div>') +
+                  ) : '<div class="text-xs text-muted">Статус: <strong>' + escHtml(pm.fullLabel) + '</strong> (режим перегляду).</div>') +
                   '<div class="grid-3">' +
                     '<div class="kpi-box" style="padding:7px"><div class="fw-800" style="color:#fff">' + st.monthCount + '</div><div class="text-xs text-muted">За місяць</div></div>' +
                     '<div class="kpi-box" style="padding:7px"><div class="fw-800" style="color:var(--accent)">' + st.totalCount + '</div><div class="text-xs text-muted">Всього</div></div>' +
                     '<div class="kpi-box" style="padding:7px"><div class="fw-bold text-xs" style="color:#fff">' + (st.lastDate ? formatDayMonth(st.lastDate) : '—') + '</div><div class="text-xs text-muted">Останній</div></div></div>' +
-                  (isAdmin() ? '<div class="grid-2">' +
+                  (canFullEdit ? '<div class="grid-2">' +
                     '<button type="button" class="btn btn-sm btn-secondary" onclick="openSoldierModal(\'' + s.id + '\')">Редагувати</button>' +
                     '<button type="button" class="btn btn-sm btn-danger" onclick="promptDeleteSoldier(\'' + s.id + '\')">Видалити</button></div>' : '') +
                 '</div>' : '') + '</div>';
@@ -2145,35 +2403,35 @@
 
         return '<div class="card-flush">' +
           '<div class="acc-header ' + (isOpen ? 'open' : '') + '" style="border-left:4px solid ' + sq.color + '" onclick="togglePersonnelSquad(\'' + sq.id + '\')">' +
-            '<div class="row min0"><span class="chevron">▸</span><span class="fw-800 text-sm" style="color:' + sq.color + '">' + esc(sq.name) + '</span><span class="text-xs text-muted">(' + members.length + ')</span></div>' +
-            (isAdmin() ? '<button type="button" class="btn btn-xs btn-primary" onclick="event.stopPropagation(); openSoldierModal(null,\'' + sq.id + '\')">+ Додати</button>' : '') + '</div>' +
+            '<div class="row min0"><span class="chevron">▸</span><span class="fw-800 text-sm" style="color:' + sq.color + '">' + escHtml(sq.name) + '</span><span class="text-xs text-muted">(' + members.length + ')</span></div>' +
+            (canFullEdit ? '<button type="button" class="btn btn-xs btn-primary" onclick="event.stopPropagation(); openSoldierModal(null,\'' + sq.id + '\')">+ Додати</button>' : '') + '</div>' +
           (isOpen ? '<div class="acc-body">' + bodyHtml + '</div>' : '') + '</div>';
       }).join('');
 
-      return '<input id="pers-search-inp" class="input" type="search" placeholder="Пошук бійця за ПІБ або званням..." value="' + esc(ui.personnelSearch) + '" oninput="setPersonnelSearch(this.value)" />' +
+      return '<input id="pers-search-inp" class="input" type="search" placeholder="Пошук бійця за ПІБ або званням..." value="' + escHtml(ui.personnelSearch) + '" oninput="setPersonnelSearch(this.value)" />' +
         tabs + '<div class="stack">' + squadsHtml + '</div>';
     }
 
     function openSoldierModal(soldierId, preSquadId) {
-      if (!isAdmin()) return;
+      if (hasPerm('skladMode') !== 'all_edit') return;
       var ex = soldierId ? getSoldierById(soldierId) : null;
       var targetSq = ex ? ex.squadId : (preSquadId || (getOrderedSquads()[0] ? getOrderedSquads()[0].id : 'sq1'));
       openModal(
         '<div class="modal-header"><div class="modal-title">' + (ex ? 'Редагувати бійця' : 'Додати військовослужбовця') + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<form class="modal-body" onsubmit="saveSoldier(event,\'' + (soldierId || '') + '\')">' +
           '<div class="field"><label class="field-label">Прізвище Ім\'я</label>' +
-            '<input id="s-name" class="input" type="text" required placeholder="Іваненко Олександр" value="' + esc(ex ? ex.fullName : '') + '" oninput="this.value=capitalizePIB(this.value)" /></div>' +
+            '<input id="s-name" class="input" type="text" required placeholder="Іваненко Олександр" value="' + escHtml(ex ? ex.fullName : '') + '" oninput="this.value=capitalizePIB(this.value)" /></div>' +
           '<div class="field"><label class="field-label">Звання (необов\'язково)</label>' +
-            '<input id="s-rank" class="input" type="text" placeholder="солдат" value="' + esc(ex ? ex.rank : '') + '" />' +
+            '<input id="s-rank" class="input" type="text" placeholder="солдат" value="' + escHtml(ex ? ex.rank : '') + '" />' +
             '<div class="chips-wrap">' + QUICK_RANKS.map(function(r) {
               return '<button type="button" class="btn btn-xs btn-secondary" onclick="document.getElementById(\'s-rank\').value=\'' + r + '\'">' + r + '</button>';
             }).join('') + '</div></div>' +
           '<div class="field"><label class="field-label">Відділення / Група</label><select id="s-squad" class="select">' +
-            getOrderedSquads().map(function(sq) { return '<option value="' + sq.id + '" ' + (sq.id === targetSq ? 'selected' : '') + '>' + esc(sq.name) + '</option>'; }).join('') +
+            getOrderedSquads().map(function(sq) { return '<option value="' + sq.id + '" ' + (sq.id === targetSq ? 'selected' : '') + '>' + escHtml(sq.name) + '</option>'; }).join('') +
           '</select></div>' +
           '<label class="toggle-pill"><input id="s-leader" type="checkbox" ' + (ex && ex.isLeader ? 'checked' : '') + ' /><span>Командир відділення / групи (★)</span></label>' +
           '<div class="field"><label class="field-label">Статус присутності</label><select id="s-presence" class="select">' +
-            PRESENCE_STATUSES.map(function(ps) { return '<option value="' + ps.key + '" ' + ((ex ? ex.presenceStatus : 'in_service') === ps.key ? 'selected' : '') + '>' + esc(ps.fullLabel) + '</option>'; }).join('') +
+            PRESENCE_STATUSES.map(function(ps) { return '<option value="' + ps.key + '" ' + ((ex ? ex.presenceStatus : 'in_service') === ps.key ? 'selected' : '') + '>' + escHtml(ps.fullLabel) + '</option>'; }).join('') +
           '</select></div>' +
           '<button type="submit" class="btn btn-primary btn-full">Зберегти</button></form>'
       );
@@ -2182,7 +2440,7 @@
 
     function saveSoldier(e, soldierId) {
       e.preventDefault();
-      if (!isAdmin()) return;
+      if (hasPerm('skladMode') !== 'all_edit') return;
       var fullName = capitalizePIB(document.getElementById('s-name').value.trim());
       var rank = document.getElementById('s-rank').value.trim();
       var squadId = document.getElementById('s-squad').value;
@@ -2196,125 +2454,194 @@
       } else {
         state.personnel.push({ id: genId('p'), fullName: fullName, rank: rank, squadId: squadId, isLeader: isLeader, presenceStatus: presenceStatus });
       }
-      scheduleCloudPush();
+      saveState(false);
       closeModal(); render();
       showToast(soldierId ? 'Дані оновлено' : 'Бійця додано');
     }
 
     function promptDeleteSoldier(sid) {
-      if (!isAdmin()) return;
+      if (hasPerm('skladMode') !== 'all_edit') return;
       var s = getSoldierById(sid); if (!s) return;
       showConfirm('Видалити ' + s.fullName + '?', 'Бійця, його наряди та заплановані відсутності буде видалено.', 'Видалити', function() {
         state.personnel = state.personnel.filter(function(p) { return p.id !== sid; });
         state.duties = state.duties.filter(function(d) { return d.soldierId !== sid; });
         state.scheduledAbsences = state.scheduledAbsences.filter(function(a) { return a.soldierId !== sid; });
-        scheduleCloudPush();
+        saveState(false);
         render(); showToast('Бійця видалено');
       }, true);
     }
 
     // =========================================================================
-    // 11. ВКЛАДКА 5: НАЛАШТУВАННЯ
+    // 11. ВКЛАДКА 5: НАЛАШТУВАННЯ (СУВОРЕ РОЗМЕЖУВАННЯ АДМІН / ІНШІ РОЛІ)
     // =========================================================================
+    function selectPermEditRole(r) { ui.permEditRole = r; render(); }
+
+    function setPermBool(role, key, val) {
+      if (!isAdmin()) return;
+      state.rolePermissions[role][key] = Boolean(val);
+    }
+
+    function setPermChoice(role, key, val) {
+      if (!isAdmin()) return;
+      state.rolePermissions[role][key] = val;
+      render();
+    }
+
+    function saveRolePermissionsBtn() {
+      if (!isAdmin()) return;
+      saveState(true);
+      showToast('Права доступу збережено та синхронізовано');
+    }
+
     function renderSettingsTab() {
       var fbUrl = getFirebaseUrl();
-      var versionCard =
-        '<div class="card" style="border-color:rgba(74,222,128,0.45);background:rgba(75,122,61,0.14)">' +
-          '<div class="fw-800" style="color:#fff">Версія сайту: ' + APP_VERSION + ' (оновлено ' + APP_UPDATED + ')</div>' +
-          '<div class="text-xs text-muted" style="margin-top:3px">Активна роль: <strong style="color:#fff">' + esc(getRoleLabel(sessionRole)) + '</strong>' +
-            (lastSyncAt ? ' • Синхронізовано: ' + esc(lastSyncAt) : '') + '</div>' +
-        '</div>';
-
-      if (!isAdmin()) {
-        return versionCard +
-          '<div class="card stack">' +
-            '<div class="section-title" style="color:var(--blue)">Синхронізація з хмарою</div>' +
-            '<div class="text-xs text-muted">Статус: <strong style="color:#fff">' + (fbUrl ? (syncStatus === 'online' ? '🟢 Підключено' : '🔴 Офлайн') : '⚪ Локальний режим') + '</strong></div>' +
-            '<button class="btn btn-info btn-full" onclick="manualSyncFromHeader()">🔄 Оновити дані з хмари</button>' +
-          '</div>' +
-          '<div class="card stack">' +
-            '<div class="section-title text-muted">Сесія</div>' +
-            '<button class="btn btn-danger btn-full" onclick="logoutSession()">🔒 Вийти / Змінити PIN</button>' +
-          '</div>';
-      }
-
-      var pins = state.pins || DEFAULT_PINS;
       var diagHtml = lastSyncDiag
-        ? '<div class="diag-box ' + (lastSyncDiag.type === 'ok' ? 'diag-ok' : (lastSyncDiag.type === 'err' ? 'diag-err' : 'diag-info')) + '">' + esc(lastSyncDiag.text) + '</div>'
+        ? '<div class="diag-box ' + (lastSyncDiag.type === 'ok' ? 'diag-ok' : (lastSyncDiag.type === 'err' ? 'diag-err' : 'diag-info')) + '">' + escHtml(lastSyncDiag.text) + '</div>'
         : '';
 
-      return versionCard +
-        '<div class="card stack" style="border-color:rgba(56,189,248,0.4)">' +
-          '<div class="section-title" style="color:var(--blue)">☁️ Синхронізація Firebase</div>' +
-          '<div class="field"><label class="field-label">Посилання на Firebase Realtime Database</label>' +
-            '<input id="fb-url-input" class="input" type="url" placeholder="https://...-default-rtdb.europe-west1.firebasedatabase.app" value="' + esc(fbUrl) + '" /></div>' +
-          '<button class="btn btn-primary btn-full" onclick="connectFirebaseFromInput()">Перевірити та підключити</button>' +
-          '<div class="grid-2">' +
-            '<button class="btn btn-sm btn-secondary" onclick="fbTestWrite()">🧪 Тест запису</button>' +
-            '<button class="btn btn-sm btn-warn" onclick="pushLocalToCloudPrompt()">☁️ Завантажити мої дані в хмару</button></div>' +
-          '<div class="grid-2">' +
-            '<button class="btn btn-sm btn-info" onclick="pullCloudToLocal()">⬇️ Завантажити з хмари</button>' +
-            '<button class="btn btn-sm btn-secondary" onclick="copyInviteLinkForKV()">🔗 Скопіювати посилання для КВ</button></div>' +
-          diagHtml +
-          '<div class="text-xs text-muted">Посилання для КВ автоматично підключає їхній телефон до вашої бази Firebase — їм залишиться лише ввести свій PIN.</div>' +
-        '</div>' +
+      // 1. Картка версії та виходу (для ВСІХ ролей)
+      var versionCard =
+        '<div class="card stack" style="border-color:rgba(74,222,128,0.45);background:rgba(75,122,61,0.14)">' +
+          '<div><div class="fw-800" style="color:#fff">Версія сайту: ' + APP_VERSION + ' (оновлено ' + APP_UPDATED + ')</div>' +
+          '<div class="text-xs text-muted" style="margin-top:3px">Активна роль: <strong style="color:#fff">' + escHtml(getRoleLabel(currentRole)) + '</strong>' +
+            (lastSyncAt ? ' • Синхронізовано: ' + escHtml(lastSyncAt) : '') + '</div></div>' +
+          '<button class="btn btn-sm btn-secondary btn-full" onclick="logoutSession()">🚪 Вийти / Змінити PIN</button>' +
+        '</div>';
 
+      // 2. Блок Firebase (різний для Адміна та не-Адміна)
+      var firebaseCard = isAdmin()
+        ? '<div class="card stack" style="border-color:rgba(56,189,248,0.4)">' +
+            '<div class="section-title" style="color:var(--blue)">☁️ Синхронізація Firebase</div>' +
+            '<div class="field"><label class="field-label">Посилання на Firebase Realtime Database</label>' +
+              '<input id="fb-url-input" class="input" type="url" placeholder="https://...-default-rtdb.europe-west1.firebasedatabase.app" value="' + escHtml(fbUrl) + '" /></div>' +
+            '<button class="btn btn-primary btn-full" onclick="connectFirebaseFromInput()">Перевірити та підключити</button>' +
+            '<div class="grid-2">' +
+              '<button class="btn btn-sm btn-secondary" onclick="fbTestWrite()">🧪 Тест запису</button>' +
+              '<button class="btn btn-sm btn-warn" onclick="pushLocalToCloudPrompt()">☁️ Завантажити мої дані в хмару</button></div>' +
+            '<div class="grid-2">' +
+              '<button class="btn btn-sm btn-info" onclick="pullCloudToLocal()">⬇️ Завантажити з хмари</button>' +
+              '<button class="btn btn-sm btn-secondary" onclick="copyInviteLinkForKV()">🔗 Посилання для КВ / КГ</button></div>' +
+            diagHtml +
+            '<div class="text-xs text-muted">Посилання для КВ / КГ автоматично підключає їхній телефон до вашої бази Firebase — їм залишиться лише ввести свій PIN.</div>' +
+          '</div>'
+        : '<div class="card stack" style="border-color:rgba(56,189,248,0.4)">' +
+            '<div class="section-title" style="color:var(--blue)">☁️ Синхронізація Firebase</div>' +
+            '<div class="field"><label class="field-label">Посилання на Firebase Realtime Database</label>' +
+              '<input id="fb-url-input" class="input" type="url" placeholder="https://...-default-rtdb.europe-west1.firebasedatabase.app" value="' + escHtml(fbUrl) + '" /></div>' +
+            '<button class="btn btn-primary btn-full" onclick="connectFirebaseFromInput()">Перевірити та підключити</button>' +
+            '<button class="btn btn-info btn-full" onclick="pullCloudToLocal()">⬇️ Оновити дані з хмари</button>' +
+            diagHtml +
+          '</div>';
+
+      // 3. Резервна копія та експорт (не-Адмін має лише збереження/експорт, Адмін + відновлення)
+      var backupCard =
+        '<div class="card stack">' +
+          '<div class="section-title" style="color:var(--accent)">Резервна копія та експорт</div>' +
+          '<div class="text-xs text-muted">Останній бекап: <strong style="color:#fff">' + escHtml(state.lastBackupAt || 'ще не створювався') + '</strong></div>' +
+          '<button class="btn btn-primary btn-full" onclick="exportBackupJSON()">Зберегти бекап у файл (JSON)</button>' +
+          (isAdmin() ? '<button class="btn btn-secondary btn-full" onclick="document.getElementById(\'import-json-input\').click()">Відновити з файлу (JSON)</button>' : '') +
+          (isAdmin()
+            ? '<div class="grid-2"><button class="btn btn-sm btn-secondary" onclick="copyBackupAsText()">Скопіювати як текст</button>' +
+              '<button class="btn btn-sm btn-secondary" onclick="openRestoreTextModal()">Вставити з тексту</button></div>'
+            : '<button class="btn btn-secondary btn-full" onclick="copyBackupAsText()">Скопіювати бекап як текст</button>') +
+          '<button class="btn btn-info btn-full" onclick="exportMonthlyCSV()">Експорт обліку нарядів за ' + MONTHS_UK[ui.month] + ' (CSV)</button>' +
+        '</div>';
+
+      // Для всіх ролей окрім Адміна — повертаємо ТІЛЬКИ ці 3 блоки
+      if (!isAdmin()) {
+        return versionCard + firebaseCard + backupCard;
+      }
+
+      // 4–9. Блоки ВИКЛЮЧНО для Адміна
+      var pins = normalizePins(state.pins);
+      var pr = ui.permEditRole;
+      var pObj = state.rolePermissions[pr] || DEFAULT_ROLE_PERMISSIONS[pr];
+
+      var pinsCard =
         '<div class="card stack">' +
           '<div class="section-title" style="color:var(--amber)">🔐 Доступ та PIN-коди (4 цифри)</div>' +
+          '<div class="field"><label class="field-label">🛡️ Адмін (повний доступ)</label><input id="pin-admin" class="input" type="tel" maxlength="4" value="' + escHtml(pins.admin) + '" /></div>' +
           '<div class="grid-2">' +
-            '<div class="field"><label class="field-label">★ Адмін (КГ)</label><input id="pin-admin" class="input" type="tel" maxlength="4" value="' + esc(pins.admin) + '" /></div>' +
-            '<div class="field"><label class="field-label">КВ 1-го відділення</label><input id="pin-sq1" class="input" type="tel" maxlength="4" value="' + esc(pins.sq1) + '" /></div>' +
-            '<div class="field"><label class="field-label">КВ 2-го відділення</label><input id="pin-sq2" class="input" type="tel" maxlength="4" value="' + esc(pins.sq2) + '" /></div>' +
-            '<div class="field"><label class="field-label">КВ 3-го відділення</label><input id="pin-sq3" class="input" type="tel" maxlength="4" value="' + esc(pins.sq3) + '" /></div>' +
+            '<div class="field"><label class="field-label">⭐ КГ (Командир групи)</label><input id="pin-kg" class="input" type="tel" maxlength="4" value="' + escHtml(pins.kg) + '" /></div>' +
+            '<div class="field"><label class="field-label">КВ 1-го відділення</label><input id="pin-kv1" class="input" type="tel" maxlength="4" value="' + escHtml(pins.kv1) + '" /></div>' +
+            '<div class="field"><label class="field-label">КВ 2-го відділення</label><input id="pin-kv2" class="input" type="tel" maxlength="4" value="' + escHtml(pins.kv2) + '" /></div>' +
+            '<div class="field"><label class="field-label">КВ 3-го відділення</label><input id="pin-kv3" class="input" type="tel" maxlength="4" value="' + escHtml(pins.kv3) + '" /></div>' +
           '</div>' +
           '<button class="btn btn-primary btn-full" onclick="savePinsFromForm()">Зберегти PIN-коди</button>' +
-          '<button class="btn btn-sm btn-secondary btn-full" onclick="logoutSession()">🔒 Вийти / Змінити роль</button>' +
-        '</div>' +
+        '</div>';
 
+      var permsCard =
+        '<div class="card stack" style="border-color:rgba(245,158,11,0.38)">' +
+          '<div class="section-title" style="color:var(--amber)">⚙️ Права доступу ролей</div>' +
+          '<div class="seg-control seg-control-4">' +
+            [{ id: 'kg', l: '⭐ КГ' }, { id: 'kv1', l: 'КВ 1' }, { id: 'kv2', l: 'КВ 2' }, { id: 'kv3', l: 'КВ 3' }].map(function(r) {
+              return '<button type="button" class="seg-btn ' + (pr === r.id ? 'active' : '') + '" onclick="selectPermEditRole(\'' + r.id + '\')">' + r.l + '</button>';
+            }).join('') +
+          '</div>' +
+          '<div class="stack-sm">' +
+            '<label class="toggle-pill"><input type="checkbox" ' + (pObj.dutiesEdit ? 'checked' : '') + ' onchange="setPermBool(\'' + pr + '\',\'dutiesEdit\',this.checked)" /><span>Наряди: призначення та редагування</span></label>' +
+            '<label class="toggle-pill"><input type="checkbox" ' + (pObj.tasksCreate ? 'checked' : '') + ' onchange="setPermBool(\'' + pr + '\',\'tasksCreate\',this.checked)" /><span>Задачі: постановка та видалення</span></label>' +
+            '<label class="toggle-pill"><input type="checkbox" ' + (pObj.tasksStatus ? 'checked' : '') + ' onchange="setPermBool(\'' + pr + '\',\'tasksStatus\',this.checked)" /><span>Задачі: зміна статусу та зауваження</span></label>' +
+            '<label class="toggle-pill"><input type="checkbox" ' + (pObj.tasksViewAll ? 'checked' : '') + ' onchange="setPermBool(\'' + pr + '\',\'tasksViewAll\',this.checked)" /><span>Задачі: перегляд задач усіх відділень</span></label>' +
+          '</div>' +
+          '<div class="perm-block">' +
+            '<div class="field-label">Розхід — рівень доступу:</div>' +
+            '<div class="seg-control seg-control-3">' +
+              '<button type="button" class="seg-btn ' + (pObj.rozkhidMode === 'view' ? 'active' : '') + '" onclick="setPermChoice(\'' + pr + '\',\'rozkhidMode\',\'view\')">Перегляд</button>' +
+              '<button type="button" class="seg-btn ' + (pObj.rozkhidMode === 'own' ? 'active' : '') + '" onclick="setPermChoice(\'' + pr + '\',\'rozkhidMode\',\'own\')">Своє відд.</button>' +
+              '<button type="button" class="seg-btn ' + (pObj.rozkhidMode === 'all' ? 'active' : '') + '" onclick="setPermChoice(\'' + pr + '\',\'rozkhidMode\',\'all\')">Увесь взвод</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="perm-block">' +
+            '<div class="field-label">Склад — рівень доступу:</div>' +
+            '<div class="seg-control seg-control-3">' +
+              '<button type="button" class="seg-btn ' + (pObj.skladMode === 'view' ? 'active' : '') + '" onclick="setPermChoice(\'' + pr + '\',\'skladMode\',\'view\')">Перегляд</button>' +
+              '<button type="button" class="seg-btn ' + (pObj.skladMode === 'own_status' ? 'active' : '') + '" onclick="setPermChoice(\'' + pr + '\',\'skladMode\',\'own_status\')">Статуси свого</button>' +
+              '<button type="button" class="seg-btn ' + (pObj.skladMode === 'all_edit' ? 'active' : '') + '" onclick="setPermChoice(\'' + pr + '\',\'skladMode\',\'all_edit\')">Повне ред.</button>' +
+            '</div>' +
+          '</div>' +
+          '<button class="btn btn-primary btn-full" onclick="saveRolePermissionsBtn()">Зберегти права доступу</button>' +
+        '</div>';
+
+      var groupCard =
         '<div class="card stack">' +
           '<div class="section-title text-muted">Основні параметри</div>' +
           '<div class="field"><label class="field-label">Номер групи за замовчуванням</label>' +
-          '<input class="input" type="text" value="' + esc(state.groupNumber) + '" onchange="state.groupNumber=this.value.trim()||\'223\';scheduleCloudPush();showToast(\'Номер групи збережено\')" /></div>' +
-        '</div>' +
+          '<input class="input" type="text" value="' + escHtml(state.groupNumber) + '" onchange="state.groupNumber=this.value.trim()||\'223\';saveState(false);showToast(\'Номер групи збережено\')" /></div>' +
+        '</div>';
 
+      var dutyTypesCard =
         '<div class="card stack">' +
-          '<div class="section-title" style="color:var(--accent)">Резервна копія та експорт</div>' +
-          '<div class="text-xs text-muted">Останній бекап: <strong style="color:#fff">' + esc(state.lastBackupAt || 'ще не створювався') + '</strong></div>' +
-          '<button class="btn btn-primary btn-full" onclick="exportBackupJSON()">Зберегти бекап у файл (JSON)</button>' +
-          '<button class="btn btn-secondary btn-full" onclick="document.getElementById(\'import-json-input\').click()">Відновити з файлу (JSON)</button>' +
-          '<div class="grid-2">' +
-            '<button class="btn btn-sm btn-secondary" onclick="copyBackupAsText()">Скопіювати як текст</button>' +
-            '<button class="btn btn-sm btn-secondary" onclick="openRestoreTextModal()">Вставити з тексту</button></div>' +
-          '<button class="btn btn-info btn-full" onclick="exportMonthlyCSV()">Експорт обліку нарядів за ' + MONTHS_UK[ui.month] + ' (CSV)</button>' +
-        '</div>' +
-
-        '<div class="card stack">' +
-          '<div class="row-between"><span class="section-title text-muted">Види нарядів</span>' +
+          '<div class="row-between"><span class="section-title text-muted">Типи нарядів</span>' +
           '<button class="btn btn-xs btn-primary" onclick="openDutyTypeModal()">+ Додати</button></div>' +
           state.dutyTypes.map(function(dt) {
             return '<div class="row-between" style="padding:9px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">' +
               '<div class="row min0"><span class="dot" style="background:' + dt.color + '"></span>' +
-                '<div class="min0"><div class="text-sm fw-bold" style="color:#fff">' + esc(dt.shortName) + ' <span class="text-xs text-muted">(до ' + dt.maxCount + ' ос.)</span></div>' +
-                '<div class="text-xs text-muted">' + esc(dt.name) + '</div></div></div>' +
+                '<div class="min0"><div class="text-sm fw-bold" style="color:#fff">' + escHtml(dt.shortName) + ' <span class="text-xs text-muted">(до ' + dt.maxCount + ' ос.)</span></div>' +
+                '<div class="text-xs text-muted">' + escHtml(dt.name) + '</div></div></div>' +
               '<div class="row"><button class="btn btn-xs btn-secondary" onclick="openDutyTypeModal(\'' + dt.id + '\')">Змінити</button>' +
               (state.dutyTypes.length > 1 ? '<button class="btn-icon btn-icon-sm danger" onclick="deleteDutyType(\'' + dt.id + '\')">✕</button>' : '') + '</div></div>';
           }).join('') +
-        '</div>' +
+        '</div>';
 
+      var squadsCard =
         '<div class="card stack">' +
           '<div class="row-between"><span class="section-title text-muted">Відділення</span>' +
           '<button class="btn btn-xs btn-primary" onclick="openSquadModal()">+ Додати</button></div>' +
           getOrderedSquads().map(function(sq) {
             return '<div class="row-between" style="padding:9px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--border);border-left:4px solid ' + sq.color + '">' +
-              '<div class="fw-bold text-sm" style="color:#fff">' + esc(sq.name) + '</div>' +
+              '<div class="fw-bold text-sm" style="color:#fff">' + escHtml(sq.name) + '</div>' +
               '<button class="btn btn-xs btn-secondary" onclick="openSquadModal(\'' + sq.id + '\')">Змінити</button></div>';
           }).join('') +
-        '</div>' +
+        '</div>';
 
+      var dangerCard =
         '<div class="card stack" style="border-color:rgba(239,68,68,0.4)">' +
           '<div class="section-title" style="color:#f87171">Небезпечна зона</div>' +
           '<button class="btn btn-danger btn-full" onclick="promptResetStep1()">Очистити всі дані</button>' +
         '</div>';
+
+      return versionCard + firebaseCard + backupCard + pinsCard + permsCard + groupCard + dutyTypesCard + squadsCard + dangerCard;
     }
 
     function connectFirebaseFromInput() {
@@ -2346,10 +2673,10 @@
           if (result.data && typeof result.data === 'object' && (result.data.meta || result.data.personnel)) {
             applyRemoteSnapshot(result.data, true);
             setDiag('ok', '✅ Підключено (HTTP ' + result.status + '). Дані завантажено з хмари');
-            showToast('Підключено! Дані завантажено з хмари');
+            showToast('Підключено! Дані оновлено з хмари');
           } else {
-            setDiag('ok', '✅ Підключено (HTTP ' + result.status + '). База порожня — натисніть «Завантажити мої дані в хмару»');
-            showToast('Підключено! Тепер завантажте дані в хмару');
+            setDiag('ok', '✅ Підключено (HTTP ' + result.status + '). База порожня');
+            showToast('Підключено до Firebase!');
           }
           startLiveSync(); render();
         })
@@ -2362,14 +2689,15 @@
     }
 
     function pushLocalToCloudPrompt() {
+      if (!isAdmin()) return;
       if (!getFirebaseUrl()) { showToast('Спочатку підключіть посилання Firebase', 'error'); return; }
       showConfirm(
         'Завантажити дані в хмару?',
-        'Усі поточні бійці, графік нарядів, задачі, розхід і PIN-коди з цього телефону будуть записані у Firebase.',
+        'Усі поточні бійці, графік нарядів, задачі, розхід, права доступу та PIN-коди будуть записані у Firebase.',
         'Завантажити в хмару',
         function() {
           fbPushAll(false).then(function(res) {
-            showToast(res.ok ? 'Дані успішно завантажено в Firebase!' : ('Помилка: ' + (res.error || '')), res.ok ? 'success' : 'error');
+            showToast(res.ok ? 'Дані успішно завантажено в Firebase!' : ('Помилка: ' + (res.message || '')), res.ok ? 'success' : 'error');
             render();
           });
         },
@@ -2379,31 +2707,34 @@
 
     function pullCloudToLocal() {
       if (!getFirebaseUrl()) { showToast('Спочатку підключіть посилання Firebase', 'error'); return; }
-      fbPullAll(false, true).then(function(res) {
-        showToast(res.ok ? 'Дані завантажено з хмари' : ('Помилка: ' + (res.error || '')), res.ok ? 'success' : 'error');
+      fbPull(false, true).then(function(res) {
+        showToast(res.ok ? 'Дані оновлено з хмари' : ('Помилка: ' + (res.message || '')), res.ok ? 'success' : 'error');
         render();
       });
     }
 
     function copyInviteLinkForKV() {
+      if (!isAdmin()) return;
       var fbUrl = getFirebaseUrl();
       if (!fbUrl) { showToast('Спочатку підключіть базу Firebase', 'error'); return; }
       var link = window.location.origin + window.location.pathname + '?fb=' + encodeURIComponent(fbUrl);
-      copyText(link, 'Посилання для КВ скопійовано!');
+      copyText(link, 'Посилання для КВ / КГ скопійовано!');
     }
 
     function savePinsFromForm() {
+      if (!isAdmin()) return;
       var pAdmin = (document.getElementById('pin-admin').value || '').trim();
-      var p1 = (document.getElementById('pin-sq1').value || '').trim();
-      var p2 = (document.getElementById('pin-sq2').value || '').trim();
-      var p3 = (document.getElementById('pin-sq3').value || '').trim();
-      var all = [pAdmin, p1, p2, p3];
+      var pKg = (document.getElementById('pin-kg').value || '').trim();
+      var p1 = (document.getElementById('pin-kv1').value || '').trim();
+      var p2 = (document.getElementById('pin-kv2').value || '').trim();
+      var p3 = (document.getElementById('pin-kv3').value || '').trim();
+      var all = [pAdmin, pKg, p1, p2, p3];
       for (var i = 0; i < all.length; i++) {
         if (!/^\d{4}$/.test(all[i])) { showToast('Кожен PIN має складатися рівно з 4 цифр', 'error'); return; }
       }
-      if (new Set(all).size < 4) { showToast('Усі 4 PIN-коди мають бути різними', 'error'); return; }
-      state.pins = { admin: pAdmin, sq1: p1, sq2: p2, sq3: p3 };
-      scheduleCloudPush();
+      if (new Set(all).size < 5) { showToast('Усі 5 PIN-кодів мають бути різними', 'error'); return; }
+      state.pins = { admin: pAdmin, kg: pKg, kv1: p1, kv2: p2, kv3: p3 };
+      saveState(true);
       showToast('PIN-коди збережено та синхронізовано');
     }
 
@@ -2424,10 +2755,10 @@
       if (!isAdmin()) return;
       var ex = dtId ? state.dutyTypes.find(function(x) { return x.id === dtId; }) : null;
       openModal(
-        '<div class="modal-header"><div class="modal-title">' + (ex ? 'Редагувати вид наряду' : 'Новий вид наряду') + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
+        '<div class="modal-header"><div class="modal-title">' + (ex ? 'Редагувати тип наряду' : 'Новий тип наряду') + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<form class="modal-body" onsubmit="saveDutyType(event,\'' + (dtId || '') + '\')">' +
-          '<div class="field"><label class="field-label">Скорочення (для звіту)</label><input id="dt-short" class="input" required placeholder="ЧК, Дн, КПП..." value="' + esc(ex ? ex.shortName : '') + '" /></div>' +
-          '<div class="field"><label class="field-label">Повна назва</label><input id="dt-full" class="input" placeholder="Черговий курсу" value="' + esc(ex ? ex.name : '') + '" /></div>' +
+          '<div class="field"><label class="field-label">Скорочення (для звіту)</label><input id="dt-short" class="input" required placeholder="ЧК, Дн, КПП..." value="' + escHtml(ex ? ex.shortName : '') + '" /></div>' +
+          '<div class="field"><label class="field-label">Повна назва</label><input id="dt-full" class="input" placeholder="Черговий курсу" value="' + escHtml(ex ? ex.name : '') + '" /></div>' +
           '<div class="field"><label class="field-label">Макс. кількість людей (1–10)</label><input id="dt-max" class="input" type="number" min="1" max="10" required value="' + (ex ? ex.maxCount : 1) + '" /></div>' +
           '<div class="field"><label class="field-label">Колір мітки</label>' + renderColorSwatches(ex ? ex.color : '#38bdf8') + '</div>' +
           '<button type="submit" class="btn btn-primary btn-full">Зберегти</button></form>'
@@ -2447,13 +2778,13 @@
       } else {
         state.dutyTypes.push({ id: genId('dt'), shortName: shortName, name: name, maxCount: maxCount, color: tempColor });
       }
-      scheduleCloudPush(); closeModal(); render(); showToast('Вид наряду збережено');
+      saveState(false); closeModal(); render(); showToast('Тип наряду збережено');
     }
 
     function deleteDutyType(dtId) {
       if (!isAdmin() || state.dutyTypes.length <= 1) return;
       state.dutyTypes = state.dutyTypes.filter(function(x) { return x.id !== dtId; });
-      scheduleCloudPush(); render(); showToast('Вид наряду видалено');
+      saveState(false); render(); showToast('Тип наряду видалено');
     }
 
     function openSquadModal(sqId) {
@@ -2462,7 +2793,7 @@
       openModal(
         '<div class="modal-header"><div class="modal-title">' + (ex ? 'Редагувати відділення' : 'Нове відділення') + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<form class="modal-body" onsubmit="saveSquad(event,\'' + (sqId || '') + '\')">' +
-          '<div class="field"><label class="field-label">Назва</label><input id="sq-name" class="input" required placeholder="4-те відділення" value="' + esc(ex ? ex.name : '') + '" /></div>' +
+          '<div class="field"><label class="field-label">Назва</label><input id="sq-name" class="input" required placeholder="4-те відділення" value="' + escHtml(ex ? ex.name : '') + '" /></div>' +
           '<div class="field"><label class="field-label">Колір</label>' + renderColorSwatches(ex ? ex.color : '#a855f7') + '</div>' +
           '<button type="submit" class="btn btn-primary btn-full">Зберегти</button></form>'
       );
@@ -2480,7 +2811,7 @@
         state.squads.push({ id: nid, name: name, color: tempColor, isCmdGroup: false });
         ui.openPersonnelSquads[nid] = true;
       }
-      scheduleCloudPush(); closeModal(); render(); showToast('Відділення збережено');
+      saveState(false); closeModal(); render(); showToast('Відділення збережено');
     }
 
     function downloadFile(content, filename, mime) {
@@ -2499,12 +2830,13 @@
     }
 
     function handleImportJSON(e) {
+      if (!isAdmin()) return;
       var file = e.target.files && e.target.files[0]; if (!file) return;
       var r = new FileReader();
       r.onload = function(ev) {
         try {
           state = normalizeState(JSON.parse(ev.target.result));
-          scheduleCloudPush();
+          saveState(true);
           render(); showToast('Дані відновлено з файлу');
         } catch (err) { showToast('Некоректний файл резервної копії', 'error'); }
         finally { e.target.value = ''; }
@@ -2519,6 +2851,7 @@
     }
 
     function openRestoreTextModal() {
+      if (!isAdmin()) return;
       openModal(
         '<div class="modal-header"><div class="modal-title">Відновити з тексту</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<div class="modal-body"><textarea id="restore-txt" class="textarea" style="min-height:130px" placeholder="Вставте сюди скопійований текст резервної копії..."></textarea>' +
@@ -2527,10 +2860,11 @@
     }
 
     function restoreFromText() {
+      if (!isAdmin()) return;
       var raw = (document.getElementById('restore-txt').value || '').trim();
       try {
         state = normalizeState(JSON.parse(raw));
-        scheduleCloudPush();
+        saveState(true);
         closeModal(); render(); showToast('Дані успішно відновлено');
       } catch (err) { showToast('Помилка: некоректний формат тексту', 'error'); }
     }
@@ -2555,9 +2889,11 @@
       showConfirm('Очистити всі дані? (Крок 1/2)', 'Буде видалено весь особовий склад, графік нарядів, задачі та розхід.', 'Продовжити', function() {
         showConfirm('Точно видалити все? (Крок 2/2)', 'Цю дію неможливо скасувати, якщо у вас немає резервної копії.', 'Так, очистити все', function() {
           var keepPins = state.pins;
+          var keepPerms = state.rolePermissions;
           state = createFreshState();
           state.pins = keepPins;
-          scheduleCloudPush();
+          state.rolePermissions = keepPerms;
+          saveState(true);
           render(); showToast('Усі дані очищено');
         }, true);
       }, true);
@@ -2567,7 +2903,7 @@
     // 12. ГОЛОВНИЙ РЕНДЕР ТА ЗАПУСК
     // =========================================================================
     function render() {
-      if (!sessionRole) return;
+      if (!currentRole) return;
       updateSyncPillUI();
       document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
       var act = document.getElementById('nav-' + ui.activeTab);
