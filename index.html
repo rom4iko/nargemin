@@ -1,591 +1,2820 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f2937">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Наряди">
-<title>Наряди взводу</title>
-<style>
-:root{--bg:#f3f4f6;--card:#fff;--bd:#d1d5db;--tx:#111827;--mut:#6b7280;--pri:#1d4ed8;--we:#fee2e2;--today:#fef9c3;--bar:#1f2937}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:calc(90px + env(safe-area-inset-bottom))}
-header{background:var(--bar);color:#fff;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;position:sticky;top:0;z-index:20}
-.hrow{display:flex;align-items:center;justify-content:center;min-height:42px}
-.tabs{display:flex;gap:4px;margin-top:6px}
-.tabs button{flex:1;background:#374151;color:#d1d5db;border:0;border-radius:8px;padding:9px 2px;font-size:14px}
-.tabs button.on{background:var(--pri);color:#fff;font-weight:600}
-#toast{display:none;position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));background:#111827;color:#fff;border-radius:12px;padding:10px 14px;z-index:60;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
-#toast button{background:none;border:0;color:#93c5fd;font-weight:700;font-size:16px;padding:8px 10px}
-.whor{display:flex;gap:6px;margin-top:4px;align-items:stretch}
-.whor .who{margin-top:0;flex:1}
-.whor .x{flex:0 0 52px;background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;border-radius:8px;font-size:20px;font-weight:700}
-#htitle{font-size:18px;font-weight:600}
-.mnav{display:flex;gap:6px;align-items:center;width:100%;justify-content:space-between}
-.mnav b{flex:1;text-align:center;font-size:17px}
-.mnav button{background:#374151;color:#fff;border:0;border-radius:8px;min-width:44px;height:40px;font-size:18px}
-.mnav .td{font-size:13px;padding:0 10px}
-main{padding:10px;max-width:900px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
-h2{font-size:16px;margin:0 0 10px}
-button.b{background:var(--pri);color:#fff;border:0;border-radius:10px;padding:0 14px;min-height:44px;font-size:16px}
-button.b.gray{background:#6b7280}button.b.red{background:#dc2626}button.b.full{width:100%}
-input,select{font:inherit;font-size:16px;padding:0 10px;min-height:44px;border:1px solid var(--bd);border-radius:10px;background:#fff;max-width:100%}
-input[type=color]{padding:2px;width:48px}
-input[type=checkbox]{min-height:0;width:24px;height:24px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
-.row>input:not([type=color]):not([type=checkbox]),.row>select{flex:1;min-width:120px}
-.seg{display:flex;background:#e5e7eb;border-radius:10px;padding:3px;margin-bottom:10px}
-.seg button{flex:1;border:0;background:none;padding:9px 6px;border-radius:8px;font-size:15px;color:var(--tx)}
-.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);font-weight:600}
-.chip{display:inline-block;color:#fff;border-radius:6px;padding:1px 7px;font-weight:600;font-size:13px}
-.mut{color:var(--mut)}.zero{color:#c4c9d1}
-.hint{color:var(--mut);font-size:14px;margin:6px 0}
-.kv{display:inline-block;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:4px;font-size:11px;font-weight:700;line-height:1.3;padding:0 4px;margin-right:5px;vertical-align:middle}
-.warn{background:#fef3c7;border:1px solid #f59e0b;padding:10px 12px;border-radius:10px;margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
-.tag{font-size:11px;background:#fde68a;border-radius:4px;padding:1px 5px;margin-left:4px;white-space:nowrap}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0e1318" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Помічник взводу</title>
+  <style>
+    /* =====================================================================
+       БАЗОВІ ЗМІННІ ТА СКИДАННЯ (100% АВТОНОМНИЙ CSS БЕЗ ЗОВНІШНІХ CDN)
+       ===================================================================== */
+    :root {
+      --bg: #0e1318;
+      --card: #161d25;
+      --card-2: #1c2530;
+      --border: #273240;
+      --text: #e8eef5;
+      --muted: #8b99a8;
+      --accent: #4d7c3f;
+      --accent-bright: #5e964d;
+      --accent-soft: rgba(94, 150, 77, 0.16);
+      --green: #10b981;
+      --blue: #3b82f6;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --cyan: #06b6d4;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --nav-h: 66px;
+    }
 
-/* day strip */
-.strip{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;margin-bottom:6px;position:relative;scrollbar-width:none}
-.strip::-webkit-scrollbar{display:none}
-.dchip{flex:0 0 auto;width:48px;border:1px solid var(--bd);background:#fff;border-radius:10px;padding:5px 0 4px;display:flex;flex-direction:column;align-items:center;font:inherit}
-.dchip small{font-size:11px;color:var(--mut)}.dchip b{font-size:18px}
-.dchip i{font-style:normal;font-size:11px;min-height:14px;color:var(--pri);font-weight:700}
-.dchip.we{background:var(--we)}.dchip.td{outline:2px solid #eab308}
-.dchip.on{background:var(--pri);color:#fff;border-color:var(--pri)}.dchip.on small,.dchip.on i{color:#fff}
-.dayhead{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px}
-.dayhead h2{margin:0}
-.duty{border-left:6px solid #888;padding:6px 10px;margin-bottom:8px;background:#fff;border-radius:8px;border:1px solid var(--bd);border-left-width:6px}
-.duty .dn{font-weight:600;margin-bottom:4px}
-.who{display:flex;justify-content:space-between;align-items:center;width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-top:4px;font:inherit;text-align:left}
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* month table */
-.tw{overflow:auto;max-height:calc(100vh - 300px);max-height:calc(100dvh - 300px);border:1px solid var(--bd);border-radius:8px;-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;background:#fff;font-size:13px}
-th,td{border:1px solid var(--bd);padding:3px 5px;text-align:center;white-space:nowrap}
-thead th{position:sticky;top:0;background:#f9fafb;z-index:3}
-td.name,th.name{text-align:left;position:sticky;left:0;background:#fff;z-index:2;max-width:130px;min-width:110px;overflow:hidden;text-overflow:ellipsis}
-thead th.name{z-index:4;background:#f9fafb}
-tr.sq td{background:#e5e7eb;font-weight:600;text-align:left}
-tr.sq td:first-child{position:sticky;left:0}
-th.day{cursor:pointer;min-width:36px;padding:2px}
-th.day small{display:block;color:var(--mut);font-weight:400;font-size:10px}
-th.we,td.we{background:var(--we)}
-th.today{background:var(--today)!important;outline:2px solid #eab308;outline-offset:-2px}
-td.cell{height:38px;min-width:36px;padding:2px}
-.sum{background:#eff6ff;font-weight:600}
-tfoot td{background:#f9fafb;font-weight:600;position:sticky;bottom:0}
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
 
-/* stats cards */
-.sumbox{display:flex;gap:8px;margin-bottom:10px}
-.sumbox div{flex:1;background:#fff;border:1px solid var(--bd);border-radius:12px;text-align:center;padding:10px 4px}
-.sumbox b{display:block;font-size:26px}.sumbox small{color:var(--mut)}
-.sqh{display:flex;justify-content:space-between;font-weight:700;margin:12px 4px 6px}
-.pc{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:10px;margin-bottom:8px}
-.pc-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.pc-h small{display:block;color:var(--mut);font-size:12px}
-.nums{display:flex;gap:12px;text-align:center}
-.nums b{display:block;font-size:20px}.nums small{font-size:11px;color:var(--mut)}
-.nums span:first-child b{color:var(--pri)}
-.mg{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:10px}
-.mg div{background:#f3f4f6;border-radius:6px;text-align:center;padding:4px 0}
-.mg div.cur{background:#dbeafe;outline:1px solid var(--pri)}
-.mg small{display:block;font-size:11px;color:var(--mut)}
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      outline: none;
+    }
 
-/* people list */
-.li{display:flex;justify-content:space-between;align-items:center;width:100%;background:#fff;border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:8px;font:inherit;text-align:left}
-.li small{display:block;color:var(--mut);font-size:13px}
+    button {
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
-/* bottom sheet */
-.ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50}
-.md{background:#fff;border-radius:18px 18px 0 0;padding:16px 14px calc(14px + env(safe-area-inset-bottom));width:100%;max-width:640px;max-height:90vh;max-height:90dvh;overflow:auto}
-.md h3{margin:0 0 4px;font-size:18px}
-.tl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-.tl button{border:3px solid transparent;border-radius:10px;padding:10px 6px;color:#fff;font-size:15px;min-height:48px}
-.tl button.sel{border-color:#111}
-#dl{max-height:42vh;max-height:42dvh;overflow:auto;border:1px solid var(--bd);border-radius:10px}
-.pr{display:flex;gap:8px;align-items:center;justify-content:space-between;width:100%;text-align:left;background:#fff;border:0;border-bottom:1px solid #eee;padding:10px;font:inherit;min-height:52px}
-.pr.as{background:#ecfdf5}.pr.bad{background:#fffbeb}
-.pr .r{text-align:right;font-size:13px;white-space:nowrap}
-.fld{display:block;margin-bottom:10px}.fld small{display:block;color:var(--mut);margin-bottom:3px}.fld input,.fld select{width:100%}
-@media(min-width:700px){.md{border-radius:18px;margin-bottom:5vh}.ov{align-items:center}}
-@media print{header,nav,.warn,.noprint,.seg{display:none!important}.tw{max-height:none;overflow:visible}body{background:#fff;padding:0}.card{border:0;padding:0}td.name,th.name,thead th,tfoot td{position:static}@page{size:landscape;margin:8mm}}
-</style>
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Головний контейнер (mobile-first) */
+    .app-shell {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: calc(var(--nav-h) + 24px);
+    }
+
+    /* Верхня шапка */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(14, 19, 24, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(94, 150, 77, 0.45);
+      color: #84cc16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Основний контент */
+    .main-content {
+      flex: 1;
+      padding: 14px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Нижня навігація */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: rgba(22, 29, 37, 0.97);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .bottom-nav-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      height: var(--nav-h);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      position: relative;
+      transition: color 0.15s;
+    }
+
+    .nav-btn.active {
+      color: #4ade80;
+    }
+
+    .nav-btn.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 22%;
+      right: 22%;
+      height: 3px;
+      border-radius: 0 0 4px 4px;
+      background: #4ade80;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 7px;
+      right: calc(50% - 21px);
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      border-radius: 999px;
+      background: var(--amber);
+      color: #111;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Картки та секції */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .card-flush {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 11px 14px;
+      background: rgba(14, 19, 24, 0.6);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Підвкладки (сегментований перемикач) */
+    .subtabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+    }
+
+    .subtab-btn {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+
+    .subtab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Горизонтальні вкладки-пілюлі */
+    .pills-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .pills-row::-webkit-scrollbar { display: none; }
+
+    .pill-btn {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+      min-height: 36px;
+    }
+
+    .pill-btn.active {
+      background: var(--card-2);
+      color: #fff;
+      border-color: var(--pill-color, #4ade80);
+      box-shadow: inset 0 0 0 1px var(--pill-color, #4ade80);
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .pill-count {
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    /* Кнопки */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 42px;
+    }
+
+    .btn-sm {
+      padding: 7px 11px;
+      font-size: 12px;
+      min-height: 34px;
+      border-radius: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .btn-primary:hover { background: var(--accent-bright); }
+
+    .btn-secondary {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #24303e; }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.14);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.22); }
+
+    .btn-danger-solid {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { color: #fff; background: var(--card-2); }
+    .btn-icon.danger {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-full { width: 100%; }
+
+    /* Поля вводу */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .input, .select, .textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 12px;
+      font-size: 14px;
+      color: #fff;
+      transition: border-color 0.15s;
+    }
+
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: var(--accent-bright);
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 84px;
+    }
+
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-wrap .input {
+      padding-left: 38px;
+      padding-right: 36px;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Чекбокс-картка */
+    .checkbox-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .checkbox-card input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #f59e0b;
+      cursor: pointer;
+    }
+
+    /* Бейджі */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-kv {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .badge-status-active { background: rgba(16, 185, 129, 0.14); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+    .badge-status-leave { background: rgba(59, 130, 246, 0.14); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+    .badge-status-medical { background: rgba(239, 68, 68, 0.14); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+    .badge-status-trip { background: rgba(245, 158, 11, 0.14); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+
+    .badge-warn {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .badge-rec {
+      background: rgba(34, 197, 94, 0.16);
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    /* Перемикач місяця */
+    .month-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px;
+    }
+
+    .month-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #fff;
+      text-align: center;
+      flex: 1;
+    }
+
+    /* Календар */
+    .cal-weekdays, .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-weekdays {
+      margin-bottom: 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .cal-weekdays .wknd { color: rgba(251, 191, 36, 0.85); }
+
+    .cal-cell {
+      min-height: 48px;
+      border-radius: 9px;
+      background: rgba(14, 19, 24, 0.65);
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 2px;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .cal-cell:hover { background: var(--card-2); }
+
+    .cal-cell.today {
+      border-color: rgba(74, 222, 128, 0.55);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .cal-cell.selected {
+      background: rgba(94, 150, 77, 0.25);
+      border-color: #4ade80;
+      box-shadow: inset 0 0 0 1px #4ade80;
+    }
+
+    .cal-day-num {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .cal-cell.today .cal-day-num { color: #4ade80; }
+
+    .cal-dots {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 3px;
+      min-height: 8px;
+      max-width: 100%;
+    }
+
+    .cal-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    /* Рядок бійця */
+    .soldier-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--sq-color, #4ade80);
+      border-bottom: 1px solid rgba(39, 50, 64, 0.65);
+      background: var(--card);
+    }
+    .soldier-row:last-child { border-bottom: none; }
+    .soldier-row.is-kv {
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, rgba(22, 29, 37, 1) 72%);
+    }
+
+    .soldier-info { min-width: 0; flex: 1; }
+
+    .soldier-name-line {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .soldier-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .soldier-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* KPI сітка */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .kpi-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Смужка навантаження */
+    .bar-track {
+      height: 5px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.25s;
+    }
+
+    /* Картка задачі */
+    .task-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--sq-color, #8b99a8);
+      border-radius: var(--radius);
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-card.status-done { opacity: 0.85; }
+
+    .task-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .task-text {
+      font-size: 14px;
+      color: #fff;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+    }
+
+    .task-card.status-done .task-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .task-status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .status-tap-btn {
+      padding: 9px 6px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      text-align: center;
+      transition: all 0.15s;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-tap-btn.active-received {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+
+    .status-tap-btn.active-done {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: #10b981;
+      color: #6ee7b7;
+    }
+
+    .status-tap-btn.active-failed {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #fca5a5;
+    }
+
+    /* Блок зауважень під задачею */
+    .note-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 9px;
+      background: rgba(14, 19, 24, 0.65);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .note-toggle-btn.has-note {
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fde68a;
+    }
+
+    .note-box {
+      background: rgba(14, 19, 24, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Палітра кольорів */
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .color-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      transition: transform 0.12s;
+    }
+
+    .color-swatch.selected {
+      border-color: #fff;
+      transform: scale(1.12);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+    }
+
+    .chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Модальні вікна */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    @media (min-width: 560px) {
+      .modal-backdrop { align-items: center; padding: 16px; }
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.18s ease-out;
+    }
+
+    @media (min-width: 560px) {
+      .modal-panel { border-radius: 18px; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Сповіщення (Toast) */
+    .toast-wrap {
+      position: fixed;
+      top: 66px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: #1d2834;
+      border: 1px solid rgba(74, 222, 128, 0.55);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      animation: slideUp 0.18s ease-out;
+    }
+
+    .toast.error {
+      background: #331619;
+      border-color: rgba(239, 68, 68, 0.6);
+      color: #fecaca;
+    }
+
+    /* Допоміжні утиліти */
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .row-gap { display: flex; align-items: center; gap: 8px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stack { display: flex; flex-direction: column; gap: 10px; }
+    .empty-state { text-align: center; padding: 26px 14px; color: var(--muted); font-size: 13px; }
+    .text-xs { font-size: 11px; }
+    .text-sm { font-size: 13px; }
+    .text-muted { color: var(--muted); }
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-<header>
-  <div class="hrow">
-    <div id="htitle"></div>
-    <div class="mnav" id="mnav">
-      <button data-act="prev" aria-label="Попередній місяць">‹</button>
-      <b id="mlabel"></b>
-      <button data-act="next" aria-label="Наступний місяць">›</button>
-      <button class="td" data-act="today">Сьогодні</button>
-    </div>
+  <div class="app-shell">
+    <!-- Верхня шапка -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">Помічник взводу</div>
+          <div class="brand-sub">Наряди • Задачі • Особовий склад</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Основний контент активної вкладки -->
+    <main id="main-content" class="main-content"></main>
+
+    <!-- Нижня фіксована навігація (4 вкладки) -->
+    <nav class="bottom-nav" aria-label="Головна навігація">
+      <div class="bottom-nav-inner">
+        <button class="nav-btn" id="nav-duties" onclick="switchTab('duties')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>Наряди</span>
+        </button>
+
+        <button class="nav-btn" id="nav-tasks" onclick="switchTab('tasks')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span>Задачі</span>
+          <span id="nav-tasks-badge" class="nav-badge hidden">0</span>
+        </button>
+
+        <button class="nav-btn" id="nav-personnel" onclick="switchTab('personnel')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Склад</span>
+        </button>
+
+        <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Налаштування</span>
+        </button>
+      </div>
+    </nav>
   </div>
-  <div class="tabs">
-    <button data-act="tab" data-tab="schedule">📅 Графік</button>
-    <button data-act="tab" data-tab="stats">📊 Облік</button>
-    <button data-act="tab" data-tab="people">👥 Склад</button>
-    <button data-act="tab" data-tab="settings">⚙️ Ще</button>
+
+  <!-- Модальне вікно -->
+  <div id="modal-root" class="modal-backdrop">
+    <div id="modal-panel" class="modal-panel"></div>
   </div>
-</header>
-<main id="app"></main>
-<div id="modal"></div>
-<div id="toast"></div>
 
-<script>
-const KEY='naryady_platoon_v1';
-const MONTHS=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
-const MGEN=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
-const MSHORT=['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
-const WD=['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
-const WDL=['Неділя','Понеділок','Вівторок','Середа','Четвер','Пʼятниця','Субота'];
-const RANKS=['солдат','старший солдат','молодший сержант','сержант','старший сержант','головний сержант','штаб-сержант','майстер-сержант','молодший лейтенант','лейтенант','старший лейтенант','капітан'];
+  <!-- Контейнер сповіщень -->
+  <div id="toast-root" class="toast-wrap"></div>
 
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pad=n=>String(n).padStart(2,'0');
-const dk=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`;
-const keyOf=dt=>dk(dt.getFullYear(),dt.getMonth(),dt.getDate());
-const dim=(y,m)=>new Date(y,m+1,0).getDate();
-const uid=()=>Math.random().toString(36).slice(2,10);
+  <!-- Прихований інпут для імпорту JSON -->
+  <input type="file" id="import-json-input" accept=".json,application/json" class="hidden" onchange="handleImportJSONFile(event)" />
 
-function defaults(){
-  return {
-    squads:[{id:'s1',name:'1 відділення'},{id:'s2',name:'2 відділення'},{id:'s3',name:'3 відділення'}],
-    people:[],
-    types:[
-      {id:'t1',name:'Черговий роти',code:'ЧР',color:'#2563eb'},
-      {id:'t2',name:'Днювальний роти',code:'ДР',color:'#d97706'}
-    ],
-    duties:{},            // { 'YYYY-MM-DD': { personId: typeId } }
-    meta:{lastBackup:null,v:2}
-  };
-}
-function normalize(o){
-  const d=Object.assign(defaults(),o);
-  d.meta=Object.assign({lastBackup:null,v:1},o.meta||{});
-  if(d.meta.v<2){
-    // перехід на два види нарядів: «Черговий роти» і «Днювальний роти»
-    const inUse=id=>Object.values(d.duties).some(m=>Object.values(m).includes(id));
-    const old={t1:'Черговий по роті',t2:'Добовий наряд',t3:'Варта',t4:'Патруль'};
-    d.types=d.types.filter(t=>!((t.id==='t3'||t.id==='t4')&&old[t.id]===t.name&&!inUse(t.id)));
-    const t1=d.types.find(t=>t.id==='t1'&&t.name===old.t1); if(t1) t1.name='Черговий роти';
-    const t2=d.types.find(t=>t.id==='t2'&&t.name===old.t2); if(t2){t2.name='Днювальний роти';t2.code='ДР';t2.color='#d97706';}
-    d.meta.v=2;
-  }
-  d.people.forEach(p=>{p.name=cap(p.name);p.cmd=!!p.cmd;});
-  return d;
-}
-function load(){
-  try{const r=localStorage.getItem(KEY); if(r){const d=normalize(JSON.parse(r)); try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){} return d;}}catch(e){}
-  return defaults();
-}
-function save(){
-  try{localStorage.setItem(KEY,JSON.stringify(S));}
-  catch(e){toast('Не вдалося зберегти дані: '+e.message);}
-}
-/* повідомлення та підтвердження всередині програми (системні вікна на телефонах працюють не скрізь) */
-let toastT=null,TU=null,CB=null;
-function toast(msg,label,fn){
-  const el=$('#toast'); if(!el) return; clearTimeout(toastT);
-  el.innerHTML=`<span>${esc(msg)}</span>`+(label?`<button data-act="toastUndo">${esc(label)}</button>`:'');
-  el.style.display='flex'; TU=fn||null;
-  toastT=setTimeout(()=>{el.style.display='none';TU=null;},label?7000:4000);
-}
-function confirmBox(text,yesLabel,yes,no){
-  CB={yes,no};
-  modal(`<h3>${esc(text)}</h3><div class="row" style="margin-top:16px"><button class="b red" data-act="cbYes" style="flex:1">${esc(yesLabel)}</button><button class="b gray" data-act="cbNo" style="flex:1">Скасувати</button></div>`);
-}
-function removeDuty(pid,date){
-  const p=person(pid),tid=dutyOn(pid,date); if(!tid) return;
-  setDuty(pid,date,null);
-  toast(`Знято з наряду: ${p?p.name:''}`,'Скасувати',()=>{setDuty(pid,date,tid);render();});
-}
-let S=load();
-const now=new Date();
-const V={tab:S.people.length?'schedule':'people',sched:'day',sort:'squad',open:{},year:now.getFullYear(),month:now.getMonth(),day:now.getDate()};
-let DA=null;
+  <script>
+    // =========================================================================
+    // КОНСТАНТИ ТА БАЗОВІ ДОВІДНИКИ
+    // =========================================================================
+    const STORAGE_KEY = 'pomichnyk_vzvodu_v3';
 
-const person=id=>S.people.find(p=>p.id===id);
-const type=id=>S.types.find(t=>t.id===id);
-const squad=id=>S.squads.find(s=>s.id===id);
-const sqIdx=id=>S.squads.findIndex(s=>s.id===id);
-const sortedPeople=()=>[...S.people].sort((a,b)=>sqIdx(a.squad)-sqIdx(b.squad)||(!!b.cmd-!!a.cmd)||a.name.localeCompare(b.name,'uk'));
-// Кожне слово імені з великої літери (після пробілу або дефіса): «іваненко-петренко петро» → «Іваненко-Петренко Петро»
-const cap=s=>String(s||'').trim().replace(/\s+/g,' ').replace(/(^|[\s-])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase());
-const kv=p=>p.cmd?'<span class="kv">КВ</span>':'';
-function setCmd(p,on){ if(on) S.people.forEach(x=>{if(x.squad===p.squad&&x.id!==p.id) x.cmd=false;}); p.cmd=!!on; }
-const nz=n=>n?n:`<span class="zero">0</span>`;
-const clampDay=()=>{V.day=Math.max(1,Math.min(V.day,dim(V.year,V.month)));};
-function setMonth(){const c=V.year===now.getFullYear()&&V.month===now.getMonth();V.day=c?now.getDate():1;}
+    const MONTHS_UK = [
+      'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+      'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
+    ];
 
-function buildIndex(){
-  const byMonth={},byType={},total={};
-  for(const [date,m] of Object.entries(S.duties)){
-    const ym=date.slice(0,7);
-    for(const [pid,tid] of Object.entries(m)){
-      byMonth[pid]=byMonth[pid]||{}; byMonth[pid][ym]=(byMonth[pid][ym]||0)+1;
-      total[pid]=(total[pid]||0)+1;
-      const k=pid+'|'+ym; byType[k]=byType[k]||{}; byType[k][tid]=(byType[k][tid]||0)+1;
+    const MONTHS_GEN_UK = [
+      'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+      'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'
+    ];
+
+    const WEEKDAYS_UK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+
+    const SQUAD_PALETTE = [
+      '#10b981', // Смарагдовий (1-ше відділення)
+      '#3b82f6', // Синій (2-ге відділення)
+      '#f59e0b', // Бурштиновий (3-тє відділення)
+      '#a855f7', // Фіолетовий
+      '#06b6d4', // Бірюзовий
+      '#f43f5e', // Малиновий
+      '#84cc16', // Лаймовий
+      '#ec4899'  // Рожевий
+    ];
+
+    const STATUS_LIST = [
+      { id: 'active', label: 'В строю', cls: 'badge-status-active' },
+      { id: 'leave', label: 'Відпустка', cls: 'badge-status-leave' },
+      { id: 'medical', label: 'Лікування', cls: 'badge-status-medical' },
+      { id: 'trip', label: 'Відрядження', cls: 'badge-status-trip' }
+    ];
+
+    const DEFAULT_SQUADS = [
+      { id: 'sq_1', name: '1-ше відділення', color: '#10b981' },
+      { id: 'sq_2', name: '2-ге відділення', color: '#3b82f6' },
+      { id: 'sq_3', name: '3-тє відділення', color: '#f59e0b' }
+    ];
+
+    const DEFAULT_DUTY_TYPES = [
+      { id: 'dt_1', name: 'Черговий' },
+      { id: 'dt_2', name: 'Днювальний' },
+      { id: 'dt_3', name: 'КПП' },
+      { id: 'dt_4', name: 'Патруль' }
+    ];
+
+    // =========================================================================
+    // СТАН ДАНИХ ТА UI (БЕЗ ЖОДНИХ ДЕМО-ЗАПИСІВ)
+    // =========================================================================
+    let state = {
+      squads: [],       // [{ id, name, color }]
+      soldiers: [],     // [{ id, name, rank, squadId, isCommander, status }]
+      dutyTypes: [],    // [{ id, name }]
+      duties: [],       // [{ id, date: 'YYYY-MM-DD', soldierId, dutyTypeId }]
+      tasks: [],        // [{ id, targetType: 'squad'|'all_commanders', targetSquadId, text, issuer, deadline, status, note, createdAt }]
+      lastBackupAt: null
+    };
+
+    const nowDate = new Date();
+    let ui = {
+      activeTab: 'duties',        // 'duties' | 'tasks' | 'personnel' | 'settings'
+      dutiesSubTab: 'schedule',   // 'schedule' | 'stats'
+      year: nowDate.getFullYear(),
+      month: nowDate.getMonth(),
+      selectedDate: toISODate(nowDate),
+      scheduleSquadFilter: 'all',
+      statsSquadFilter: 'all',
+      statsSort: 'month_desc',    // 'month_desc' | 'month_asc' | 'total_desc' | 'alpha'
+      personnelSquadFilter: 'all',
+      personnelSearch: '',
+      tasksTargetFilter: 'all',   // 'all' | squadId
+      tasksStatusFilter: 'all',   // 'all' | 'active' | 'done' | 'failed'
+      openNotes: {}
+    };
+
+    let assignModal = {
+      date: '',
+      dutyTypeId: ''
+    };
+
+    // =========================================================================
+    // УТИЛІТИ
+    // =========================================================================
+    function genId(prefix = 'id') {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
     }
-  }
-  return {byMonth,byType,total};
-}
-function setDuty(pid,date,tid){
-  if(!tid){ if(S.duties[date]){delete S.duties[date][pid]; if(!Object.keys(S.duties[date]).length) delete S.duties[date];} }
-  else { S.duties[date]=S.duties[date]||{}; S.duties[date][pid]=tid; }
-  save();
-}
-const dutyOn=(pid,date)=>(S.duties[date]||{})[pid];
-const fmtDate=k=>{const [y,m,d]=k.split('-').map(Number);return `${d} ${MGEN[m-1]} ${y}`;};
 
-/* ---------- render ---------- */
-function render(){
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===V.tab));
-  const showNav=(V.tab==='schedule'||V.tab==='stats');
-  $('#mnav').style.display=showNav?'flex':'none';
-  $('#htitle').style.display=showNav?'none':'block';
-  $('#htitle').textContent={people:'Особовий склад',settings:'Налаштування'}[V.tab]||'';
-  $('#mlabel').textContent=`${MONTHS[V.month]} ${V.year}`;
-  clampDay();
-  const f={schedule:renderSchedule,stats:renderStats,people:renderPeople,settings:renderSettings}[V.tab];
-  const sc=$('.tw'); const st=sc?[sc.scrollTop,sc.scrollLeft]:null;
-  const pageY=window.scrollY;
-  $('#app').innerHTML=backupBanner()+f();
-  const sc2=$('.tw'); if(st&&sc2){sc2.scrollTop=st[0];sc2.scrollLeft=st[1];}
-  const strip=$('.strip'),on=$('.dchip.on');
-  if(strip&&on) strip.scrollLeft=on.offsetLeft-strip.clientWidth/2+on.clientWidth/2;
-  window.scrollTo(0,pageY);
-}
-function backupBanner(){
-  if(!Object.keys(S.duties).length) return '';
-  const lb=S.meta.lastBackup?new Date(S.meta.lastBackup):null;
-  if(lb && (Date.now()-lb.getTime())<7*864e5) return '';
-  return `<div class="warn noprint"><div style="flex:1">⚠️ Дані зберігаються лише в цьому браузері. ${lb?'Остання копія: '+lb.toLocaleDateString('uk-UA'):'Резервної копії ще не було.'}</div>
-    <button class="b" data-act="share">Зберегти копію</button></div>`;
-}
+    function toISODate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
 
-function renderSchedule(){
-  if(!S.people.length) return `<div class="card"><h2>Спочатку додайте особовий склад</h2><button class="b full" data-act="tab" data-tab="people">Перейти до складу</button></div>`;
-  const seg=`<div class="seg"><button data-act="sview" data-v="day" class="${V.sched==='day'?'on':''}">День</button><button data-act="sview" data-v="month" class="${V.sched==='month'?'on':''}">Таблиця місяця</button></div>`;
-  return seg+(V.sched==='day'?renderDayView():renderMonthTable());
-}
+    function toDateTimeHuman(d) {
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}.${mm}.${yyyy} о ${hh}:${min}`;
+    }
 
-function renderDayView(){
-  const {year:y,month:m}=V,n=dim(y,m),todayK=keyOf(new Date()),date=dk(y,m,V.day);
-  let h=`<div class="strip">`;
-  for(let d=1;d<=n;d++){
-    const k=dk(y,m,d),wd=new Date(y,m,d).getDay(),c=Object.keys(S.duties[k]||{}).length;
-    h+=`<button class="dchip ${d===V.day?'on':''} ${(wd===0||wd===6)?'we':''} ${k===todayK?'td':''}" data-act="pickday" data-d="${d}"><small>${WD[wd]}</small><b>${d}</b><i>${c||''}</i></button>`;
-  }
-  h+=`</div>`;
-  const wd=new Date(y,m,V.day).getDay(),day=S.duties[date]||{};
-  h+=`<div class="dayhead"><h2>${WDL[wd]}, ${V.day} ${MGEN[m]}</h2><span class="mut">${Object.keys(day).length} в наряді</span></div>`;
-  let any=false;
-  for(const t of S.types){
-    const ids=Object.keys(day).filter(pid=>day[pid]===t.id&&person(pid));
-    if(!ids.length) continue; any=true;
-    ids.sort((a,b)=>person(a).name.localeCompare(person(b).name,'uk'));
-    h+=`<div class="duty" style="border-left-color:${esc(t.color)}"><div class="dn"><span class="chip" style="background:${esc(t.color)}">${esc(t.code)}</span> ${esc(t.name)} <span class="mut">(${ids.length})</span></div>`+
-      ids.map(pid=>{const p=person(pid);return `<div class="whor"><button class="who" data-act="openCell" data-p="${pid}" data-date="${date}"><span><b>${kv(p)}${esc(p.name)}</b><br><small class="mut">${esc(p.rank)} · ${esc(squad(p.squad)?.name||'')}</small></span><span class="mut">змінити ›</span></button><button class="x" data-act="rmDuty" data-p="${pid}" data-date="${date}" aria-label="Зняти з наряду" title="Зняти з наряду">✕</button></div>`;}).join('')+`</div>`;
-  }
-  if(!any) h+=`<div class="card mut" style="text-align:center">На цей день нарядів ще немає</div>`;
-  h+=`<button class="b full" data-act="openDay" data-date="${date}">＋ Призначити в наряд</button>`;
-  return h;
-}
+    function addDaysISO(iso, delta) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return toISODate(new Date(y, m - 1, d + delta));
+    }
 
-function renderMonthTable(){
-  const idx=buildIndex(),{year:y,month:m}=V,n=dim(y,m),ym=`${y}-${pad(m+1)}`,todayK=keyOf(new Date());
-  let h=`<div class="card" style="padding:8px"><div class="legend row">`+
-    S.types.map(t=>`<span><span class="chip" style="background:${esc(t.color)}">${esc(t.code)}</span> <small>${esc(t.name)}</small></span>`).join('')+`</div>
-    <div class="hint" style="margin-top:0">Торкніться клітинки — призначити. Торкніться дати — відкрити день.</div>`;
-  h+=`<div class="tw"><table><thead><tr><th class="name">Військовослужбовець</th>`;
-  for(let d=1;d<=n;d++){
-    const wd=new Date(y,m,d).getDay(),we=wd===0||wd===6,k=dk(y,m,d);
-    h+=`<th class="day ${we?'we':''} ${k===todayK?'today':''}" data-day="${d}"><div>${d}</div><small>${WD[wd]}</small></th>`;
-  }
-  h+=`<th class="sum">Міс.</th><th class="sum">Всього</th></tr></thead><tbody>`;
-  const perDay=Array(n+1).fill(0);
-  for(const sq of S.squads){
-    const ps=sortedPeople().filter(p=>p.squad===sq.id&&(p.active||(idx.byMonth[p.id]?.[ym]||0)>0));
-    if(!ps.length) continue;
-    h+=`<tr class="sq"><td colspan="${n+3}">${esc(sq.name)} <span class="mut">(${ps.length})</span></td></tr>`;
-    for(const p of ps){
-      h+=`<tr><td class="name"><b>${kv(p)}${esc(p.name)}</b>${p.active?'':' <i class="mut">(вибув)</i>'}</td>`;
-      for(let d=1;d<=n;d++){
-        const wd=new Date(y,m,d).getDay(),we=wd===0||wd===6,tid=dutyOn(p.id,dk(y,m,d)),t=tid&&type(tid);
-        if(tid) perDay[d]++;
-        h+=`<td class="cell ${we?'we':''}" data-p="${p.id}" data-d="${dk(y,m,d)}">${tid?(t?`<span class="chip" style="background:${esc(t.color)}" title="${esc(t.name)}">${esc(t.code)}</span>`:'?'):''}</td>`;
+    function diffDaysISO(isoA, isoB) {
+      const [ya, ma, da] = isoA.split('-').map(Number);
+      const [yb, mb, db] = isoB.split('-').map(Number);
+      return Math.round((Date.UTC(ya, ma - 1, da) - Date.UTC(yb, mb - 1, db)) / 86400000);
+    }
+
+    function formatDateHuman(iso) {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-').map(Number);
+      return `${d} ${MONTHS_GEN_UK[m - 1]} ${y}`;
+    }
+
+    function formatDateShort(iso) {
+      if (!iso) return 'Не було';
+      const [y, m, d] = iso.split('-').map(Number);
+      return `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`;
+    }
+
+    function formatDeadline(val) {
+      if (!val) return '';
+      const [datePart, timePart] = val.split('T');
+      const [y, m, d] = datePart.split('-').map(Number);
+      const base = `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`;
+      return timePart ? `${base} о ${timePart.slice(0, 5)}` : base;
+    }
+
+    function getMonthPrefix(year, month) {
+      return `${year}-${String(month + 1).padStart(2, '0')}`;
+    }
+
+    function esc(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Автоматична велика літера для кожного слова та ініціалів у ПІБ
+    function formatFullName(raw) {
+      if (!raw) return '';
+      return raw
+        .trim()
+        .replace(/\s+/g, ' ')
+        .split(' ')
+        .map(word =>
+          word
+            .split('-')
+            .map(part =>
+              part
+                .split('.')
+                .map(seg => seg ? seg.charAt(0).toUpperCase() + seg.slice(1) : '')
+                .join('.')
+            )
+            .join('-')
+        )
+        .join(' ');
+    }
+
+    // Живе переведення першої літери кожного слова у верхній регістр під час вводу
+    function capitalizeLive(inputEl) {
+      const pos = inputEl.selectionStart;
+      const val = inputEl.value;
+      const formatted = val.replace(/(^|[\s\-\.])([a-zа-яіїєґ])/g, (m, sep, ch) => sep + ch.toUpperCase());
+      if (formatted !== val) {
+        inputEl.value = formatted;
+        try { inputEl.setSelectionRange(pos, pos); } catch (e) {}
       }
-      h+=`<td class="sum">${idx.byMonth[p.id]?.[ym]||0}</td><td class="sum">${idx.total[p.id]||0}</td></tr>`;
     }
-  }
-  h+=`</tbody><tfoot><tr><td class="name">В наряді</td>`;
-  let sumAll=0; for(let d=1;d<=n;d++){sumAll+=perDay[d]; h+=`<td>${perDay[d]||''}</td>`;}
-  h+=`<td class="sum">${sumAll}</td><td></td></tr></tfoot></table></div>
-   <div class="row noprint" style="margin-top:8px"><button class="b gray" data-act="print">🖨 Друк</button></div></div>`;
-  return h;
-}
 
-function statsData(){
-  const idx=buildIndex();
-  const rows=sortedPeople().filter(p=>p.active||(idx.total[p.id]||0)>0);
-  return {idx,rows};
-}
-function renderStats(){
-  const {idx,rows}=statsData(),y=V.year,ym=`${y}-${pad(V.month+1)}`;
-  if(!rows.length) return `<div class="card">Немає даних. Додайте особовий склад.</div>`;
-  const mc=p=>idx.byMonth[p.id]?.[ym]||0;
-  const yc=p=>{let s=0;for(let i=0;i<12;i++)s+=idx.byMonth[p.id]?.[`${y}-${pad(i+1)}`]||0;return s;};
-  const ac=p=>idx.total[p.id]||0;
-  const sum=(ps,f)=>ps.reduce((a,p)=>a+f(p),0);
-  const card=p=>{
-    let ex='';
-    if(V.open[p.id]){
-      ex=`<div class="mg">`+MSHORT.map((s,i)=>{const c=idx.byMonth[p.id]?.[`${y}-${pad(i+1)}`]||0;return `<div class="${i===V.month?'cur':''}"><small>${s}</small><b>${c}</b></div>`;}).join('')+`</div>`;
-      const bt=idx.byType[p.id+'|'+ym]||{};
-      const parts=S.types.filter(t=>bt[t.id]).map(t=>`<span class="chip" style="background:${esc(t.color)}">${esc(t.code)} × ${bt[t.id]}</span>`).join(' ');
-      ex+=`<div class="hint">${MONTHS[V.month]}: ${parts||'нарядів не було'}</div>`;
+    // Копіювання в буфер обміну через document.execCommand('copy')
+    function copyToClipboard(text, successMsg = 'Скопійовано у буфер обміну') {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '-9999px';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) {
+          showToast(successMsg);
+          return true;
+        }
+      } catch (e) {}
+      showToast('Не вдалося скопіювати текст', 'error');
+      return false;
     }
-    return `<div class="pc" data-act="togglep" data-id="${p.id}"><div class="pc-h"><div><b>${kv(p)}${esc(p.name)}</b>${p.active?'':' <i class="mut">(вибув)</i>'}<small>${esc(p.rank)}${p.rank?' · ':''}${esc(squad(p.squad)?.name||'')}</small></div>
-      <div class="nums"><span><b>${mc(p)}</b><small>міс.</small></span><span><b>${yc(p)}</b><small>${y}</small></span><span><b>${ac(p)}</b><small>всього</small></span></div></div>${ex}</div>`;
-  };
-  let h=`<div class="sumbox"><div><b>${sum(rows,mc)}</b><small>за ${MSHORT[V.month].toLowerCase()}</small></div><div><b>${sum(rows,yc)}</b><small>за ${y}</small></div><div><b>${sum(rows,ac)}</b><small>всього</small></div></div>
-    <div class="seg"><button data-act="sortmode" data-v="squad" class="${V.sort==='squad'?'on':''}">По відділеннях</button><button data-act="sortmode" data-v="least" class="${V.sort==='least'?'on':''}">Найменше нарядів</button></div>`;
-  if(V.sort==='least'){
-    const l=[...rows].sort((a,b)=>mc(a)-mc(b)||ac(a)-ac(b)||a.name.localeCompare(b.name,'uk'));
-    h+=`<div class="hint">Сортування: за місяць, потім за весь час — зверху ті, кому йти в наряд найдоречніше.</div>`+l.map(card).join('');
-  } else {
-    for(const sq of S.squads){
-      const ps=rows.filter(p=>p.squad===sq.id); if(!ps.length) continue;
-      h+=`<div class="sqh"><span>${esc(sq.name)}</span><span class="mut">${sum(ps,mc)} · ${sum(ps,yc)} · ${sum(ps,ac)}</span></div>`+ps.map(card).join('');
+
+    function getStatusObj(id) {
+      return STATUS_LIST.find(s => s.id === id) || STATUS_LIST[0];
     }
-    h+=`<div class="hint">У заголовку відділення: місяць · рік · всього. Торкніться картки, щоб побачити розбивку по місяцях.</div>`;
-  }
-  h+=`<div class="row noprint" style="margin-top:10px"><button class="b gray" data-act="csv">⬇ CSV (Excel)</button></div>`;
-  return h;
-}
 
-function renderPeople(){
-  let h=`<div class="card"><h2>Додати військовослужбовця</h2>
-    <label class="fld"><small>Звання</small><input id="np-rank" list="ranks" placeholder="напр. сержант"></label>
-    <datalist id="ranks">${RANKS.map(r=>`<option value="${r}">`).join('')}</datalist>
-    <label class="fld"><small>Прізвище Ім'я</small><input id="np-name" placeholder="Прізвище Ім'я" autocapitalize="words"></label>
-    <label class="fld"><small>Відділення</small><select id="np-squad">${S.squads.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></label>
-    <label class="row" style="margin:4px 0 12px"><input type="checkbox" id="np-cmd"> Командир відділення</label>
-    <button class="b full" data-act="addPerson">Додати</button></div>`;
-  if(S.people.length){
-    const idx=buildIndex();
-    h+=`<h2 style="margin:14px 4px 8px">Склад (${S.people.length})</h2>`;
-    for(const sq of S.squads){
-      const ps=sortedPeople().filter(p=>p.squad===sq.id); if(!ps.length) continue;
-      h+=`<div class="sqh"><span>${esc(sq.name)}</span><span class="mut">${ps.length} осіб</span></div>`+
-        ps.map(p=>`<button class="li" data-act="openPerson" data-id="${p.id}"><span><b>${kv(p)}${esc(p.name)}</b>${p.active?'':'<span class="tag">вибув</span>'}<small>${esc(p.rank)||'—'}</small></span><span class="mut">нарядів: ${idx.total[p.id]||0} ›</span></button>`).join('');
+    function getSquadById(id) {
+      return state.squads.find(s => s.id === id) || { id, name: 'Без відділення', color: '#64748b' };
     }
-    h+=`<p class="hint">Торкніться людини, щоб змінити дані, перевести в інше відділення або позначити «вибув» (історія нарядів збережеться).</p>`;
-  }
-  return h;
-}
 
-function renderSettings(){
-  let h=`<div class="card"><h2>Відділення</h2>`;
-  for(const s of S.squads) h+=`<div class="row"><input data-sf="name" data-id="${s.id}" value="${esc(s.name)}"><button class="b red" data-act="delSquad" data-id="${s.id}">✕</button></div>`;
-  h+=`<div class="row"><input id="ns-name" placeholder="Нове відділення"><button class="b" data-act="addSquad">Додати</button></div></div>`;
-  h+=`<div class="card"><h2>Види нарядів</h2>`;
-  for(const t of S.types) h+=`<div class="row"><input data-tf="name" data-id="${t.id}" value="${esc(t.name)}" placeholder="Назва" style="min-width:100%"><input data-tf="code" data-id="${t.id}" value="${esc(t.code)}" style="max-width:90px;min-width:70px" maxlength="4" placeholder="Код"><input type="color" data-tf="color" data-id="${t.id}" value="${esc(t.color)}"><button class="b red" data-act="delType" data-id="${t.id}" style="margin-left:auto">✕</button></div><hr style="border:0;border-top:1px solid #eee;margin:6px 0">`;
-  h+=`<div class="row"><input id="nt-name" placeholder="Новий наряд: назва" style="min-width:100%"><input id="nt-code" placeholder="Код" maxlength="4" style="max-width:90px;min-width:70px"><input type="color" id="nt-color" value="#7c3aed"><button class="b" data-act="addType" style="margin-left:auto">Додати</button></div></div>`;
-  h+=`<div class="card"><h2>Дані та резервні копії</h2>
-    <button class="b full" data-act="share" style="margin-bottom:8px">⬆ Зберегти / надіслати резервну копію</button>
-    <button class="b gray full" data-act="importBtn" style="margin-bottom:8px">⬇ Відновити з копії</button>
-    <input type="file" id="imp" accept=".json,application/json" style="display:none">
-    <button class="b red full" data-act="wipe">Стерти всі дані</button>
-    <p class="hint">Усі дані зберігаються лише в браузері цього телефону. Якщо очистити дані браузера або втратити телефон, вони зникнуть — тому робіть резервну копію (її можна надіслати собі в месенджер або покласти у файли) і відновлювати з неї на будь-якому пристрої.</p></div>`;
-  h+=`<p class="hint" style="text-align:center">Версія програми: 3 · 19.11.2026</p>`;
-  return h;
-}
+    // Коротка назва вкладки: "1 відд.", "2 відд.", "3 відд."
+    function getSquadTabLabel(sq) {
+      if (!sq) return 'Відд.';
+      const m = sq.name.match(/^(\d+)/);
+      if (m) return `${m[1]} відд.`;
+      return sq.name.length > 11 ? sq.name.slice(0, 10) + '…' : sq.name;
+    }
 
-/* ---------- sheets ---------- */
-function modal(html){ $('#modal').innerHTML=`<div class="ov"><div class="md">${html}</div></div>`; }
-function closeModal(){ $('#modal').innerHTML=''; DA=null; CB=null; render(); }
+    // Формат адресата задачі: "Командиру 1-го відділення", "Командиру 2-го відділення" тощо
+    function formatCommanderTargetLabel(sq) {
+      if (!sq) return 'Командиру відділення';
+      const m = sq.name.match(/^(\d+)/);
+      if (m) return `Командиру ${m[1]}-го відділення`;
+      return `Командиру (${sq.name})`;
+    }
 
-function openCell(pid,date){
-  const p=person(pid),cur=dutyOn(pid,date);
-  const [y,m,d]=date.split('-').map(Number);
-  const yest=dutyOn(pid,keyOf(new Date(y,m-1,d-1))),tom=dutyOn(pid,keyOf(new Date(y,m-1,d+1)));
-  let h=`<h3>${esc(p.name)}</h3><div class="mut">${fmtDate(date)}</div>`;
-  if(yest||tom) h+=`<div class="warn" style="margin:8px 0 0">${yest?'Вчора вже був у наряді. ':''}${tom?'Завтра вже в наряді.':''}</div>`;
-  if(cur) h+=`<button class="b red full" data-act="clearCell" data-p="${pid}" data-date="${date}" style="margin-top:10px">✕ Зняти наряд</button><div class="hint" style="margin:10px 0 0">Або оберіть інший вид наряду:</div>`;
-  h+=`<div class="tl">`+S.types.map(t=>`<button class="${t.id===cur?'sel':''}" style="background:${esc(t.color)}" data-act="setCell" data-p="${pid}" data-date="${date}" data-t="${t.id}">${esc(t.code)} — ${esc(t.name)}</button>`).join('')+`</div>
-   <button class="b gray full" data-act="closeModal">Закрити</button>`;
-  modal(h);
-}
+    function getSoldierById(id) {
+      return state.soldiers.find(s => s.id === id);
+    }
 
-function openDay(date){ DA={date,tid:S.types[0]?.id,squad:'all'}; renderDay(); }
-function renderDay(){
-  const idx=buildIndex(),date=DA.date,ym=date.slice(0,7);
-  const [y,m,d]=date.split('-').map(Number);
-  const pk=keyOf(new Date(y,m-1,d-1)),nk=keyOf(new Date(y,m-1,d+1)),day=S.duties[date]||{};
-  const list=S.people.filter(p=>p.active&&(DA.squad==='all'||p.squad===DA.squad)).map(p=>({p,as:day[p.id],yest:!!(S.duties[pk]||{})[p.id],tom:!!(S.duties[nk]||{})[p.id],mc:idx.byMonth[p.id]?.[ym]||0,tot:idx.total[p.id]||0}));
-  list.sort((a,b)=>(!!a.as-!!b.as)||(a.yest-b.yest)||(a.tom-b.tom)||a.mc-b.mc||a.tot-b.tot||a.p.name.localeCompare(b.p.name,'uk'));
-  const old=$('#dl'),st=old?old.scrollTop:0;
-  let h=`<h3>Наряд на ${fmtDate(date)}</h3><div class="hint" style="margin-top:2px">Оберіть вид наряду, потім торкайтесь людей. Зверху — ті, хто ходив найменше (за місяць, потім за весь час). Повторний дотик прибирає наряд.</div>
-   <div class="tl">`+S.types.map(t=>`<button class="${t.id===DA.tid?'sel':''}" style="background:${esc(t.color)}" data-act="dtype" data-t="${t.id}">${esc(t.code)} — ${esc(t.name)}</button>`).join('')+`</div>
-   <div class="row"><select data-bind="dsq"><option value="all">Всі відділення</option>${S.squads.map(s=>`<option value="${s.id}" ${DA.squad===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
-   <div id="dl">`;
-  for(const r of list){
-    const t=r.as&&type(r.as);
-    h+=`<button class="pr ${r.as?'as':(r.yest||r.tom)?'bad':''}" data-act="assign" data-p="${r.p.id}">
-      <span><b>${kv(r.p)}${esc(r.p.name)}</b><br><small class="mut">${esc(squad(r.p.squad)?.name||'')}</small>${r.yest?'<span class="tag">вчора</span>':''}${r.tom?'<span class="tag">завтра</span>':''}</span>
-      <span class="r">${t?`<span class="chip" style="background:${esc(t.color)}">${esc(t.code)}</span><br>`:''}<span class="mut">міс: ${r.mc} · всього: ${r.tot}</span></span></button>`;
-  }
-  if(!list.length) h+=`<div class="hint" style="padding:10px">Немає людей.</div>`;
-  h+=`</div><div class="row" style="margin-top:12px"><button class="b full" data-act="closeModal">Готово</button></div>`;
-  modal(h); const nl=$('#dl'); if(nl) nl.scrollTop=st;
-  render();
-}
+    function getDutyTypeById(id) {
+      return state.dutyTypes.find(d => d.id === id) || { id, name: 'Наряд' };
+    }
 
-function openPerson(id){
-  const p=person(id);
-  modal(`<h3>Редагування</h3>
-   <label class="fld"><small>Звання</small><input id="pe-rank" list="ranks" value="${esc(p.rank)}"></label>
-   <datalist id="ranks">${RANKS.map(r=>`<option value="${r}">`).join('')}</datalist>
-   <label class="fld"><small>Прізвище Ім'я</small><input id="pe-name" value="${esc(p.name)}" autocapitalize="words"></label>
-   <label class="fld"><small>Відділення</small><select id="pe-squad">${S.squads.map(s=>`<option value="${s.id}" ${s.id===p.squad?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
-   <label class="row" style="margin:6px 0"><input type="checkbox" id="pe-cmd" ${p.cmd?'checked':''}> Командир відділення</label>
-   <label class="row" style="margin:6px 0 14px"><input type="checkbox" id="pe-active" ${p.active?'checked':''}> В строю (зніміть, якщо вибув)</label>
-   <div class="row"><button class="b" data-act="savePerson" data-id="${id}" style="flex:1">Зберегти</button><button class="b gray" data-act="closeModal" style="flex:1">Скасувати</button></div>
-   <button class="b red full" data-act="delPerson" data-id="${id}">Видалити з усіма нарядами</button>`);
-}
+    function getSquadCommander(squadId) {
+      return state.soldiers.find(s => s.squadId === squadId && s.isCommander) || null;
+    }
 
-/* ---------- export / import ---------- */
-function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);}
-function markBackup(){S.meta.lastBackup=new Date().toISOString();save();render();}
-function backupBlob(){return new Blob([JSON.stringify(S,null,2)],{type:'application/json'});}
-const backupName=()=>`naryady_backup_${keyOf(new Date())}.json`;
-async function shareBackup(){
-  const file=new File([backupBlob()],backupName(),{type:'application/json'});
-  if(navigator.canShare&&navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],title:'Резервна копія нарядів'});markBackup();return;}
-    catch(e){if(e&&e.name==='AbortError')return;}
-  }
-  download(backupName(),backupBlob()); markBackup();
-}
-function exportCSV(){
-  const {idx,rows}=statsData(),y=V.year;
-  const q=v=>`"${String(v).replace(/"/g,'""')}"`;
-  const lines=[['№','Звання','ПІБ','Відділення',...MONTHS,`За ${y}`,'Всього'].map(q).join(';')];
-  rows.forEach((p,i)=>{
-    const ms=MONTHS.map((_,k)=>idx.byMonth[p.id]?.[`${y}-${pad(k+1)}`]||0),ys=ms.reduce((a,b)=>a+b,0);
-    lines.push([i+1,p.rank,p.name,squad(p.squad)?.name||'',...ms,ys,idx.total[p.id]||0].map(q).join(';'));
-  });
-  download(`oblik_naryadiv_${y}.csv`,new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));
-}
-function importJSON(file){
-  const r=new FileReader();
-  r.onload=()=>{
-    try{
-      const o=JSON.parse(r.result);
-      if(!Array.isArray(o.people)||!Array.isArray(o.squads)||!Array.isArray(o.types)||typeof o.duties!=='object') throw new Error('Невірний формат файлу');
-      confirmBox('Поточні дані буде замінено даними з файлу. Продовжити?','Замінити',()=>{S=normalize(o);save();closeModal();toast('Дані відновлено з копії');});
-    }catch(e){toast('Не вдалося завантажити: '+e.message);}
-  };
-  r.readAsText(file);
-}
-
-/* ---------- actions ---------- */
-function act(a,ds){
-  switch(a){
-    case 'tab': V.tab=ds.tab; render(); window.scrollTo(0,0); break;
-    case 'prev': V.month--; if(V.month<0){V.month=11;V.year--;} setMonth(); render(); break;
-    case 'next': V.month++; if(V.month>11){V.month=0;V.year++;} setMonth(); render(); break;
-    case 'today': V.year=now.getFullYear(); V.month=now.getMonth(); V.day=now.getDate(); render(); break;
-    case 'sview': V.sched=ds.v; render(); break;
-    case 'pickday': V.day=+ds.d; render(); break;
-    case 'sortmode': V.sort=ds.v; render(); break;
-    case 'togglep': V.open[ds.id]=!V.open[ds.id]; render(); break;
-    case 'print': window.print(); break;
-    case 'closeModal': closeModal(); break;
-    case 'openCell': openCell(ds.p,ds.date); break;
-    case 'openDay': openDay(ds.date); break;
-    case 'openPerson': openPerson(ds.id); break;
-    case 'setCell': setDuty(ds.p,ds.date,ds.t); closeModal(); break;
-    case 'clearCell': removeDuty(ds.p,ds.date); closeModal(); break;
-    case 'rmDuty': removeDuty(ds.p,ds.date); render(); break;
-    case 'toastUndo': { const f=TU; TU=null; $('#toast').style.display='none'; if(f) f(); break; }
-    case 'cbYes': { const f=CB&&CB.yes; CB=null; if(f) f(); break; }
-    case 'cbNo': { const f=CB&&CB.no; CB=null; if(f) f(); else closeModal(); break; }
-    case 'dtype': DA.tid=ds.t; renderDay(); break;
-    case 'assign':
-      if(!DA.tid) return;
-      if(dutyOn(ds.p,DA.date)===DA.tid) setDuty(ds.p,DA.date,null); else setDuty(ds.p,DA.date,DA.tid);
-      renderDay(); break;
-    case 'addPerson': {
-      const name=cap($('#np-name').value); if(!name){$('#np-name').focus();return;}
-      const sq=$('#np-squad').value,rk=$('#np-rank').value.trim(),isCmd=$('#np-cmd').checked;
-      const np={id:uid(),rank:rk,name,squad:sq,active:true,cmd:false};
-      S.people.push(np); setCmd(np,isCmd);
-      save(); render(); $('#np-squad').value=sq; $('#np-rank').value=rk; $('#np-name').focus(); break; }
-    case 'savePerson': {
-      const p=person(ds.id),name=cap($('#pe-name').value); if(!name){$('#pe-name').focus();return;}
-      p.name=name; p.rank=$('#pe-rank').value.trim(); p.squad=$('#pe-squad').value; p.active=$('#pe-active').checked;
-      setCmd(p,$('#pe-cmd').checked);
-      save(); closeModal(); break; }
-    case 'delPerson': {
-      const p=person(ds.id);
-      confirmBox(`Видалити «${p.name}» разом з усіма його нарядами? (Щоб зберегти історію — краще зняти позначку «В строю».)`,'Видалити',()=>{
-        S.people=S.people.filter(x=>x.id!==ds.id);
-        for(const k of Object.keys(S.duties)){delete S.duties[k][ds.id]; if(!Object.keys(S.duties[k]).length) delete S.duties[k];}
-        save(); closeModal();
-      },()=>openPerson(ds.id));
-      break; }
-    case 'addSquad': { const v=$('#ns-name').value.trim(); if(!v)return; S.squads.push({id:uid(),name:v}); save(); render(); break; }
-    case 'delSquad':
-      if(S.squads.length<2){toast('Має залишитись хоча б одне відділення.');return;}
-      if(S.people.some(p=>p.squad===ds.id)){toast('У цьому відділенні є особовий склад. Спочатку переведіть людей в інше відділення.');return;}
-      S.squads=S.squads.filter(s=>s.id!==ds.id); save(); render(); break;
-    case 'addType': { const n=$('#nt-name').value.trim(),c=$('#nt-code').value.trim(); if(!n||!c){toast('Вкажіть назву і код.');return;} S.types.push({id:uid(),name:n,code:c,color:$('#nt-color').value}); save(); render(); break; }
-    case 'delType': {
-      const t=type(ds.id); let cnt=0; Object.values(S.duties).forEach(m=>Object.values(m).forEach(x=>{if(x===ds.id)cnt++;}));
-      confirmBox(`Видалити вид наряду «${t.name}»${cnt?` разом з ${cnt} призначеними нарядами`:''}?`,'Видалити',()=>{
-        S.types=S.types.filter(x=>x.id!==ds.id);
-        for(const k of Object.keys(S.duties)){for(const pid of Object.keys(S.duties[k])) if(S.duties[k][pid]===ds.id) delete S.duties[k][pid]; if(!Object.keys(S.duties[k]).length) delete S.duties[k];}
-        save(); closeModal();
+    // КВ завжди перший зверху, решта — за алфавітом
+    function sortSquadMembers(list) {
+      return [...list].sort((a, b) => {
+        if (a.isCommander && !b.isCommander) return -1;
+        if (!a.isCommander && b.isCommander) return 1;
+        return a.name.localeCompare(b.name, 'uk');
       });
-      break; }
-    case 'share': shareBackup(); break;
-    case 'csv': exportCSV(); break;
-    case 'importBtn': $('#imp').click(); break;
-    case 'wipe':
-      confirmBox('Стерти ВСІ дані (особовий склад, наряди, налаштування)? Це незворотно.','Далі',()=>
-        confirmBox('Точно стерти? Рекомендується спершу зробити резервну копію.','Стерти все',()=>{S=defaults();save();V.tab='people';closeModal();}));
-      break;
-  }
-}
+    }
 
-document.addEventListener('click',e=>{
-  const t=e.target;
-  const a=t.closest('[data-act]'); if(a){act(a.dataset.act,a.dataset);return;}
-  if(t.classList&&t.classList.contains('ov')){closeModal();return;}
-  const c=t.closest('td.cell'); if(c){openCell(c.dataset.p,c.dataset.d);return;}
-  const th=t.closest('th[data-day]'); if(th){V.day=+th.dataset.day;V.sched='day';render();window.scrollTo(0,0);return;}
-});
-document.addEventListener('change',e=>{
-  const t=e.target,id=t.dataset.id;
-  if(t.id==='imp'){ if(t.files[0]) importJSON(t.files[0]); t.value=''; return; }
-  if(t.dataset.bind==='dsq'){DA.squad=t.value;renderDay();return;}
-  if(t.dataset.sf){squad(id).name=t.value.trim()||squad(id).name;save();return;}
-  if(t.dataset.tf){const x=type(id);x[t.dataset.tf]=t.value.trim()||x[t.dataset.tf];save();return;}
-});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&e.target.id==='np-name') act('addPerson',{});
-  if(e.key==='Escape'&&$('#modal').innerHTML) closeModal();
-});
-render();
-</script>
+    // Підрахунок нарядів бійця (місяць, всього, останній наряд)
+    function getSoldierStats(soldierId, year, month, beforeOrOnDate = null) {
+      const prefix = getMonthPrefix(year, month);
+      let monthCount = 0;
+      let totalCount = 0;
+      let lastDate = null;
+
+      for (const d of state.duties) {
+        if (d.soldierId !== soldierId) continue;
+        totalCount++;
+        if (d.date.startsWith(prefix)) monthCount++;
+        if (!beforeOrOnDate || d.date <= beforeOrOnDate) {
+          if (!lastDate || d.date > lastDate) lastDate = d.date;
+        }
+      }
+      return { monthCount, totalCount, lastDate };
+    }
+
+    // =========================================================================
+    // ІНІЦІАЛІЗАЦІЯ ТА ЗБЕРЕЖЕННЯ (ПОРОЖНІЙ СТАРТ БЕЗ ДЕМО-ЗАПИСІВ)
+    // =========================================================================
+    function createEmptyInitialState() {
+      return {
+        squads: JSON.parse(JSON.stringify(DEFAULT_SQUADS)),
+        soldiers: [],
+        dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+        duties: [],
+        tasks: [],
+        lastBackupAt: null
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          state = createEmptyInitialState();
+          saveState();
+          return;
+        }
+        const parsed = JSON.parse(raw);
+        state = {
+          squads: Array.isArray(parsed.squads) ? parsed.squads : JSON.parse(JSON.stringify(DEFAULT_SQUADS)),
+          soldiers: Array.isArray(parsed.soldiers) ? parsed.soldiers : [],
+          dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
+            ? parsed.dutyTypes
+            : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+          duties: Array.isArray(parsed.duties) ? parsed.duties : [],
+          tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+          lastBackupAt: parsed.lastBackupAt || null
+        };
+      } catch (e) {
+        console.error('Помилка читання localStorage:', e);
+        state = createEmptyInitialState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error('Помилка збереження:', e);
+        showToast('Помилка збереження в пам\'ять пристрою', 'error');
+      }
+    }
+
+    // =========================================================================
+    // СПОВІЩЕННЯ ТА МОДАЛЬНІ ВІКНА (БЕЗ alert() / confirm())
+    // =========================================================================
+    function showToast(msg, type = 'success') {
+      const root = document.getElementById('toast-root');
+      const el = document.createElement('div');
+      el.className = `toast ${type === 'error' ? 'error' : ''}`;
+      el.textContent = msg;
+      root.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.2s';
+        setTimeout(() => el.remove(), 220);
+      }, 2400);
+    }
+
+    function openModal(html) {
+      const root = document.getElementById('modal-root');
+      const panel = document.getElementById('modal-panel');
+      panel.innerHTML = html;
+      root.classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-root').classList.remove('open');
+    }
+
+    document.getElementById('modal-root').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-root') closeModal();
+    });
+
+    function showConfirm(title, message, confirmLabel, onConfirm, danger = true) {
+      openModal(`
+        <div class="modal-header">
+          <div class="modal-title">${esc(title)}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="text-sm text-muted" style="line-height:1.5">${esc(message)}</p>
+          <div class="grid-2" style="margin-top:4px">
+            <button class="btn btn-secondary" onclick="closeModal()">Скасувати</button>
+            <button id="confirm-ok-btn" class="btn ${danger ? 'btn-danger-solid' : 'btn-primary'}">${esc(confirmLabel)}</button>
+          </div>
+        </div>
+      `);
+      document.getElementById('confirm-ok-btn').onclick = () => {
+        closeModal();
+        onConfirm();
+      };
+    }
+
+    // =========================================================================
+    // НАВІГАЦІЯ ТА ЗАГАЛЬНІ КОМПОНЕНТИ
+    // =========================================================================
+    function switchTab(tab) {
+      ui.activeTab = tab;
+      render();
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    function switchDutiesSubTab(sub) {
+      ui.dutiesSubTab = sub;
+      render();
+    }
+
+    function changeMonth(delta) {
+      ui.month += delta;
+      if (ui.month < 0) { ui.month = 11; ui.year--; }
+      else if (ui.month > 11) { ui.month = 0; ui.year++; }
+
+      if (ui.year === nowDate.getFullYear() && ui.month === nowDate.getMonth()) {
+        ui.selectedDate = toISODate(nowDate);
+      } else {
+        ui.selectedDate = `${ui.year}-${String(ui.month + 1).padStart(2, '0')}-01`;
+      }
+      render();
+    }
+
+    function goToToday() {
+      const t = new Date();
+      ui.year = t.getFullYear();
+      ui.month = t.getMonth();
+      ui.selectedDate = toISODate(t);
+      render();
+    }
+
+    function renderMonthBar(showTodayBtn = true) {
+      return `
+        <div class="month-bar">
+          <button class="btn-icon" onclick="changeMonth(-1)" aria-label="Попередній місяць">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="month-title">${MONTHS_UK[ui.month]} ${ui.year}</div>
+          ${showTodayBtn ? `<button class="btn btn-sm btn-secondary" onclick="goToToday()">Сьогодні</button>` : ''}
+          <button class="btn-icon" onclick="changeMonth(1)" aria-label="Наступний місяць">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      `;
+    }
+
+    function renderSquadTabs(activeId, handlerName, showCounts = false) {
+      const totalSoldiers = state.soldiers.length;
+      const allBtn = `
+        <button class="pill-btn ${activeId === 'all' ? 'active' : ''}" style="--pill-color:#4ade80" onclick="${handlerName}('all')">
+          <span>Всі</span>
+          ${showCounts ? `<span class="pill-count">${totalSoldiers}</span>` : ''}
+        </button>
+      `;
+      const squadBtns = state.squads.map(sq => {
+        const cnt = state.soldiers.filter(s => s.squadId === sq.id).length;
+        return `
+          <button class="pill-btn ${activeId === sq.id ? 'active' : ''}" style="--pill-color:${sq.color}" onclick="${handlerName}('${sq.id}')">
+            <span class="pill-dot" style="background:${sq.color}"></span>
+            <span>${esc(getSquadTabLabel(sq))}</span>
+            ${showCounts ? `<span class="pill-count">${cnt}</span>` : ''}
+          </button>
+        `;
+      }).join('');
+      return `<div class="pills-row">${allBtn}${squadBtns}</div>`;
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 1: НАРЯДИ (ГРАФІК + ОБЛІК)
+    // =========================================================================
+    function renderDutiesTab() {
+      const subTabsHtml = `
+        <div class="subtabs">
+          <button class="subtab-btn ${ui.dutiesSubTab === 'schedule' ? 'active' : ''}" onclick="switchDutiesSubTab('schedule')">Графік</button>
+          <button class="subtab-btn ${ui.dutiesSubTab === 'stats' ? 'active' : ''}" onclick="switchDutiesSubTab('stats')">Облік</button>
+        </div>
+      `;
+      return subTabsHtml + (ui.dutiesSubTab === 'schedule' ? renderScheduleView() : renderStatsView());
+    }
+
+    function setScheduleSquadFilter(id) {
+      ui.scheduleSquadFilter = id;
+      render();
+    }
+
+    function selectCalendarDate(iso) {
+      ui.selectedDate = iso;
+      render();
+    }
+
+    function renderScheduleView() {
+      const y = ui.year;
+      const m = ui.month;
+      const firstDay = new Date(y, m, 1);
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      let offset = firstDay.getDay() - 1;
+      if (offset < 0) offset = 6;
+
+      const todayISO = toISODate(nowDate);
+      const monthPrefix = getMonthPrefix(y, m);
+
+      const byDate = {};
+      for (const d of state.duties) {
+        if (!d.date.startsWith(monthPrefix)) continue;
+        const soldier = getSoldierById(d.soldierId);
+        if (!soldier) continue;
+        if (ui.scheduleSquadFilter !== 'all' && soldier.squadId !== ui.scheduleSquadFilter) continue;
+        if (!byDate[d.date]) byDate[d.date] = [];
+        byDate[d.date].push({ duty: d, soldier });
+      }
+
+      let cells = '';
+      for (let i = 0; i < offset; i++) cells += `<div></div>`;
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+        const items = byDate[iso] || [];
+        const isToday = iso === todayISO;
+        const isSelected = iso === ui.selectedDate;
+
+        const dots = items.slice(0, 5).map(item => {
+          const sq = getSquadById(item.soldier.squadId);
+          return `<span class="cal-dot" style="background:${sq.color}"></span>`;
+        }).join('');
+
+        cells += `
+          <button class="cal-cell ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="selectCalendarDate('${iso}')">
+            <span class="cal-day-num">${day}</span>
+            <div class="cal-dots">${dots}${items.length > 5 ? '<span style="font-size:9px;color:#8b99a8;line-height:6px">+</span>' : ''}</div>
+          </button>
+        `;
+      }
+
+      const dayDuties = state.duties.filter(d => {
+        if (d.date !== ui.selectedDate) return false;
+        const s = getSoldierById(d.soldierId);
+        if (!s) return false;
+        if (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter) return false;
+        return true;
+      });
+
+      const dayListHtml = dayDuties.length === 0
+        ? `<div class="empty-state">На ${formatDateHuman(ui.selectedDate)} нарядів не призначено.</div>`
+        : `<div class="stack">
+            ${dayDuties.map(d => {
+              const s = getSoldierById(d.soldierId);
+              const sq = getSquadById(s.squadId);
+              const dt = getDutyTypeById(d.dutyTypeId);
+              return `
+                <div class="soldier-row" style="--sq-color:${sq.color}; border-radius:10px; border:1px solid var(--border); border-left:4px solid ${sq.color};">
+                  <div class="soldier-info">
+                    <div class="soldier-name-line">
+                      <span class="badge" style="background:${sq.color}22; color:${sq.color}; border-color:${sq.color}55">${esc(dt.name)}</span>
+                      <span class="soldier-name">${esc(s.name)}</span>
+                      ${s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
+                    </div>
+                    <div class="soldier-meta">
+                      <span>${esc(sq.name)}</span>
+                      ${s.rank ? `<span>• ${esc(s.rank)}</span>` : ''}
+                    </div>
+                  </div>
+                  <button class="btn-icon danger" onclick="removeDuty('${d.id}')" title="Видалити наряд">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>`;
+
+      return `
+        ${renderMonthBar(true)}
+        ${renderSquadTabs(ui.scheduleSquadFilter, 'setScheduleSquadFilter', false)}
+
+        <div class="card">
+          <div class="cal-weekdays">
+            ${WEEKDAYS_UK.map((w, i) => `<div class="${i >= 5 ? 'wknd' : ''}">${w}</div>`).join('')}
+          </div>
+          <div class="cal-grid">${cells}</div>
+        </div>
+
+        <div class="card stack">
+          <div class="row-between">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:#fff">${formatDateHuman(ui.selectedDate)}</div>
+              <div class="text-xs text-muted">Призначено нарядів: ${dayDuties.length}</div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="openAssignDutyModal('${ui.selectedDate}')">+ Призначити наряд</button>
+          </div>
+          ${dayListHtml}
+          ${dayDuties.length > 0 ? `
+            <button class="btn btn-secondary btn-full" onclick="copyDayDuties('${ui.selectedDate}')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Скопіювати наряд на день</span>
+            </button>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function copyDayDuties(isoDate) {
+      const dayDuties = state.duties.filter(d => {
+        if (d.date !== isoDate) return false;
+        const s = getSoldierById(d.soldierId);
+        if (!s) return false;
+        if (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter) return false;
+        return true;
+      });
+      if (!dayDuties.length) return;
+
+      const lines = [`Наряд на ${formatDateHuman(isoDate)}:`];
+      dayDuties.forEach((d, idx) => {
+        const s = getSoldierById(d.soldierId);
+        const sq = getSquadById(s.squadId);
+        const dt = getDutyTypeById(d.dutyTypeId);
+        lines.push(`${idx + 1}. ${dt.name} — ${s.name}${s.rank ? ' (' + s.rank + ')' : ''} [${getSquadTabLabel(sq)}]`);
+      });
+      copyToClipboard(lines.join('\n'), 'Наряд на день скопійовано');
+    }
+
+    function removeDuty(id, reopenSoldierId = null) {
+      state.duties = state.duties.filter(d => d.id !== id);
+      saveState();
+      render();
+      if (reopenSoldierId) {
+        openSoldierHistoryModal(reopenSoldierId);
+      }
+      showToast('Запис наряду видалено');
+    }
+
+    // Вікно призначення наряду (розумне сортування)
+    function openAssignDutyModal(isoDate) {
+      if (state.soldiers.length === 0) {
+        showToast('Спочатку додайте бійців у вкладці «Склад»', 'error');
+        return;
+      }
+      assignModal.date = isoDate;
+      assignModal.dutyTypeId = state.dutyTypes[0]?.id || '';
+      renderAssignDutyModal();
+    }
+
+    function setAssignDutyType(id) {
+      assignModal.dutyTypeId = id;
+      renderAssignDutyModal();
+    }
+
+    function renderAssignDutyModal() {
+      const [y, m] = assignModal.date.split('-').map(Number);
+      const targetYear = y;
+      const targetMonth = m - 1;
+      const yesterdayISO = addDaysISO(assignModal.date, -1);
+
+      const busyTodaySet = new Set(state.duties.filter(d => d.date === assignModal.date).map(d => d.soldierId));
+      const busyYestSet = new Set(state.duties.filter(d => d.date === yesterdayISO).map(d => d.soldierId));
+
+      const candidates = state.soldiers.map(s => {
+        const stats = getSoldierStats(s.id, targetYear, targetMonth, yesterdayISO);
+        const isToday = busyTodaySet.has(s.id);
+        const isYesterday = busyYestSet.has(s.id);
+        const restDays = stats.lastDate ? diffDaysISO(assignModal.date, stats.lastDate) : 9999;
+        return { ...s, stats, isToday, isYesterday, restDays };
+      });
+
+      // Сортування: в строю зверху, далі вільні сьогодні/вчора, далі найменше за місяць, далі найменше всього
+      candidates.sort((a, b) => {
+        const aActive = a.status === 'active';
+        const bActive = b.status === 'active';
+        if (aActive !== bActive) return aActive ? -1 : 1;
+        if (a.isToday !== b.isToday) return a.isToday ? 1 : -1;
+        if (a.isYesterday !== b.isYesterday) return a.isYesterday ? 1 : -1;
+        if (a.stats.monthCount !== b.stats.monthCount) return a.stats.monthCount - b.stats.monthCount;
+        if (a.stats.totalCount !== b.stats.totalCount) return a.stats.totalCount - b.stats.totalCount;
+        return a.name.localeCompare(b.name, 'uk');
+      });
+
+      const eligible = candidates.filter(c => c.status === 'active' && !c.isToday && !c.isYesterday);
+      const bestMonthCount = eligible.length ? Math.min(...eligible.map(c => c.stats.monthCount)) : -1;
+
+      const listHtml = candidates.map(c => {
+        const sq = getSquadById(c.squadId);
+        const stObj = getStatusObj(c.status);
+        const isRec = c.status === 'active' && !c.isToday && !c.isYesterday && c.stats.monthCount === bestMonthCount;
+
+        return `
+          <button class="soldier-row" onclick="confirmAssignDuty('${c.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left; border-radius:10px; border:1px solid ${isRec ? 'rgba(16,185,129,0.45)' : 'var(--border)'}; border-left:4px solid ${sq.color}; opacity:${c.status !== 'active' ? '0.6' : '1'}">
+            <div class="soldier-info">
+              <div class="soldier-name-line">
+                <span class="soldier-name">${esc(c.name)}</span>
+                ${c.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
+                ${isRec ? `<span class="badge badge-rec">Рекомендовано</span>` : ''}
+                ${c.isToday ? `<span class="badge badge-warn">Вже сьогодні</span>` : ''}
+                ${!c.isToday && c.isYesterday ? `<span class="badge badge-warn">Був учора</span>` : ''}
+                ${c.status !== 'active' ? `<span class="badge ${stObj.cls}">${stObj.label}</span>` : ''}
+              </div>
+              <div class="soldier-meta">
+                <span class="badge" style="background:${sq.color}22;color:${sq.color};border-color:${sq.color}44">${esc(getSquadTabLabel(sq))}</span>
+                ${c.rank ? `<span>${esc(c.rank)}</span>` : ''}
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:15px;font-weight:800;color:${isRec ? '#4ade80' : '#fff'}">${c.stats.monthCount} <span class="text-xs text-muted" style="font-weight:500">міс</span></div>
+              <div class="text-xs text-muted">${c.stats.totalCount} всього</div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      openModal(`
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Призначити наряд</div>
+            <div class="text-xs text-muted">${formatDateHuman(assignModal.date)}</div>
+          </div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <div class="field-label">1. Оберіть вид наряду:</div>
+            <div class="chips-wrap">
+              ${state.dutyTypes.map(dt => `
+                <button class="btn btn-sm ${assignModal.dutyTypeId === dt.id ? 'btn-primary' : 'btn-secondary'}" onclick="setAssignDutyType('${dt.id}')">
+                  ${esc(dt.name)}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="field-label">2. Оберіть бійця (найменше навантаження зверху):</div>
+          <div class="stack">${listHtml}</div>
+        </div>
+      `);
+    }
+
+    function confirmAssignDuty(soldierId) {
+      if (!assignModal.dutyTypeId) {
+        showToast('Оберіть вид наряду', 'error');
+        return;
+      }
+      state.duties.push({
+        id: genId('d'),
+        date: assignModal.date,
+        soldierId,
+        dutyTypeId: assignModal.dutyTypeId
+      });
+      saveState();
+      closeModal();
+      render();
+      showToast('Наряд призначено');
+    }
+
+    // Підвкладка «ОБЛІК»
+    function setStatsSquadFilter(id) {
+      ui.statsSquadFilter = id;
+      render();
+    }
+
+    function setStatsSort(val) {
+      ui.statsSort = val;
+      render();
+    }
+
+    function renderStatsView() {
+      const y = ui.year;
+      const m = ui.month;
+
+      const filtered = state.soldiers
+        .filter(s => ui.statsSquadFilter === 'all' || s.squadId === ui.statsSquadFilter)
+        .map(s => ({
+          ...s,
+          stats: getSoldierStats(s.id, y, m)
+        }));
+
+      const totalMonth = filtered.reduce((sum, s) => sum + s.stats.monthCount, 0);
+      const totalAllTime = filtered.reduce((sum, s) => sum + s.stats.totalCount, 0);
+      const activeCnt = filtered.filter(s => s.status === 'active').length;
+      const maxMonth = Math.max(1, ...filtered.map(s => s.stats.monthCount));
+
+      const sorted = [...filtered].sort((a, b) => {
+        if (ui.statsSort === 'month_desc') return b.stats.monthCount - a.stats.monthCount || b.stats.totalCount - a.stats.totalCount || a.name.localeCompare(b.name, 'uk');
+        if (ui.statsSort === 'month_asc') return a.stats.monthCount - b.stats.monthCount || a.stats.totalCount - b.stats.totalCount || a.name.localeCompare(b.name, 'uk');
+        if (ui.statsSort === 'total_desc') return b.stats.totalCount - a.stats.totalCount || b.stats.monthCount - a.stats.monthCount || a.name.localeCompare(b.name, 'uk');
+        return a.name.localeCompare(b.name, 'uk');
+      });
+
+      const listHtml = sorted.length === 0
+        ? `<div class="card empty-state">Особового складу ще немає. Додайте бійців у вкладці «Склад».</div>`
+        : `
+          <div class="card-flush">
+            <div class="card-header">
+              <span class="section-title">Облік нарядів (${sorted.length})</span>
+              <span class="text-xs text-muted">Міс. / Всього</span>
+            </div>
+            <div>
+              ${sorted.map(s => renderStatsRow(s, getSquadById(s.squadId), maxMonth)).join('')}
+            </div>
+          </div>
+        `;
+
+      return `
+        ${renderMonthBar(false)}
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-val">${totalMonth}</div>
+            <div class="kpi-label">За місяць</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" style="color:#4ade80">${totalAllTime}</div>
+            <div class="kpi-label">За весь час</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val">${activeCnt}</div>
+            <div class="kpi-label">В строю</div>
+          </div>
+        </div>
+
+        ${renderSquadTabs(ui.statsSquadFilter, 'setStatsSquadFilter', false)}
+
+        <div class="row-between">
+          <span class="text-xs text-muted" style="font-weight:600">Сортування:</span>
+          <select class="select" style="width:auto;padding:8px 10px;font-size:12px" onchange="setStatsSort(this.value)">
+            <option value="month_desc" ${ui.statsSort === 'month_desc' ? 'selected' : ''}>За місяць (більше → менше)</option>
+            <option value="month_asc" ${ui.statsSort === 'month_asc' ? 'selected' : ''}>За місяць (менше → більше)</option>
+            <option value="total_desc" ${ui.statsSort === 'total_desc' ? 'selected' : ''}>За весь час</option>
+            <option value="alpha" ${ui.statsSort === 'alpha' ? 'selected' : ''}>За алфавітом</option>
+          </select>
+        </div>
+
+        ${listHtml}
+      `;
+    }
+
+    function renderStatsRow(s, sq, maxMonth) {
+      const pct = Math.round((s.stats.monthCount / maxMonth) * 100);
+      const st = getStatusObj(s.status);
+      return `
+        <button class="soldier-row ${s.isCommander ? 'is-kv' : ''}" onclick="openSoldierHistoryModal('${s.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left;">
+          <div class="soldier-info">
+            <div class="soldier-name-line">
+              <span class="soldier-name">${esc(s.name)}</span>
+              ${s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
+              ${s.status !== 'active' ? `<span class="badge ${st.cls}">${st.label}</span>` : ''}
+            </div>
+            <div class="soldier-meta">
+              <span style="color:${sq.color};font-weight:600">${esc(getSquadTabLabel(sq))}</span>
+              <span>• Ост.: ${formatDateShort(s.stats.lastDate)}</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${pct}%; background:${sq.color}"></div>
+            </div>
+          </div>
+          <div class="row-gap" style="flex-shrink:0">
+            <div style="text-align:right">
+              <div style="font-size:16px;font-weight:800;color:#fff;line-height:1">${s.stats.monthCount}</div>
+              <div class="text-xs text-muted">міс.</div>
+            </div>
+            <div style="width:1px;height:26px;background:var(--border)"></div>
+            <div style="text-align:right;min-width:34px">
+              <div style="font-size:14px;font-weight:700;color:#4ade80;line-height:1">${s.stats.totalCount}</div>
+              <div class="text-xs text-muted">всього</div>
+            </div>
+          </div>
+        </button>
+      `;
+    }
+
+    function openSoldierHistoryModal(soldierId) {
+      const s = getSoldierById(soldierId);
+      if (!s) return;
+      const sq = getSquadById(s.squadId);
+      const stats = getSoldierStats(s.id, ui.year, ui.month);
+      const history = state.duties
+        .filter(d => d.soldierId === s.id)
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      openModal(`
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">${esc(s.name)} ${s.isCommander ? '★' : ''}</div>
+            <div class="text-xs text-muted">${esc(sq.name)}${s.rank ? ' • ' + esc(s.rank) : ''}</div>
+          </div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="grid-2">
+            <div class="kpi-card">
+              <div class="kpi-val">${stats.monthCount}</div>
+              <div class="kpi-label">${MONTHS_UK[ui.month]} ${ui.year}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-val" style="color:#4ade80">${stats.totalCount}</div>
+              <div class="kpi-label">За весь час</div>
+            </div>
+          </div>
+
+          <div class="field-label">Історія нарядів (${history.length}):</div>
+          ${history.length === 0
+            ? `<div class="empty-state">Записів про наряди ще немає.</div>`
+            : `<div class="stack">
+                ${history.map(d => {
+                  const dt = getDutyTypeById(d.dutyTypeId);
+                  return `
+                    <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">
+                      <div>
+                        <div class="text-sm" style="font-weight:600;color:#fff">${formatDateHuman(d.date)}</div>
+                        <span class="badge" style="margin-top:4px;background:${sq.color}22;color:${sq.color};border-color:${sq.color}55">${esc(dt.name)}</span>
+                      </div>
+                      <button class="btn-icon danger" onclick="removeDuty('${d.id}', '${s.id}')" title="Видалити помилковий запис">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
+              </div>`
+          }
+        </div>
+      `);
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 2: ЗАДАЧІ
+    // =========================================================================
+    function setTasksTargetFilter(val) {
+      ui.tasksTargetFilter = val;
+      render();
+    }
+
+    function setTasksStatusFilter(val) {
+      ui.tasksStatusFilter = val;
+      render();
+    }
+
+    function getFilteredTasks() {
+      return state.tasks.filter(t => {
+        if (ui.tasksTargetFilter !== 'all') {
+          const matchesSquad = t.targetType === 'squad' && t.targetSquadId === ui.tasksTargetFilter;
+          const isAllCmd = t.targetType === 'all_commanders';
+          if (!matchesSquad && !isAllCmd) return false;
+        }
+        if (ui.tasksStatusFilter === 'active' && t.status !== 'received') return false;
+        if (ui.tasksStatusFilter === 'done' && t.status !== 'done') return false;
+        if (ui.tasksStatusFilter === 'failed' && t.status !== 'failed') return false;
+        return true;
+      });
+    }
+
+    function getTaskTargetDisplay(task) {
+      if (task.targetType === 'all_commanders') {
+        return { label: 'Усім командирам відділень', color: '#a855f7', kvName: '' };
+      }
+      const sq = getSquadById(task.targetSquadId);
+      const kv = getSquadCommander(task.targetSquadId);
+      return {
+        label: formatCommanderTargetLabel(sq),
+        color: sq.color,
+        kvName: kv ? kv.name : ''
+      };
+    }
+
+    function renderTasksTab() {
+      const targetPills = `
+        <div class="pills-row">
+          <button class="pill-btn ${ui.tasksTargetFilter === 'all' ? 'active' : ''}" style="--pill-color:#4ade80" onclick="setTasksTargetFilter('all')">
+            <span>Всі</span>
+          </button>
+          ${state.squads.map(sq => `
+            <button class="pill-btn ${ui.tasksTargetFilter === sq.id ? 'active' : ''}" style="--pill-color:${sq.color}" onclick="setTasksTargetFilter('${sq.id}')">
+              <span class="pill-dot" style="background:${sq.color}"></span>
+              <span>${esc(getSquadTabLabel(sq))}</span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      const statusPills = `
+        <div class="pills-row">
+          <button class="pill-btn ${ui.tasksStatusFilter === 'all' ? 'active' : ''}" style="--pill-color:#e8eef5" onclick="setTasksStatusFilter('all')">Всі</button>
+          <button class="pill-btn ${ui.tasksStatusFilter === 'active' ? 'active' : ''}" style="--pill-color:#3b82f6" onclick="setTasksStatusFilter('active')">Активні</button>
+          <button class="pill-btn ${ui.tasksStatusFilter === 'done' ? 'active' : ''}" style="--pill-color:#10b981" onclick="setTasksStatusFilter('done')">Виконано</button>
+          <button class="pill-btn ${ui.tasksStatusFilter === 'failed' ? 'active' : ''}" style="--pill-color:#ef4444" onclick="setTasksStatusFilter('failed')">Не виконано</button>
+        </div>
+      `;
+
+      const filteredTasks = getFilteredTasks();
+
+      const tasksHtml = filteredTasks.length === 0
+        ? `<div class="card empty-state">Задач немає. Натисніть «+ Нова задача», щоб поставити задачу.</div>`
+        : filteredTasks.map(t => {
+            const target = getTaskTargetDisplay(t);
+            const isNoteOpen = Boolean(ui.openNotes[t.id]);
+            const hasNote = Boolean(t.note && t.note.trim());
+
+            return `
+              <div class="task-card status-${t.status}" style="--sq-color:${target.color}">
+                <div class="task-top">
+                  <div>
+                    <span class="badge" style="background:${target.color}22; color:${target.color}; border-color:${target.color}55; white-space:normal; line-height:1.25">
+                      ${esc(target.label)}
+                    </span>
+                    ${target.kvName ? `<div class="text-xs text-muted" style="margin-top:3px">КВ: ${esc(target.kvName)}</div>` : ''}
+                  </div>
+                  <div class="row-gap" style="flex-shrink:0">
+                    <button class="btn-icon" style="width:30px;height:30px" onclick="openTaskModal('${t.id}')" title="Редагувати">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="btn-icon danger" style="width:30px;height:30px" onclick="promptDeleteTask('${t.id}')" title="Видалити">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="task-text">${esc(t.text)}</div>
+
+                <div class="task-meta">
+                  <span>Поставив: <strong style="color:#fff">${esc(t.issuer || 'Не вказано')}</strong></span>
+                  <span>• ${esc(t.createdAt || '')}</span>
+                  ${t.deadline ? `<span>• Термін: <strong style="color:#fbbf24">${formatDeadline(t.deadline)}</strong></span>` : ''}
+                </div>
+
+                <!-- Перемикач статусу в один дотик -->
+                <div class="task-status-grid">
+                  <button class="status-tap-btn ${t.status === 'received' ? 'active-received' : ''}" onclick="setTaskStatus('${t.id}', 'received')">Отримав задачу</button>
+                  <button class="status-tap-btn ${t.status === 'done' ? 'active-done' : ''}" onclick="setTaskStatus('${t.id}', 'done')">Виконано</button>
+                  <button class="status-tap-btn ${t.status === 'failed' ? 'active-failed' : ''}" onclick="setTaskStatus('${t.id}', 'failed')">Не виконано</button>
+                </div>
+
+                <!-- Розгортувана вкладка «Зауваження» -->
+                <div>
+                  <button class="note-toggle-btn ${hasNote ? 'has-note' : ''}" onclick="toggleTaskNote('${t.id}')">
+                    <span>${hasNote ? '● Зауваження (є запис)' : 'Зауваження'}</span>
+                    <span>${isNoteOpen ? '▲' : '▼'}</span>
+                  </button>
+                  ${isNoteOpen ? `
+                    <div class="note-box" style="margin-top:6px">
+                      <textarea id="note-input-${t.id}" class="textarea" style="min-height:68px" placeholder="Вкажіть причину невиконання або коментар...">${esc(t.note || '')}</textarea>
+                      <div class="row-between">
+                        <span class="text-xs text-muted">${t.status === 'failed' ? 'Вкажіть причину невиконання' : 'Коментар до задачі'}</span>
+                        <button class="btn btn-sm btn-primary" onclick="saveTaskNote('${t.id}')">Зберегти</button>
+                      </div>
+                    </div>
+                  ` : (hasNote ? `<div class="text-xs" style="margin-top:6px;padding:7px 10px;border-radius:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);color:#fde68a;white-space:pre-wrap">${esc(t.note)}</div>` : '')}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+      return `
+        <div class="grid-2">
+          <button class="btn btn-primary" onclick="openTaskModal()">+ Нова задача</button>
+          <button class="btn btn-secondary" onclick="copyActiveTasks()">Скопіювати активні задачі</button>
+        </div>
+
+        ${targetPills}
+        ${statusPills}
+
+        <div class="stack">${tasksHtml}</div>
+      `;
+    }
+
+    function setTaskStatus(taskId, status) {
+      const t = state.tasks.find(x => x.id === taskId);
+      if (!t) return;
+      t.status = status;
+      if (status === 'failed') {
+        ui.openNotes[taskId] = true;
+      }
+      saveState();
+      render();
+      if (status === 'failed') {
+        setTimeout(() => document.getElementById(`note-input-${taskId}`)?.focus(), 60);
+      }
+    }
+
+    function toggleTaskNote(taskId) {
+      ui.openNotes[taskId] = !ui.openNotes[taskId];
+      render();
+    }
+
+    function saveTaskNote(taskId) {
+      const t = state.tasks.find(x => x.id === taskId);
+      const input = document.getElementById(`note-input-${taskId}`);
+      if (!t || !input) return;
+      t.note = input.value.trim();
+      ui.openNotes[taskId] = false;
+      saveState();
+      render();
+      showToast('Зауваження збережено');
+    }
+
+    function openTaskModal(taskId = null) {
+      const existing = taskId ? state.tasks.find(t => t.id === taskId) : null;
+      let currentTargetVal = 'all_commanders';
+      if (existing) {
+        currentTargetVal = existing.targetType === 'squad' ? `squad:${existing.targetSquadId}` : 'all_commanders';
+      } else if (ui.tasksTargetFilter !== 'all') {
+        currentTargetVal = `squad:${ui.tasksTargetFilter}`;
+      } else if (state.squads.length > 0) {
+        currentTargetVal = `squad:${state.squads[0].id}`;
+      }
+
+      const targetOptions = [
+        ...state.squads.map(sq => {
+          const kv = getSquadCommander(sq.id);
+          const baseLbl = formatCommanderTargetLabel(sq);
+          const fullLbl = kv ? `${baseLbl} (${kv.name})` : baseLbl;
+          return `<option value="squad:${sq.id}" ${currentTargetVal === 'squad:' + sq.id ? 'selected' : ''}>${esc(fullLbl)}</option>`;
+        }),
+        `<option value="all_commanders" ${currentTargetVal === 'all_commanders' ? 'selected' : ''}>Усім командирам відділень</option>`
+      ].join('');
+
+      openModal(`
+        <div class="modal-header">
+          <div class="modal-title">${existing ? 'Редагувати задачу' : 'Нова задача'}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <form class="modal-body" onsubmit="saveTask(event, '${taskId || ''}')">
+          <div class="field">
+            <label class="field-label" for="task-target">Кому</label>
+            <select id="task-target" class="select">${targetOptions}</select>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="task-issuer">Хто поставив</label>
+            <input id="task-issuer" class="input" type="text" required value="${esc(existing?.issuer || '')}" placeholder="Введіть вручну..." />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="task-text">Суть задачі</label>
+            <textarea id="task-text" class="textarea" required placeholder="Опишіть задачу...">${esc(existing?.text || '')}</textarea>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="task-deadline">Термін виконання (необов'язково)</label>
+            <input id="task-deadline" class="input" type="datetime-local" value="${esc(existing?.deadline || '')}" />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full">${existing ? 'Зберегти зміни' : 'Поставити задачу'}</button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('task-issuer')?.focus(), 60);
+    }
+
+    function saveTask(e, taskId) {
+      e.preventDefault();
+      const targetVal = document.getElementById('task-target').value;
+      const issuer = document.getElementById('task-issuer').value.trim();
+      const text = document.getElementById('task-text').value.trim();
+      const deadline = document.getElementById('task-deadline').value;
+      if (!text || !issuer) return;
+
+      let targetType = 'all_commanders';
+      let targetSquadId = null;
+      if (targetVal.startsWith('squad:')) {
+        targetType = 'squad';
+        targetSquadId = targetVal.slice(6);
+      }
+
+      if (taskId) {
+        const t = state.tasks.find(x => x.id === taskId);
+        if (t) {
+          t.targetType = targetType;
+          t.targetSquadId = targetSquadId;
+          t.text = text;
+          t.issuer = issuer;
+          t.deadline = deadline;
+        }
+      } else {
+        state.tasks.unshift({
+          id: genId('t'),
+          targetType,
+          targetSquadId,
+          text,
+          issuer,
+          deadline,
+          status: 'received',
+          note: '',
+          createdAt: toDateTimeHuman(new Date())
+        });
+      }
+      saveState();
+      closeModal();
+      render();
+      showToast(taskId ? 'Задачу оновлено' : 'Задачу поставлено');
+    }
+
+    function promptDeleteTask(taskId) {
+      showConfirm(
+        'Видалити задачу?',
+        'Задача та зауваження до неї будуть видалені.',
+        'Видалити',
+        () => {
+          state.tasks = state.tasks.filter(t => t.id !== taskId);
+          saveState();
+          render();
+          showToast('Задачу видалено');
+        }
+      );
+    }
+
+    function copyActiveTasks() {
+      const list = state.tasks.filter(t => {
+        if (t.status === 'done') return false;
+        if (ui.tasksTargetFilter !== 'all') {
+          const matchesSquad = t.targetType === 'squad' && t.targetSquadId === ui.tasksTargetFilter;
+          const isAllCmd = t.targetType === 'all_commanders';
+          if (!matchesSquad && !isAllCmd) return false;
+        }
+        return true;
+      });
+      if (!list.length) {
+        showToast('Немає активних задач для копіювання', 'error');
+        return;
+      }
+      const statusMap = { received: 'Отримав задачу', done: 'Виконано', failed: 'Не виконано' };
+      const lines = [`Активні задачі (${formatDateShort(toISODate(new Date()))}):`];
+      list.forEach((t, i) => {
+        const target = getTaskTargetDisplay(t);
+        lines.push(`${i + 1}. [${target.label}${target.kvName ? ' — ' + target.kvName : ''}] ${t.text}`);
+        lines.push(`   Поставив: ${t.issuer} | Статус: ${statusMap[t.status]}${t.deadline ? ' | Термін: ' + formatDeadline(t.deadline) : ''}`);
+        if (t.note) lines.push(`   Зауваження: ${t.note}`);
+      });
+      copyToClipboard(lines.join('\n'), 'Активні задачі скопійовано');
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 3: СКЛАД (КНОПКА «+ ДОДАТИ БІЙЦЯ» БІЛЯ КОЖНОГО ВІДДІЛЕННЯ)
+    // =========================================================================
+    function setPersonnelSquadFilter(id) {
+      ui.personnelSquadFilter = id;
+      render();
+    }
+
+    function onPersonnelSearchInput(val) {
+      ui.personnelSearch = val;
+      const container = document.getElementById('personnel-list-container');
+      if (container) container.innerHTML = buildPersonnelCardsHtml();
+      const clearBtn = document.getElementById('personnel-search-clear');
+      if (clearBtn) clearBtn.classList.toggle('hidden', !val);
+    }
+
+    function clearPersonnelSearch() {
+      ui.personnelSearch = '';
+      render();
+    }
+
+    function renderPersonnelTab() {
+      return `
+        ${renderSquadTabs(ui.personnelSquadFilter, 'setPersonnelSquadFilter', true)}
+
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="personnel-search-input" class="input" type="text" value="${esc(ui.personnelSearch)}" placeholder="Пошук бійця за ПІБ..." oninput="onPersonnelSearchInput(this.value)" />
+          <button id="personnel-search-clear" class="search-clear ${ui.personnelSearch ? '' : 'hidden'}" onclick="clearPersonnelSearch()" aria-label="Очистити">✕</button>
+        </div>
+
+        <div id="personnel-list-container" class="stack">
+          ${buildPersonnelCardsHtml()}
+        </div>
+      `;
+    }
+
+    function buildPersonnelCardsHtml() {
+      if (state.squads.length === 0) {
+        return `<div class="card empty-state">Немає відділень. Додайте відділення у вкладці «Налаштування».</div>`;
+      }
+
+      const query = ui.personnelSearch.trim().toLowerCase();
+      const squadsToShow = ui.personnelSquadFilter === 'all'
+        ? state.squads
+        : state.squads.filter(sq => sq.id === ui.personnelSquadFilter);
+
+      let totalShown = 0;
+      const html = squadsToShow.map(sq => {
+        const allMembers = state.soldiers.filter(s => s.squadId === sq.id);
+        const filteredMembers = sortSquadMembers(
+          allMembers.filter(s => !query || s.name.toLowerCase().includes(query) || (s.rank && s.rank.toLowerCase().includes(query)))
+        );
+
+        if (query && filteredMembers.length === 0) return '';
+        totalShown += filteredMembers.length;
+
+        return `
+          <div class="card-flush">
+            <div class="card-header" style="border-left:4px solid ${sq.color}">
+              <div class="row-gap" style="min-width:0">
+                <span class="pill-dot" style="background:${sq.color}"></span>
+                <div style="min-width:0">
+                  <div class="section-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</div>
+                  <div class="text-xs text-muted">Особового складу: ${allMembers.length}</div>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="openSoldierModal(null, '${sq.id}')">+ Додати бійця</button>
+            </div>
+            <div>
+              ${filteredMembers.length === 0
+                ? `<div class="empty-state" style="padding:18px">У відділенні поки немає бійців</div>`
+                : filteredMembers.map(s => {
+                    const st = getStatusObj(s.status);
+                    return `
+                      <div class="soldier-row ${s.isCommander ? 'is-kv' : ''}" style="--sq-color:${sq.color}">
+                        <div class="soldier-info">
+                          <div class="soldier-name-line">
+                            <span class="soldier-name">${esc(s.name)}</span>
+                            ${s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
+                            <span class="badge ${st.cls}">${st.label}</span>
+                          </div>
+                          ${s.rank ? `<div class="soldier-meta">${esc(s.rank)}</div>` : ''}
+                        </div>
+                        <div class="row-gap" style="flex-shrink:0">
+                          <button class="btn-icon" onclick="openSoldierModal('${s.id}')" title="Редагувати">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          </button>
+                          <button class="btn-icon danger" onclick="promptDeleteSoldier('${s.id}')" title="Видалити">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (query && totalShown === 0) {
+        return `<div class="card empty-state">За запитом «${esc(ui.personnelSearch)}» нікого не знайдено.</div>`;
+      }
+      return html;
+    }
+
+    // Модалка додавання/редагування бійця (з передвибраним відділенням)
+    function openSoldierModal(soldierId = null, preselectedSquadId = null) {
+      if (state.squads.length === 0) {
+        showToast('Спочатку створіть відділення в Налаштуваннях', 'error');
+        return;
+      }
+      const existing = soldierId ? state.soldiers.find(s => s.id === soldierId) : null;
+      const defaultSquad = existing?.squadId || preselectedSquadId || state.squads[0].id;
+
+      openModal(`
+        <div class="modal-header">
+          <div class="modal-title">${existing ? 'Редагувати бійця' : 'Додати військовослужбовця'}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <form class="modal-body" onsubmit="saveSoldier(event, '${soldierId || ''}')">
+          <div class="field">
+            <label class="field-label" for="s-name">ПІБ (перша літера кожного слова — автоматично велика)</label>
+            <input id="s-name" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Прізвище Ім'я" oninput="capitalizeLive(this)" onblur="this.value = formatFullName(this.value)" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="s-rank">Звання / Посада (необов'язково)</label>
+            <input id="s-rank" class="input" type="text" value="${esc(existing?.rank || '')}" placeholder="Наприклад: солдат, стрілець" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="s-squad">Відділення</label>
+            <select id="s-squad" class="select">
+              ${state.squads.map(sq => `<option value="${sq.id}" ${defaultSquad === sq.id ? 'selected' : ''}>${esc(sq.name)}</option>`).join('')}
+            </select>
+          </div>
+
+          <label class="checkbox-card" for="s-kv">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#fbbf24">★ Командир відділення</div>
+              <div class="text-xs text-muted">Закріплюється зверху списку відділення</div>
+            </div>
+            <input id="s-kv" type="checkbox" ${existing?.isCommander ? 'checked' : ''} />
+          </label>
+
+          <div class="field">
+            <label class="field-label" for="s-status">Статус</label>
+            <select id="s-status" class="select">
+              ${STATUS_LIST.map(st => `<option value="${st.id}" ${(existing?.status || 'active') === st.id ? 'selected' : ''}>${st.label}</option>`).join('')}
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full">Зберегти</button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('s-name')?.focus(), 50);
+    }
+
+    function saveSoldier(e, soldierId) {
+      e.preventDefault();
+      const name = formatFullName(document.getElementById('s-name').value);
+      const rank = document.getElementById('s-rank').value.trim();
+      const squadId = document.getElementById('s-squad').value;
+      const isCommander = document.getElementById('s-kv').checked;
+      const status = document.getElementById('s-status').value;
+      if (!name) return;
+
+      // Один командир на відділення
+      if (isCommander) {
+        state.soldiers.forEach(s => {
+          if (s.squadId === squadId && s.id !== soldierId) s.isCommander = false;
+        });
+      }
+
+      if (soldierId) {
+        const s = state.soldiers.find(x => x.id === soldierId);
+        if (s) {
+          s.name = name;
+          s.rank = rank;
+          s.squadId = squadId;
+          s.isCommander = isCommander;
+          s.status = status;
+        }
+      } else {
+        state.soldiers.push({ id: genId('s'), name, rank, squadId, isCommander, status });
+      }
+      saveState();
+      closeModal();
+      render();
+      showToast(soldierId ? 'Дані бійця оновлено' : 'Бійця додано');
+    }
+
+    function promptDeleteSoldier(soldierId) {
+      const s = getSoldierById(soldierId);
+      if (!s) return;
+      showConfirm(
+        `Видалити ${s.name}?`,
+        'Військовослужбовець та всі записи про його наряди будуть видалені.',
+        'Видалити',
+        () => {
+          state.soldiers = state.soldiers.filter(x => x.id !== soldierId);
+          state.duties = state.duties.filter(d => d.soldierId !== soldierId);
+          saveState();
+          render();
+          showToast('Бійця видалено');
+        }
+      );
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 4: НАЛАШТУВАННЯ (БЕКАП, CSV, ВІДДІЛЕННЯ, ВИДИ НАРЯДІВ, ОЧИЩЕННЯ)
+    // =========================================================================
+    function renderSettingsTab() {
+      const backupStatusText = state.lastBackupAt
+        ? `Остання резервна копія: <strong style="color:#4ade80">${esc(state.lastBackupAt)}</strong>`
+        : `Резервна копія ще не створювалась`;
+
+      return `
+        <!-- 1. Збереження даних та резервна копія -->
+        <div class="card stack" style="border-color:rgba(94,150,77,0.45)">
+          <span class="section-title" style="color:#4ade80">Збереження даних та резервна копія</span>
+          <div class="text-xs text-muted" style="line-height:1.5">
+            ${backupStatusText}<br/>
+            Усі дані зберігаються в пам'яті браузера. Створюйте резервну копію, щоб не втратити дані або перенести їх на інший телефон.
+          </div>
+          <button class="btn btn-primary btn-full" onclick="exportBackupJSON()">
+            Зберегти резервну копію (файл JSON)
+          </button>
+          <button class="btn btn-secondary btn-full" onclick="document.getElementById('import-json-input').click()">
+            Відновити з файлу JSON
+          </button>
+          <div class="grid-2">
+            <button class="btn btn-secondary" style="font-size:12px" onclick="copyBackupText()">Скопіювати код копії</button>
+            <button class="btn btn-secondary" style="font-size:12px" onclick="openPasteBackupModal()">Вставити з тексту</button>
+          </div>
+        </div>
+
+        <!-- 2. Експорт обліку в CSV -->
+        <div class="card stack">
+          <span class="section-title">Експорт для Excel</span>
+          <button class="btn btn-secondary btn-full" onclick="exportCSV()">
+            Експорт обліку за ${MONTHS_UK[ui.month]} ${ui.year} (CSV)
+          </button>
+        </div>
+
+        <!-- 3. Керування відділеннями -->
+        <div class="card stack">
+          <div class="row-between">
+            <span class="section-title">Відділення</span>
+            <button class="btn btn-sm btn-primary" onclick="openSquadModal()">+ Додати</button>
+          </div>
+          ${state.squads.length === 0
+            ? `<div class="text-sm text-muted">Відділень немає.</div>`
+            : `<div class="stack">
+                ${state.squads.map(sq => `
+                  <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);border-left:4px solid ${sq.color}">
+                    <div class="row-gap" style="min-width:0">
+                      <span class="pill-dot" style="background:${sq.color}"></span>
+                      <span class="text-sm" style="font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</span>
+                    </div>
+                    <div class="row-gap" style="flex-shrink:0">
+                      <button class="btn btn-sm btn-secondary" onclick="openSquadModal('${sq.id}')">Змінити</button>
+                      <button class="btn-icon danger" style="width:32px;height:32px" onclick="promptDeleteSquad('${sq.id}')" title="Видалити">✕</button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>`
+          }
+        </div>
+
+        <!-- 4. Керування видами нарядів -->
+        <div class="card stack">
+          <div class="row-between">
+            <span class="section-title">Види нарядів</span>
+            <button class="btn btn-sm btn-primary" onclick="openAddDutyTypeModal()">+ Додати</button>
+          </div>
+          <div class="stack">
+            ${state.dutyTypes.map(dt => `
+              <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">
+                <span class="text-sm" style="font-weight:600;color:#fff">${esc(dt.name)}</span>
+                ${state.dutyTypes.length > 1
+                  ? `<button class="btn btn-sm btn-danger" onclick="deleteDutyType('${dt.id}')">Видалити</button>`
+                  : `<span class="text-xs text-muted">Останній</span>`
+                }
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- 5. Очищення всіх даних (подвійне підтвердження) -->
+        <div class="card stack" style="border-color:rgba(239,68,68,0.35)">
+          <span class="section-title" style="color:#f87171">Небезпечна зона</span>
+          <button class="btn btn-danger btn-full" onclick="promptResetAllStep1()">Очистити всі дані</button>
+        </div>
+      `;
+    }
+
+    // --- Керування відділеннями ---
+    let tempSquadColor = SQUAD_PALETTE[0];
+
+    function openSquadModal(squadId = null) {
+      const existing = squadId ? state.squads.find(s => s.id === squadId) : null;
+      tempSquadColor = existing?.color || SQUAD_PALETTE[state.squads.length % SQUAD_PALETTE.length];
+
+      openModal(`
+        <div class="modal-header">
+          <div class="modal-title">${existing ? 'Редагувати відділення' : 'Нове відділення'}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <form class="modal-body" onsubmit="saveSquad(event, '${squadId || ''}')">
+          <div class="field">
+            <label class="field-label" for="squad-name-input">Назва відділення</label>
+            <input id="squad-name-input" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Наприклад: 4-те відділення" />
+          </div>
+          <div class="field">
+            <div class="field-label">Колір відділення</div>
+            <div class="color-palette" id="squad-color-palette">
+              ${SQUAD_PALETTE.map(c => `
+                <button type="button" class="color-swatch ${c === tempSquadColor ? 'selected' : ''}" style="background:${c}" onclick="pickSquadColor('${c}', this)" aria-label="Колір"></button>
+              `).join('')}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Зберегти</button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('squad-name-input')?.focus(), 50);
+    }
+
+    function pickSquadColor(hex, btn) {
+      tempSquadColor = hex;
+      document.querySelectorAll('#squad-color-palette .color-swatch').forEach(el => el.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function saveSquad(e, squadId) {
+      e.preventDefault();
+      const name = document.getElementById('squad-name-input').value.trim();
+      if (!name) return;
+      if (squadId) {
+        const sq = state.squads.find(x => x.id === squadId);
+        if (sq) { sq.name = name; sq.color = tempSquadColor; }
+      } else {
+        state.squads.push({ id: genId('sq'), name, color: tempSquadColor });
+      }
+      saveState();
+      closeModal();
+      render();
+      showToast(squadId ? 'Відділення оновлено' : 'Відділення додано');
+    }
+
+    function promptDeleteSquad(squadId) {
+      const sq = getSquadById(squadId);
+      const cnt = state.soldiers.filter(s => s.squadId === squadId).length;
+      showConfirm(
+        `Видалити «${sq.name}»?`,
+        cnt > 0
+          ? `У цьому відділенні є ${cnt} бійців. Вони та їхні наряди також будуть видалені.`
+          : 'Відділення буде видалено зі списку.',
+        'Видалити',
+        () => {
+          const sIds = new Set(state.soldiers.filter(s => s.squadId === squadId).map(s => s.id));
+          state.squads = state.squads.filter(s => s.id !== squadId);
+          state.soldiers = state.soldiers.filter(s => s.squadId !== squadId);
+          state.duties = state.duties.filter(d => !sIds.has(d.soldierId));
+          state.tasks = state.tasks.filter(t => !(t.targetType === 'squad' && t.targetSquadId === squadId));
+          if (ui.scheduleSquadFilter === squadId) ui.scheduleSquadFilter = 'all';
+          if (ui.statsSquadFilter === squadId) ui.statsSquadFilter = 'all';
+          if (ui.personnelSquadFilter === squadId) ui.personnelSquadFilter = 'all';
+          if (ui.tasksTargetFilter === squadId) ui.tasksTargetFilter = 'all';
+          saveState();
+          render();
+          showToast('Відділення видалено');
+        }
+      );
+    }
+
+    // --- Види нарядів ---
+    function openAddDutyTypeModal() {
+      openModal(`
+        <div class="modal-header">
+          <div class="modal-title">Новий вид наряду</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <form class="modal-body" onsubmit="saveDutyType(event)">
+          <div class="field">
+            <label class="field-label" for="dt-name">Назва виду наряду</label>
+            <input id="dt-name" class="input" type="text" required placeholder="Наприклад: Черговий по роті" />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Додати</button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('dt-name')?.focus(), 50);
+    }
+
+    function saveDutyType(e) {
+      e.preventDefault();
+      const name = document.getElementById('dt-name').value.trim();
+      if (!name) return;
+      state.dutyTypes.push({ id: genId('dt'), name });
+      saveState();
+      closeModal();
+      render();
+      showToast('Вид наряду додано');
+    }
+
+    function deleteDutyType(id) {
+      if (state.dutyTypes.length <= 1) return;
+      state.dutyTypes = state.dutyTypes.filter(d => d.id !== id);
+      saveState();
+      render();
+      showToast('Вид наряду видалено');
+    }
+
+    // --- Резервне копіювання (JSON файл + текст через буфер обміну) ---
+    function buildBackupPayload() {
+      return {
+        app: 'pomichnyk_vzvodu',
+        version: 3,
+        exportedAt: toDateTimeHuman(new Date()),
+        squads: state.squads,
+        soldiers: state.soldiers,
+        dutyTypes: state.dutyTypes,
+        duties: state.duties,
+        tasks: state.tasks
+      };
+    }
+
+    function downloadFile(content, filename, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportBackupJSON() {
+      const now = new Date();
+      state.lastBackupAt = toDateTimeHuman(now);
+      saveState();
+      const d = toISODate(now);
+      downloadFile(JSON.stringify(buildBackupPayload(), null, 2), `pomichnyk_vzvodu_backup_${d}.json`, 'application/json');
+      render();
+      showToast('Резервну копію JSON збережено');
+    }
+
+    function copyBackupText() {
+      const now = new Date();
+      const text = JSON.stringify(buildBackupPayload());
+      if (copyToClipboard(text, 'Код резервної копії скопійовано')) {
+        state.lastBackupAt = toDateTimeHuman(now);
+        saveState();
+        render();
+      }
+    }
+
+    function parseAndValidateBackup(rawText) {
+      const parsed = JSON.parse(rawText);
+      if (!parsed || !Array.isArray(parsed.squads) || !Array.isArray(parsed.soldiers) || !Array.isArray(parsed.duties)) {
+        throw new Error('Некоректна структура резервної копії');
+      }
+      return {
+        squads: parsed.squads,
+        soldiers: parsed.soldiers,
+        dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
+          ? parsed.dutyTypes
+          : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+        duties: parsed.duties,
+        tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+        lastBackupAt: state.lastBackupAt
+      };
+    }
+
+    function confirmApplyBackup(validatedState) {
+      showConfirm(
+        'Відновити дані з резервної копії?',
+        `Поточні дані будуть замінені. У копії: відділень — ${validatedState.squads.length}, бійців — ${validatedState.soldiers.length}, нарядів — ${validatedState.duties.length}, задач — ${validatedState.tasks.length}.`,
+        'Відновити',
+        () => {
+          state = validatedState;
+          saveState();
+          render();
+          showToast('Дані успішно відновлено');
+        },
+        false
+      );
+    }
+
+    function handleImportJSONFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const validated = parseAndValidateBackup(e.target.result);
+          confirmApplyBackup(validated);
+        } catch (err) {
+          showToast('Помилка: некоректний файл резервної копії', 'error');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function openPasteBackupModal() {
+      openModal(`
+        <div class="modal-header">
+          <div class="modal-title">Вставити резервну копію з тексту</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <form class="modal-body" onsubmit="submitPasteBackup(event)">
+          <div class="field">
+            <label class="field-label" for="paste-backup-area">Вставте раніше скопійований код JSON:</label>
+            <textarea id="paste-backup-area" class="textarea" style="min-height:130px;font-family:monospace;font-size:12px" required placeholder='{"app":"pomichnyk_vzvodu", ...}'></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Перевірити та відновити</button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('paste-backup-area')?.focus(), 50);
+    }
+
+    function submitPasteBackup(e) {
+      e.preventDefault();
+      const raw = document.getElementById('paste-backup-area').value.trim();
+      try {
+        const validated = parseAndValidateBackup(raw);
+        confirmApplyBackup(validated);
+      } catch (err) {
+        showToast('Помилка: некоректний код резервної копії', 'error');
+      }
+    }
+
+    // --- Експорт CSV ---
+    function exportCSV() {
+      const y = ui.year;
+      const m = ui.month;
+      const header = ['Відділення', 'ПІБ', 'Звання/Посада', 'КВ', 'Статус', `За ${MONTHS_UK[m]} ${y}`, 'За весь час', 'Останній наряд'];
+      const rows = [header];
+
+      for (const sq of state.squads) {
+        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
+        for (const s of members) {
+          const st = getSoldierStats(s.id, y, m);
+          rows.push([
+            sq.name,
+            s.name,
+            s.rank || '',
+            s.isCommander ? 'Так' : '',
+            getStatusObj(s.status).label,
+            st.monthCount,
+            st.totalCount,
+            formatDateShort(st.lastDate)
+          ]);
+        }
+      }
+
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+      downloadFile('\uFEFF' + csv, `oblik_naryadiv_${y}_${String(m + 1).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8;');
+      showToast('CSV-файл збережено');
+    }
+
+    // --- Подвійне підтвердження очищення всіх даних ---
+    function promptResetAllStep1() {
+      showConfirm(
+        'Очистити всі дані? (Крок 1 з 2)',
+        'Будуть видалені всі бійці, графік нарядів та задачі. Рекомендуємо спочатку зберегти резервну копію.',
+        'Продовжити',
+        () => {
+          setTimeout(() => promptResetAllStep2(), 120);
+        },
+        true
+      );
+    }
+
+    function promptResetAllStep2() {
+      showConfirm(
+        'Точно видалити все? (Крок 2 з 2)',
+        'Цю дію неможливо скасувати. Залишаться лише 3 базові порожні відділення та базові види нарядів.',
+        'Так, очистити все',
+        () => {
+          state = createEmptyInitialState();
+          saveState();
+          render();
+          showToast('Усі дані очищено');
+        },
+        true
+      );
+    }
+
+    // =========================================================================
+    // ГОЛОВНИЙ РЕНДЕР
+    // =========================================================================
+    function render() {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-${ui.activeTab}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      // Лічильник невиконаних/активних задач на вкладці «Задачі»
+      const activeTasksCnt = state.tasks.filter(t => t.status !== 'done').length;
+      const badge = document.getElementById('nav-tasks-badge');
+      if (activeTasksCnt > 0) {
+        badge.textContent = activeTasksCnt > 99 ? '99+' : activeTasksCnt;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      const main = document.getElementById('main-content');
+      if (ui.activeTab === 'duties') {
+        main.innerHTML = renderDutiesTab();
+      } else if (ui.activeTab === 'tasks') {
+        main.innerHTML = renderTasksTab();
+      } else if (ui.activeTab === 'personnel') {
+        main.innerHTML = renderPersonnelTab();
+      } else if (ui.activeTab === 'settings') {
+        main.innerHTML = renderSettingsTab();
+      }
+    }
+
+    // Ініціалізація при старті
+    loadState();
+    render();
+  </script>
 </body>
 </html>
