@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.5</title>
+  <title>Помічник взводу v3.6-tiles</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -523,6 +523,157 @@
     [data-theme="light"] .pin-screen [style*="color:#fff"] { color: #0f172a !important; }
     [data-theme="light"] .duty-group-box { background: #f8fafc !important; }
 
+    /* =========================================================================
+       ВАРІАНТ 1: КАРТКОВИЙ ДАШБОРД / ПЛИТКОВИЙ ДИЗАЙН
+       ========================================================================= */
+    .header {
+      margin: 8px 10px 0;
+      border-radius: 18px;
+      border: 1px solid var(--border-strong);
+      background: rgba(22, 31, 42, 0.94);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+    .nav {
+      bottom: calc(10px + var(--safe-bottom));
+      left: 10px;
+      right: 10px;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-top: none;
+      padding-bottom: 0;
+      pointer-events: none;
+    }
+    .nav-inner {
+      max-width: 580px;
+      height: 62px;
+      border-radius: 20px;
+      background: rgba(19, 27, 36, 0.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      padding: 4px;
+      pointer-events: auto;
+    }
+    .nav-btn.active {
+      background: rgba(74, 222, 128, 0.14);
+      border-radius: 15px;
+    }
+    .app { padding-bottom: calc(92px + var(--safe-bottom)); }
+    .card { border-radius: 18px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); }
+    .card-flush { border-radius: 18px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); }
+    .btn { border-radius: 13px; }
+    .input, .select, .textarea { border-radius: 13px; }
+    .date-bar { border-radius: 16px; }
+
+    /* Плиткова сітка Розходу (2 колонки, тап по плитці відкриває ПІБ) */
+    .rozkhid-tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+    .rozkhid-tile {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 11px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 92px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.16);
+      transition: transform 0.12s ease, border-color 0.16s ease, background-color 0.16s ease;
+    }
+    .rozkhid-tile.has-count {
+      border-color: rgba(245, 158, 11, 0.65);
+      background: linear-gradient(160deg, rgba(245, 158, 11, 0.11), var(--card) 58%);
+    }
+    .rozkhid-tile-tap {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .rozkhid-tile-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .rozkhid-tile-num {
+      font-size: 21px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--muted);
+    }
+    .rozkhid-tile.has-count .rozkhid-tile-num { color: #fbbf24; }
+    .rozkhid-tile-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .rozkhid-tile .stepper { gap: 4px; }
+    .rozkhid-tile .step-btn { width: 30px; height: 30px; font-size: 15px; border-radius: 8px; }
+    .rozkhid-tile .step-val { min-width: 18px; font-size: 13px; }
+
+    /* Компактні плитки нарядів на обраний день */
+    .duty-tile {
+      padding: 11px 12px;
+      border-radius: 15px;
+      background: rgba(11, 16, 21, 0.45);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .duty-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+    .duty-person-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 7px 9px;
+      border-radius: 11px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3.5px solid var(--accent);
+      min-width: 0;
+    }
+
+    /* Компактний підсумок вгорі кожної вкладки */
+    .dash-summary-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 15px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      font-size: 12.5px;
+    }
+
+    /* Адаптація світлої та OLED тем під плитковий дизайн */
+    [data-theme="oled"] .header { background: rgba(14, 14, 14, 0.96); }
+    [data-theme="oled"] .nav-inner { background: rgba(14, 14, 14, 0.97); }
+    [data-theme="oled"] .rozkhid-tile.has-count { background: linear-gradient(160deg, rgba(245, 158, 11, 0.14), #0e0e0e 60%); }
+    [data-theme="light"] .header { background: rgba(255, 255, 255, 0.96); box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08); }
+    [data-theme="light"] .nav-inner { background: rgba(255, 255, 255, 0.97); box-shadow: 0 10px 26px rgba(15, 23, 42, 0.14); }
+    [data-theme="light"] .duty-tile { background: #f8fafc; }
+    [data-theme="light"] .duty-person-chip { background: #ffffff; }
+    [data-theme="light"] .rozkhid-tile-tap .fw-bold { color: #0f172a; }
+    [data-theme="light"] .rozkhid-tile.has-count .rozkhid-tile-num { color: #b45309; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -745,7 +896,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.5';
+    var APP_VERSION = 'v3.6-tiles';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -1910,29 +2061,39 @@
       // Наряди на обрану дату
       var selDay = state.duties[ui.selectedDate] || {};
       var editable = canEditDuties();
-      var dutyBlocks = state.dutyTypes.map(function(dt) {
-        var assigned = (selDay[dt.id] || []).map(getSoldierById).filter(Boolean);
-        var listHtml = assigned.length
-          ? assigned.map(function(s) {
-              var sq = getSquadById(s.squadId);
-              return '<div class="row-between" style="padding:7px 9px;border-radius:9px;background:var(--bg);border:1px solid var(--border);border-left:4px solid ' + esc(sq ? sq.color : 'var(--accent)') + '">' +
-                '<div class="min0">' +
-                  '<div class="fw-bold text-sm">' + esc(s.rank) + ' ' + esc(s.name) + '</div>' +
-                  '<div class="text-xs text-muted">' + esc(sq ? sq.name : '') + '</div>' +
-                '</div>' +
-                (editable ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="removeSoldierFromDuty(\'' + ui.selectedDate + '\',\'' + dt.id + '\',\'' + s.id + '\')">✕</button>' : '') +
-              '</div>';
-            }).join('')
-          : '<div class="text-xs text-muted">Не призначено</div>';
+      var totalAssignedDay = 0;
+      state.dutyTypes.forEach(function(dt) {
+        totalAssignedDay += (selDay[dt.id] || []).map(getSoldierById).filter(Boolean).length;
+      });
 
-        return '<div class="stack-sm duty-group-box" style="padding:10px;border-radius:11px;background:rgba(11,16,21,0.5);border:1px solid var(--border)">' +
-          '<div class="row-between">' +
-            '<div class="row"><span class="dot" style="background:' + esc(dt.color) + '"></span><span class="fw-800">' + esc(dt.shortName) + '</span><span class="text-xs text-muted">(' + esc(dt.name) + ' • ' + assigned.length + '/' + (dt.maxCount || 1) + ')</span></div>' +
-            (editable ? '<button type="button" class="btn btn-xs btn-primary" onclick="openAssignDutyModal(\'' + dt.id + '\')">+ Призначити</button>' : '') +
-          '</div>' +
-          listHtml +
-        '</div>';
-      }).join('');
+      var dutyBlocks =
+        '<div class="dash-summary-strip">' +
+          '<span class="text-muted">Дата: <b style="color:var(--text)">' + fmtUA(ui.selectedDate) + '</b></span>' +
+          '<span class="badge badge-info">Призначено: ' + totalAssignedDay + ' ос.</span>' +
+        '</div>' +
+        state.dutyTypes.map(function(dt) {
+          var assigned = (selDay[dt.id] || []).map(getSoldierById).filter(Boolean);
+          var listHtml = assigned.length
+            ? '<div class="duty-chips-grid">' + assigned.map(function(s) {
+                var sq = getSquadById(s.squadId);
+                return '<div class="duty-person-chip" style="border-left-color:' + esc(sq ? sq.color : 'var(--accent)') + '">' +
+                  '<div class="min0">' +
+                    '<div class="fw-bold text-xs" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(s.name) + '</div>' +
+                    '<div class="text-xs text-muted" style="font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(s.rank) + (sq ? (' • ' + esc(sq.name.replace('-ше відділення','').replace('-ге відділення','').replace('-тє відділення',''))) : '') + '</div>' +
+                  '</div>' +
+                  (editable ? '<button type="button" style="color:#f87171;font-weight:800;padding:2px 5px;font-size:13px;flex-shrink:0" onclick="removeSoldierFromDuty(\'' + ui.selectedDate + '\',\'' + dt.id + '\',\'' + s.id + '\')" title="Зняти">✕</button>' : '') +
+                '</div>';
+              }).join('') + '</div>'
+            : '<div class="text-xs text-muted">Не призначено</div>';
+
+          return '<div class="duty-tile duty-group-box">' +
+            '<div class="row-between">' +
+              '<div class="row min0"><span class="dot" style="background:' + esc(dt.color) + '"></span><span class="fw-800">' + esc(dt.shortName) + '</span><span class="text-xs text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(dt.name) + ' • ' + assigned.length + '/' + (dt.maxCount || 1) + '</span></div>' +
+              (editable ? '<button type="button" class="btn btn-xs btn-primary" style="flex-shrink:0" onclick="openAssignDutyModal(\'' + dt.id + '\')">+ ПІБ</button>' : '') +
+            '</div>' +
+            listHtml +
+          '</div>';
+        }).join('');
 
       var dayCard =
         '<div class="card stack">' +
@@ -2369,32 +2530,38 @@
           '<div class="kpi-box"><div class="kpi-val" style="color:var(--accent)">' + present + '</div><div class="kpi-lbl">Вн (В наявності)</div></div>' +
         '</div>';
 
-      // 11 категорій
-      var catRows = ROZKHID_CATS.map(function(c) {
+      // 11 категорій у форматі плиткового дашборду
+      var catRows = '<div class="rozkhid-tiles-grid">' + ROZKHID_CATS.map(function(c) {
         var entry = day[c.key];
         var cnt = Number(entry.count) || 0;
         var chips = entry.ids.map(function(id) {
           var s = getSoldierById(id);
           return s ? '<span class="name-chip">' + esc(s.name.split(/\s+/)[0]) + '</span>' : '';
         }).join('');
+        var tapAttrs = mode !== 'view' ? ('onclick="openRozkhidPickerModal(\'' + c.key + '\')" title="Обрати ПІБ"') : '';
 
-        return '<div class="rozkhid-row ' + (cnt > 0 ? 'has-count' : '') + '">' +
-          '<div class="row-between">' +
-            '<div class="fw-bold text-sm">' + esc(c.label) + (c.hint ? ' <span class="text-xs text-muted">(' + esc(c.hint) + ')</span>' : '') + '</div>' +
-            '<div class="row" style="gap:6px">' +
-              (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-secondary" onclick="openRozkhidPickerModal(\'' + c.key + '\')">ПІБ (' + entry.ids.length + ')</button>' : '') +
-              (mode === 'all' ? (
-                '<div class="stepper">' +
-                  '<button type="button" class="step-btn" onclick="stepRozkhidCount(\'' + c.key + '\',-1)">−</button>' +
-                  '<span class="step-val">' + cnt + '</span>' +
-                  '<button type="button" class="step-btn" onclick="stepRozkhidCount(\'' + c.key + '\',1)">+</button>' +
-                '</div>'
-              ) : '<span class="step-val">' + cnt + '</span>') +
+        return '<div class="rozkhid-tile ' + (cnt > 0 ? 'has-count' : '') + '">' +
+          '<button type="button" class="rozkhid-tile-tap" ' + tapAttrs + '>' +
+            '<div class="rozkhid-tile-top">' +
+              '<span class="fw-bold text-sm" style="color:var(--text)">' + esc(c.label) + '</span>' +
+              '<span class="rozkhid-tile-num">' + cnt + '</span>' +
             '</div>' +
+            (c.hint ? '<div class="text-xs text-muted" style="font-size:11px">' + esc(c.hint) + '</div>' : '') +
+          '</button>' +
+          (chips ? '<div class="row wrap" style="gap:3px">' + chips + '</div>' : '') +
+          '<div class="rozkhid-tile-foot">' +
+            (mode !== 'view'
+              ? '<button type="button" class="btn btn-xs btn-secondary" style="padding:3px 7px;min-height:30px;font-size:11px" onclick="openRozkhidPickerModal(\'' + c.key + '\')">ПІБ (' + entry.ids.length + ')</button>'
+              : '<span class="text-xs text-muted">ПІБ: ' + entry.ids.length + '</span>') +
+            (mode === 'all' ? (
+              '<div class="stepper">' +
+                '<button type="button" class="step-btn" onclick="stepRozkhidCount(\'' + c.key + '\',-1)">−</button>' +
+                '<button type="button" class="step-btn" onclick="stepRozkhidCount(\'' + c.key + '\',1)">+</button>' +
+              '</div>'
+            ) : '') +
           '</div>' +
-          (chips ? '<div class="row wrap" style="gap:4px">' + chips + '</div>' : '') +
         '</div>';
-      }).join('');
+      }).join('') + '</div>';
 
       // Прев'ю та копіювання
       var preview =
@@ -2412,7 +2579,7 @@
         (mode === 'own' ? '<div class="info-banner">Ви можете відмічати у розході бійців лише свого відділення через кнопку «ПІБ».</div>' : '') +
         (mode === 'view' ? '<div class="info-banner">Режим перегляду розходу.</div>' : '') +
         schedBanner + kpi +
-        '<div class="card stack-sm">' + catRows + '</div>' + preview;
+        catRows + preview;
     }
 
     function shiftRozkhidDate(delta) {
