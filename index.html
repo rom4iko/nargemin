@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.10-tasks-photo-prio</title>
+  <title>Помічник взводу v3.12-tasks-irrelevant-tab</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -797,6 +797,47 @@
       border-color: rgba(100, 116, 139, 0.3);
     }
 
+    /* =========================================================================
+       АНТИ-МОХЛЮВАННЯ ТА ВКЛАДКА «БІЛЬШЕ НЕ АКТУАЛЬНО» (v3.12)
+       ========================================================================= */
+    .st-pending-review {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: var(--amber);
+      color: #fde68a;
+    }
+    .st-irrelevant {
+      background: rgba(148, 163, 184, 0.2);
+      border-color: #94a3b8;
+      color: #cbd5e1;
+    }
+    .task-card.st-pending_review { border-left-color: var(--amber); }
+    .task-card.st-irrelevant { border-left-color: #94a3b8; opacity: 0.9; }
+    .audit-log-box {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 11.5px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .audit-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    html:not([data-theme="dark"]):not([data-theme="oled"]) .st-pending-review {
+      color: #b45309;
+      background: rgba(217, 119, 6, 0.14);
+    }
+    html:not([data-theme="dark"]):not([data-theme="oled"]) .st-irrelevant {
+      color: #334155;
+      background: rgba(100, 116, 139, 0.14);
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -983,7 +1024,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.10-tasks-photo-prio';
+    var APP_VERSION = 'v3.12-tasks-irrelevant-tab';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -1328,8 +1369,13 @@
           requirePhoto: Boolean(t.requirePhoto),
           photoProof: typeof t.photoProof === 'string' ? t.photoProof : '',
           photoUpdatedAt: String(t.photoUpdatedAt || ''),
-          status: (t.status === 'done' || t.status === 'failed' || t.status === 'received') ? t.status : 'received',
+          status: (t.status === 'done' || t.status === 'pending_review' || t.status === 'irrelevant' || t.status === 'failed' || t.status === 'received') ? t.status : 'received',
           remark: String(t.remark || t.note || ''),
+          statusChangedBy: String(t.statusChangedBy || ''),
+          statusChangedAt: String(t.statusChangedAt || ''),
+          verifiedBy: String(t.verifiedBy || ''),
+          verifiedAt: String(t.verifiedAt || ''),
+          auditTrail: Array.isArray(t.auditTrail) ? t.auditTrail.slice(-15) : [],
           createdAt: t.createdAt || fmtTimeNow()
         };
       });
@@ -2374,7 +2420,7 @@
     }
 
     // =========================================================================
-    // 9. ВКЛАДКА 2: ЗАДАЧІ (ПРІОРИТЕТНІСТЬ + ФОТОДОКАЗИ + АДРЕСНА ВИДИМІСТЬ)
+    // 9. ВКЛАДКА 2: ЗАДАЧІ (АНТИ-МОХЛЮВАННЯ + «БІЛЬШЕ НЕ АКТУАЛЬНО» + ПРАВА)
     // =========================================================================
     var PRIO_META = {
       high:   { label: 'Високий пріоритет', short: 'Терміново', rank: 0, cls: 'prio-high' },
@@ -2385,6 +2431,43 @@
 
     function getPriorityMeta(p) {
       return PRIO_META[p] || PRIO_META.normal;
+    }
+
+    function canConfirmFinalDone() {
+      return currentRole === 'admin' || currentRole === 'kg';
+    }
+
+    function canMoveToIrrelevant() {
+      return currentRole === 'admin' || currentRole === 'kg';
+    }
+
+    function canDeleteTaskCompletely() {
+      return currentRole === 'admin';
+    }
+
+    function isTaskDoneOrReviewOrIrrelevant(t) {
+      return t && (t.status === 'done' || t.status === 'pending_review' || t.status === 'irrelevant');
+    }
+
+    function isTaskClosedOrInactive(t) {
+      return !t || t.status === 'done' || t.status === 'irrelevant';
+    }
+
+    function appendTaskAudit(task, actionLabel) {
+      if (!task) return;
+      if (!Array.isArray(task.auditTrail)) task.auditTrail = [];
+      var actor = (ROLES_META[currentRole] && ROLES_META[currentRole].short) || currentRole || 'Система';
+      var nowStr = fmtTimeNow();
+      task.statusChangedBy = actor;
+      task.statusChangedAt = nowStr;
+      task.auditTrail.push({
+        by: actor,
+        at: nowStr,
+        action: actionLabel
+      });
+      if (task.auditTrail.length > 15) {
+        task.auditTrail = task.auditTrail.slice(-15);
+      }
     }
 
     function triggerTaskPhotoUpload(taskId) {
@@ -2437,9 +2520,17 @@
             if (t) {
               t.photoProof = dataUrl;
               t.photoUpdatedAt = fmtTimeNow();
-              t.status = 'done';
+              if (canConfirmFinalDone()) {
+                t.status = 'done';
+                t.verifiedBy = (ROLES_META[currentRole] && ROLES_META[currentRole].short) || currentRole;
+                t.verifiedAt = fmtTimeNow();
+                appendTaskAudit(t, 'Прикріпив фото та підтвердив «Виконано»');
+              } else {
+                t.status = 'pending_review';
+                appendTaskAudit(t, 'Прикріпив фото та подав «На перевірку»');
+              }
               saveState(true);
-              showToast('Фотодоказ прикріплено, задачу позначено як виконану');
+              showToast(canConfirmFinalDone() ? 'Фото прикріплено, задачу виконано' : 'Фото прикріплено, відправлено на перевірку');
               render();
             }
           } catch (err) {
@@ -2459,6 +2550,12 @@
       if (!t) return;
       t.photoProof = '';
       t.photoUpdatedAt = '';
+      if (t.requirePhoto && (t.status === 'done' || t.status === 'pending_review')) {
+        t.status = 'received';
+        appendTaskAudit(t, 'Видалив фотодоказ (статус повернуто до «Отримано»)');
+      } else {
+        appendTaskAudit(t, 'Видалив фотодоказ');
+      }
       saveState(true);
       showToast('Фотодоказ видалено');
       render();
@@ -2485,6 +2582,9 @@
     function renderTasksTab() {
       var canCreate = canCreateTasks();
       var canUpdate = canUpdateTasks();
+      var canConfirm = canConfirmFinalDone();
+      var canIrrelevant = canMoveToIrrelevant();
+      var canDelete = canDeleteTaskCompletely();
 
       var createForm = '';
       if (canCreate) {
@@ -2527,7 +2627,7 @@
       // Видимі задачі для поточної ролі
       var visibleTasks = state.tasks.filter(function(t) { return isTaskVisibleForRole(t, currentRole); });
 
-      // Фільтри
+      // Фільтри отримувачів
       var canSeeAll = isAdmin() || Boolean(getPerm().tasksViewAll);
       var recPills = '';
       if (canSeeAll) {
@@ -2539,12 +2639,17 @@
         }).join('') + '</div>';
       }
 
+      var irrelevantCount = visibleTasks.filter(function(t) { return t.status === 'irrelevant'; }).length;
+
+      // Вкладки/фільтри статусів задач, включно з «Більше не актуально»
       var statusFilters = [
         { key: 'all', label: 'Усі (' + visibleTasks.length + ')' },
         { key: 'active', label: 'Активні' },
         { key: 'received', label: 'Отримано' },
+        { key: 'pending_review', label: 'На перевірці' },
         { key: 'done', label: 'Виконано' },
-        { key: 'failed', label: 'Не виконано' }
+        { key: 'failed', label: 'Не виконано' },
+        { key: 'irrelevant', label: 'Більше не актуально (' + irrelevantCount + ')' }
       ];
       var statusPills = '<div class="pills-scroll">' + statusFilters.map(function(sf) {
         return '<button type="button" class="pill ' + (ui.tasksFilterStatus === sf.key ? 'active' : '') + '" onclick="ui.tasksFilterStatus=\'' + sf.key + '\';render()">' + esc(sf.label) + '</button>';
@@ -2553,13 +2658,14 @@
       var filtered = visibleTasks
         .filter(function(t) {
           if (canSeeAll && ui.tasksFilterRecipient !== 'all' && t.targetRole !== ui.tasksFilterRecipient) return false;
-          if (ui.tasksFilterStatus === 'active') return t.status !== 'done';
-          if (ui.tasksFilterStatus !== 'all' && t.status !== ui.tasksFilterStatus) return false;
+          if (ui.tasksFilterStatus === 'active') return !isTaskClosedOrInactive(t);
+          if (ui.tasksFilterStatus === 'all') return t.status !== 'irrelevant';
+          if (ui.tasksFilterStatus !== t.status) return false;
           return true;
         })
         .sort(function(a, b) {
-          var aDone = a.status === 'done' ? 1 : 0;
-          var bDone = b.status === 'done' ? 1 : 0;
+          var aDone = isTaskClosedOrInactive(a) ? 1 : 0;
+          var bDone = isTaskClosedOrInactive(b) ? 1 : 0;
           if (aDone !== bDone) return aDone - bDone;
           var ra = getPriorityMeta(a.priority).rank;
           var rb = getPriorityMeta(b.priority).rank;
@@ -2574,16 +2680,20 @@
         var pm = getPriorityMeta(t.priority);
         var stBadge = t.status === 'done'
           ? '<span class="badge badge-ok">Виконано</span>'
-          : t.status === 'failed'
-            ? '<span class="badge badge-err">Не виконано</span>'
-            : '<span class="badge badge-info">Отримав задачу</span>';
+          : t.status === 'pending_review'
+            ? '<span class="badge badge-warn">На перевірці</span>'
+            : t.status === 'irrelevant'
+              ? '<span class="badge">Більше не актуально</span>'
+              : t.status === 'failed'
+                ? '<span class="badge badge-err">Не виконано</span>'
+                : '<span class="badge badge-info">Отримав задачу</span>';
 
         var photoRequirementBadge = t.requirePhoto
           ? '<span class="badge badge-warn">Фото обов\'язкове</span>'
           : '<span class="badge badge-info">Фото не обов\'язкове</span>';
 
-        var showPhotoBlock = Boolean(t.requirePhoto) || Boolean(t.photoProof) || t.status === 'done';
-        var missingReqPhoto = Boolean(t.requirePhoto) && t.status === 'done' && !t.photoProof;
+        var showPhotoBlock = Boolean(t.requirePhoto) || Boolean(t.photoProof) || isTaskDoneOrReviewOrIrrelevant(t);
+        var missingReqPhoto = Boolean(t.requirePhoto) && !t.photoProof;
         var photoBlockHtml = '';
         if (showPhotoBlock) {
           var imgPreviewHtml = t.photoProof
@@ -2594,22 +2704,62 @@
                '</div>')
             : ('<div class="text-xs ' + (missingReqPhoto ? 'fw-bold" style="color:#fcd34d' : 'text-muted') + '">' +
                 (t.requirePhoto
-                  ? 'Для цієї задачі потрібен фотодоказ виконання.'
-                  : 'Фотодоказ не обов\'язковий, але можна прикріпити після виконання.') +
+                  ? 'Обов\'язково вкладіть фотодоказ перед подачею на перевірку.'
+                  : 'Фотодоказ не обов\'язковий, але можна вкласти при виконанні.') +
                '</div>');
 
           photoBlockHtml =
-            '<div class="photo-proof-box ' + (missingReqPhoto ? 'required-missing' : '') + '">' +
+            '<div class="photo-proof-box ' + (missingReqPhoto && (t.status === 'done' || t.status === 'pending_review') ? 'required-missing' : '') + '">' +
               '<div class="row-between">' +
                 '<span class="fw-bold text-xs">Фотодоказ виконання</span>' +
                 (canUpdate
-                  ? ('<button type="button" class="btn btn-xs ' + (t.requirePhoto && !t.photoProof ? 'btn-warn' : 'btn-info') + '" onclick="triggerTaskPhotoUpload(\'' + t.id + '\')">' +
+                  ? ('<button type="button" class="btn btn-xs ' + (missingReqPhoto ? 'btn-warn' : 'btn-info') + '" onclick="triggerTaskPhotoUpload(\'' + t.id + '\')">' +
                       ico('upload', 12) + ' ' + (t.photoProof ? 'Замінити фото' : 'Вкласти фото') +
                     '</button>')
                   : '') +
               '</div>' +
               imgPreviewHtml +
             '</div>';
+        }
+
+        // Кнопки статусу: для КВ замість "Виконано" подається "На перевірку", фінальне "Виконано" підтверджує Адмін / КГ
+        var doneBtnLabel = canConfirm ? 'Виконано' : 'На перевірку';
+        var doneBtnTarget = canConfirm ? 'done' : 'pending_review';
+        var isDoneOrReviewActive = canConfirm ? (t.status === 'done') : (t.status === 'pending_review' || t.status === 'done');
+
+        var statusButtonsHtml = '';
+        if (canUpdate && t.status !== 'irrelevant') {
+          statusButtonsHtml =
+            '<div class="status-group">' +
+              '<button type="button" class="status-btn ' + (t.status === 'received' ? 'st-received' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'received\')">Отримав задачу</button>' +
+              '<button type="button" class="status-btn ' + (isDoneOrReviewActive ? (t.status === 'pending_review' ? 'st-pending-review' : 'st-done') : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'' + doneBtnTarget + '\')">' + doneBtnLabel + '</button>' +
+              '<button type="button" class="status-btn ' + (t.status === 'failed' ? 'st-failed' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'failed\')">Не виконано</button>' +
+            '</div>' +
+            (canConfirm && t.status === 'pending_review' ? (
+              '<div class="row" style="gap:6px">' +
+                '<button type="button" class="btn btn-xs btn-primary min0" onclick="setTaskStatus(\'' + t.id + '\',\'done\')">✓ Підтвердити виконання</button>' +
+                '<button type="button" class="btn btn-xs btn-danger" onclick="setTaskStatus(\'' + t.id + '\',\'failed\')">✕ Відхилити</button>' +
+              '</div>'
+            ) : '');
+        }
+
+        // Перенесення у «Більше не актуально» або повернення — тільки для Адміна та КГ
+        var irrelevantActionHtml = '';
+        if (canIrrelevant) {
+          if (t.status !== 'irrelevant') {
+            irrelevantActionHtml = '<button type="button" class="btn btn-xs btn-secondary btn-full" onclick="moveTaskToIrrelevant(\'' + t.id + '\')">Перенести у «Більше не актуально»</button>';
+          } else {
+            irrelevantActionHtml = '<button type="button" class="btn btn-xs btn-info btn-full" onclick="restoreTaskFromIrrelevant(\'' + t.id + '\')">Повернути в активні задачі</button>';
+          }
+        }
+
+        // Журнал змін статусу (хто і коли змінював)
+        var auditHtml = '';
+        if (Array.isArray(t.auditTrail) && t.auditTrail.length > 0) {
+          var recentLogs = t.auditTrail.slice(-3).map(function(a) {
+            return '<div class="audit-item"><span>' + esc(a.by) + ': ' + esc(a.action) + '</span><span>' + esc(a.at) + '</span></div>';
+          }).join('');
+          auditHtml = '<div class="audit-log-box">' + recentLogs + '</div>';
         }
 
         return '<div class="task-card st-' + esc(t.status) + (t.priority === 'high' ? ' prio-high-card' : '') + '">' +
@@ -2620,7 +2770,7 @@
               photoRequirementBadge +
             '</div>' +
             '<div class="row" style="gap:6px">' + stBadge +
-              (canCreate ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')" title="Видалити">✕</button>' : '') +
+              (canDelete ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')" title="Видалити повністю">✕</button>' : '') +
             '</div>' +
           '</div>' +
           '<div style="font-size:14.5px;color:#fff;white-space:pre-wrap">' + esc(t.text) + '</div>' +
@@ -2629,22 +2779,18 @@
             '<span>' + esc(t.createdAt) + '</span>' +
           '</div>' +
           photoBlockHtml +
-          (canUpdate ? (
-            '<div class="status-group">' +
-              '<button type="button" class="status-btn ' + (t.status === 'received' ? 'st-received' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'received\')">Отримав задачу</button>' +
-              '<button type="button" class="status-btn ' + (t.status === 'done' ? 'st-done' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'done\')">Виконано</button>' +
-              '<button type="button" class="status-btn ' + (t.status === 'failed' ? 'st-failed' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'failed\')">Не виконано</button>' +
-            '</div>'
-          ) : '') +
+          statusButtonsHtml +
           (showRemark ? (
             '<div class="field">' +
-              '<label class="field-label">Зауваження / Причина</label>' +
+              '<label class="field-label">Зауваження / Причина (обов\'язково для «Не виконано»)</label>' +
               '<div class="row">' +
-                '<input id="rem-' + t.id + '" class="input" type="text" value="' + esc(t.remark) + '" placeholder="Вкажіть зауваження..." ' + (canUpdate ? '' : 'disabled') + ' />' +
-                (canUpdate ? '<button type="button" class="btn btn-sm btn-secondary" onclick="saveTaskRemark(\'' + t.id + '\')">Зберегти</button>' : '') +
+                '<input id="rem-' + t.id + '" class="input" type="text" value="' + esc(t.remark) + '" placeholder="Вкажіть причину або зауваження..." ' + (canUpdate && t.status !== 'irrelevant' ? '' : 'disabled') + ' />' +
+                (canUpdate && t.status !== 'irrelevant' ? '<button type="button" class="btn btn-sm btn-secondary" onclick="saveTaskRemark(\'' + t.id + '\')">Зберегти</button>' : '') +
               '</div>' +
             '</div>'
           ) : '') +
+          irrelevantActionHtml +
+          auditHtml +
         '</div>';
       }).join('') : '<div class="card empty-state">Задач за обраним фільтром немає.</div>';
 
@@ -2662,7 +2808,8 @@
       if (!text) { showToast('Введіть текст задачі', true); return; }
       var rec = TASK_RECIPIENTS[Number(recEl ? recEl.value : 0)] || TASK_RECIPIENTS[0];
       var prioVal = prioEl && (prioEl.value === 'high' || prioEl.value === 'low') ? prioEl.value : 'normal';
-      state.tasks.unshift({
+      var reqPhoto = Boolean(reqPhotoEl && reqPhotoEl.checked);
+      var newTask = {
         id: genId('task'),
         text: text,
         target: rec.label,
@@ -2670,13 +2817,16 @@
         targetSquadId: rec.targetSquadId,
         author: authEl ? authEl.value.trim() : '',
         priority: prioVal,
-        requirePhoto: Boolean(reqPhotoEl && reqPhotoEl.checked),
+        requirePhoto: reqPhoto,
         photoProof: '',
         photoUpdatedAt: '',
         status: 'received',
         remark: '',
-        createdAt: fmtTimeNow()
-      });
+        createdAt: fmtTimeNow(),
+        auditTrail: []
+      };
+      appendTaskAudit(newTask, 'Поставив задачу' + (reqPhoto ? ' (фото обов\'язкове)' : ''));
+      state.tasks.unshift(newTask);
       saveState(true);
       showToast('Задачу поставлено');
       render();
@@ -2685,17 +2835,74 @@
     function setTaskStatus(taskId, status) {
       if (!canUpdateTasks()) return;
       var t = state.tasks.find(function(x) { return x.id === taskId; });
-      if (!t) return;
-      if (status === 'done' && t.requirePhoto && !t.photoProof) {
-        t.status = status;
-        saveState(true);
-        showToast('Ця задача вимагає фотодоказ — прикріпіть фото після виконання', true);
+      if (!t || t.status === 'irrelevant') return;
+
+      // 1. Якщо вимагається фотодоказ — забороняємо подавати на перевірку або закривати без фото
+      if ((status === 'done' || status === 'pending_review') && t.requirePhoto && !t.photoProof) {
+        showToast('Спочатку вкладіть фотодоказ виконання задачі', true);
         render();
         return;
       }
+
+      // 2. Якщо статус "Не виконано" — вимагаємо зауваження/причину
+      if (status === 'failed') {
+        ui.tasksExpandedRemarks[taskId] = true;
+        var remInput = document.getElementById('rem-' + taskId);
+        var currentRemark = remInput ? remInput.value.trim() : (t.remark || '').trim();
+        if (!currentRemark) {
+          render();
+          showToast('Вкажіть причину в полі «Зауваження» перед статусом «Не виконано»', true);
+          var focusInp = document.getElementById('rem-' + taskId);
+          if (focusInp) focusInp.focus();
+          return;
+        }
+        t.remark = currentRemark;
+      }
+
+      // 3. Командири відділень не закривають задачу напряму у "Виконано" — переводять у "На перевірці"
+      if (status === 'done' && !canConfirmFinalDone()) {
+        status = 'pending_review';
+      }
+
       t.status = status;
-      if (status === 'failed') ui.tasksExpandedRemarks[taskId] = true;
+      if (status === 'done') {
+        t.verifiedBy = (ROLES_META[currentRole] && ROLES_META[currentRole].short) || currentRole;
+        t.verifiedAt = fmtTimeNow();
+      }
+
+      var labelMap = {
+        received: 'Позначив «Отримав задачу»',
+        pending_review: 'Подав «На перевірку»',
+        done: 'Підтвердив «Виконано»',
+        failed: 'Позначив «Не виконано»'
+      };
+      appendTaskAudit(t, labelMap[status] || ('Статус: ' + status));
       saveState(true);
+      render();
+    }
+
+    function moveTaskToIrrelevant(taskId) {
+      if (!canMoveToIrrelevant()) {
+        showToast('Переносити у «Більше не актуально» може лише Адмін або КГ', true);
+        return;
+      }
+      var t = state.tasks.find(function(x) { return x.id === taskId; });
+      if (!t) return;
+      t.status = 'irrelevant';
+      appendTaskAudit(t, 'Переніс у «Більше не актуально»');
+      saveState(true);
+      showToast('Перенесено у «Більше не актуально»');
+      render();
+    }
+
+    function restoreTaskFromIrrelevant(taskId) {
+      if (!canMoveToIrrelevant()) return;
+      var t = state.tasks.find(function(x) { return x.id === taskId; });
+      if (!t) return;
+      t.status = 'received';
+      appendTaskAudit(t, 'Повернув з «Більше не актуально» в роботу');
+      saveState(true);
+      showToast('Задачу повернуто в активні');
       render();
     }
 
@@ -2704,14 +2911,23 @@
       var t = state.tasks.find(function(x) { return x.id === taskId; });
       var inp = document.getElementById('rem-' + taskId);
       if (!t || !inp) return;
-      t.remark = inp.value.trim();
+      var val = inp.value.trim();
+      if (t.status === 'failed' && !val) {
+        showToast('Для статусу «Не виконано» зауваження не може бути порожнім', true);
+        return;
+      }
+      t.remark = val;
+      appendTaskAudit(t, val ? ('Оновив зауваження: ' + val) : 'Очистив зауваження');
       saveState(true);
       showToast('Зауваження збережено');
       render();
     }
 
     function deleteTask(taskId) {
-      if (!canCreateTasks()) return;
+      if (!canDeleteTaskCompletely()) {
+        showToast('Видаляти задачу повністю може лише Адмін', true);
+        return;
+      }
       state.tasks = state.tasks.filter(function(x) { return x.id !== taskId; });
       saveState(true);
       showToast('Задачу видалено');
@@ -2719,14 +2935,14 @@
     }
 
     function copyActiveTasks() {
-      var list = state.tasks.filter(function(t) { return t.status !== 'done' && isTaskVisibleForRole(t, currentRole); });
+      var list = state.tasks.filter(function(t) { return !isTaskClosedOrInactive(t) && isTaskVisibleForRole(t, currentRole); });
       if (!list.length) { showToast('Активних задач немає'); return; }
       var lines = ['Активні задачі (' + fmtUA(todayISO()) + '):'];
       list.forEach(function(t, i) {
-        var st = t.status === 'failed' ? 'НЕ ВИКОНАНО' : 'В роботі';
+        var st = t.status === 'failed' ? 'НЕ ВИКОНАНО' : (t.status === 'pending_review' ? 'НА ПЕРЕВІРЦІ' : 'В роботі');
         var pm = getPriorityMeta(t.priority);
         var line = (i + 1) + '. [' + pm.short + '] [' + t.target + '] ' + t.text + ' — ' + st;
-        if (t.requirePhoto) line += ' [Фото обов\'язкове]';
+        if (t.requirePhoto) line += ' [Фото обов\'язкове' + (t.photoProof ? ', додано' : ', немає') + ']';
         if (t.author) line += ' (від: ' + t.author + ')';
         if (t.remark) line += ' | Зауваження: ' + t.remark;
         lines.push(line);
@@ -3617,7 +3833,7 @@
       var badge = document.getElementById('nav-tasks-badge');
       if (!badge || !currentRole) return;
       var activeCount = state.tasks.filter(function(t) {
-        return t.status !== 'done' && isTaskVisibleForRole(t, currentRole);
+        return !isTaskClosedOrInactive(t) && isTaskVisibleForRole(t, currentRole);
       }).length;
       if (activeCount <= 0) {
         badge.classList.add('hidden');
@@ -3631,7 +3847,7 @@
     function getActiveTasksCountForRole() {
       if (!currentRole) return 0;
       return state.tasks.filter(function(t) {
-        return t.status !== 'done' && isTaskVisibleForRole(t, currentRole);
+        return !isTaskClosedOrInactive(t) && isTaskVisibleForRole(t, currentRole);
       }).length;
     }
 
