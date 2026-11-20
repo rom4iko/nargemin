@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1015" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Помічник взводу v3.0.1</title>
+  <title>Помічник взводу v3.0.2</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА ТА БАЗОВІ СТИЛІ (БЕЗ ЗОВНІШНІХ ЗАЛЕЖНОСТЕЙ)
@@ -450,7 +450,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, ДОВІДНИКИ ТА СХЕМА ДАНИХ
     // =========================================================================
-    const APP_VERSION = 'v3.0.1';
+    const APP_VERSION = 'v3.0.2';
     const APP_UPDATED = '20.11.2026';
     const STORAGE_KEY = 'pomichnyk_vzvodu_v30';
     const FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -522,6 +522,7 @@
     let fbPushDebounce = null;
     let lastSyncAt = null;
     let lastSyncError = '';
+    let lastSyncDiag = null; // { type: 'ok' | 'err' | 'info', text: string }
 
     let ui = {
       activeTab: 'duties',
@@ -550,299 +551,7 @@
     let tempColor = '#3b82f6';
 
     // =========================================================================
-    // 2. УТИЛІТИ ДАТ, ТЕКСТУ, РОЛЕЙ ТА СОРТУВАННЯ
-    // =========================================================================
-    function genId(p) { return p + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
-    function toISO(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-    function todayISO() { return toISO(new Date()); }
-    function addDaysISO(iso, delta) {
-      const p = String(iso).split('-').map(Number);
-      return toISO(new Date(p[0], p[1] - 1, p[2] + delta));
-    }
-    function formatHumanDate(iso) {
-      if (!iso) return '—';
-      const p = String(iso).split('-').map(Number);
-      return p[2] + ' ' + MONTHS_GEN[p[1] - 1] + ' ' + p[0];
-    }
-    function formatDotDate(iso) {
-      if (!iso) return '—';
-      const p = String(iso).split('-');
-      return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : iso;
-    }
-    function formatDayMonth(iso) {
-      if (!iso) return '—';
-      const p = String(iso).split('-');
-      return p.length === 3 ? (p[2] + '.' + p[1]) : iso;
-    }
-    function monthPrefix(y, m) { return y + '-' + String(m + 1).padStart(2, '0'); }
-    function formatDateTimeNow() {
-      const d = new Date();
-      return formatDotDate(toISO(d)) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    }
-    function esc(str) {
-      if (str === null || str === undefined) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-    function capitalizePIB(str) {
-      return String(str || '').replace(/(^|[\s-])([а-яіїєґa-z])/gi, function(m, sep, ch) { return sep + ch.toUpperCase(); });
-    }
-    function isCmdGroup(sq) {
-      return Boolean(sq && (sq.isCmdGroup || sq.isGroupCmd || sq.id === 'cmd' || sq.id === 'sq_group_cmd'));
-    }
-    function getOrderedSquads() {
-      const list = Array.isArray(state.squads) ? state.squads : [];
-      return list.filter(isCmdGroup).concat(list.filter(function(s) { return !isCmdGroup(s); }));
-    }
-    function getSquadById(id) {
-      return state.squads.find(function(s) { return s.id === id; }) || { id: id, name: 'Без відділення', color: '#64748b', isCmdGroup: false };
-    }
-    function getSoldierById(id) { return state.personnel.find(function(p) { return p.id === id; }); }
-    function getDutyTypeById(id) {
-      return state.dutyTypes.find(function(dt) { return dt.id === id; }) || { id: id, shortName: 'Наряд', name: 'Наряд', maxCount: 1, color: '#64748b' };
-    }
-    function getRozkhidCat(key) { return ROZKHID_CATS.find(function(c) { return c.key === key; }) || { key: key, label: key, hint: '' }; }
-    function getPresenceMeta(key) { return PRESENCE_STATUSES.find(function(p) { return p.key === key; }) || PRESENCE_STATUSES[0]; }
-    function sortSquadPersonnel(list) {
-      return list.slice().sort(function(a, b) {
-        if (a.isLeader && !b.isLeader) return -1;
-        if (!a.isLeader && b.isLeader) return 1;
-        return String(a.fullName || '').localeCompare(String(b.fullName || ''), 'uk');
-      });
-    }
-    function getSoldierDutyStats(soldierId, y, m) {
-      const pref = monthPrefix(y, m);
-      let monthCount = 0, totalCount = 0, lastDate = '';
-      for (let i = 0; i < state.duties.length; i++) {
-        const d = state.duties[i];
-        if (d.soldierId === soldierId) {
-          totalCount++;
-          if (d.date && d.date.indexOf(pref) === 0) monthCount++;
-          if (d.date && (!lastDate || d.date > lastDate)) lastDate = d.date;
-        }
-      }
-      return { monthCount: monthCount, totalCount: totalCount, lastDate: lastDate };
-    }
-    function getUpcomingAbsencesForSoldier(soldierId) {
-      const td = todayISO();
-      return state.scheduledAbsences
-        .filter(function(a) { return a.soldierId === soldierId && (a.endDate || a.startDate) >= td; })
-        .sort(function(a, b) { return a.startDate.localeCompare(b.startDate); });
-    }
-    function formatSquadRecipient(sq) {
-      const m = String(sq.name || '').match(/^(\d+)/);
-      return m ? ('Командиру ' + m[1] + '-го відділення') : ('Командиру (' + sq.name + ')');
-    }
-    function formatSquadShortTab(sq) {
-      const m = String(sq.name || '').match(/^(\d+-\S+)/);
-      return m ? (m[1] + ' відд.') : sq.name;
-    }
-
-    // Рольові права доступу (RBAC)
-    function isAdmin() { return sessionRole === 'admin'; }
-    function mySquadId() { return isAdmin() ? null : sessionRole; }
-    function canEditSoldier(soldier) { return isAdmin() || Boolean(soldier && soldier.squadId === sessionRole); }
-    function getRoleLabel(role) {
-      if (role === 'admin') return '★ Адмін';
-      if (role === 'sq1') return 'КВ 1-го відд.';
-      if (role === 'sq2') return 'КВ 2-го відд.';
-      if (role === 'sq3') return 'КВ 3-го відд.';
-      const sq = getSquadById(role);
-      return sq ? ('КВ: ' + formatSquadShortTab(sq)) : 'Гість';
-    }
-
-    // =========================================================================
-    // 3. ЛОКАЛЬНЕ ЗБЕРЕЖЕННЯ ТА МІГРАЦІЯ (v2.3 – v2.7 -> v3.0)
-    // =========================================================================
-    function createFreshState() {
-      return {
-        groupNumber: '223',
-        squads: JSON.parse(JSON.stringify(DEFAULT_SQUADS)),
-        personnel: [],
-        dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
-        duties: [],
-        tasks: [],
-        scheduledAbsences: [],
-        rozkhidManual: {},
-        rozkhidNumeric: {},
-        rozkhidCleared: {},
-        pins: Object.assign({}, DEFAULT_PINS),
-        lastBackupAt: null,
-        updatedAt: Date.now()
-      };
-    }
-
-    function mapLegacyStatus(val) {
-      if (!val) return 'in_service';
-      if (val === '__present__') return '__present__';
-      const map = {
-        active: 'in_service', in_service: 'in_service', 'Вн': 'in_service', 'В строю': 'in_service',
-        'Прийом шпиталь': 'priyom_shpytal', priyom_shpytal: 'priyom_shpytal',
-        'Прийом лазарет': 'priyom_lazaret', priyom_lazaret: 'priyom_lazaret',
-        'Ш': 'sh', sh: 'sh', 'Л': 'l', l: 'l', medical: 'l',
-        'Вд': 'vd', vd: 'vd', trip: 'vd', 'Вп': 'vp', vp: 'vp', leave: 'vp',
-        'Н': 'n', n: 'n', 'Г': 'g', g: 'g', 'Пк': 'pk', pk: 'pk', 'Хв': 'hv', hv: 'hv',
-        'Стародобовий': 'starodobovyi', starodobovyi: 'starodobovyi'
-      };
-      return map[String(val).trim()] || 'in_service';
-    }
-
-    function normalizeState(parsed) {
-      if (!parsed || typeof parsed !== 'object') return createFreshState();
-
-      let rawSquads = Array.isArray(parsed.squads) && parsed.squads.length
-        ? parsed.squads.slice()
-        : JSON.parse(JSON.stringify(DEFAULT_SQUADS));
-      if (!rawSquads.some(isCmdGroup)) {
-        rawSquads.unshift({ id: 'cmd', name: 'Командир групи', color: '#eab308', isCmdGroup: true });
-      }
-      const squads = rawSquads.map(function(sq, idx) {
-        return {
-          id: sq.id || genId('sq'),
-          name: String(sq.name || ('Відділення ' + idx)),
-          color: sq.color || PALETTE[idx % PALETTE.length],
-          isCmdGroup: isCmdGroup(sq)
-        };
-      });
-
-      const rawPeople = Array.isArray(parsed.personnel) ? parsed.personnel
-        : (Array.isArray(parsed.soldiers) ? parsed.soldiers : []);
-      const defSqId = (squads.find(function(s) { return !s.isCmdGroup; }) || squads[0]).id;
-      const personnel = rawPeople.map(function(p) {
-        const st = mapLegacyStatus(p.presenceStatus || p.status);
-        return {
-          id: p.id || genId('p'),
-          fullName: capitalizePIB(String(p.fullName || p.name || '').trim()),
-          rank: String(p.rank || '').trim(),
-          squadId: p.squadId || defSqId,
-          isLeader: Boolean(p.isLeader || p.isCommander),
-          presenceStatus: PERM_ABSENT_KEYS.has(st) ? st : 'in_service'
-        };
-      }).filter(function(p) { return p.fullName.length > 0; });
-
-      const rawTypes = Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
-        ? parsed.dutyTypes : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES));
-      const dutyTypes = rawTypes.map(function(dt, idx) {
-        const shortN = String(dt.shortName || dt.name || 'Наряд').trim();
-        const fullN = String(dt.shortName ? (dt.name || '') : (dt.desc || '')).trim();
-        const isDn = shortN.toLowerCase() === 'дн' || fullN.toLowerCase().indexOf('днювальн') !== -1;
-        return {
-          id: dt.id || genId('dt'),
-          shortName: shortN,
-          name: fullN || shortN,
-          maxCount: Math.min(10, Math.max(1, Number(dt.maxCount || dt.maxPeople) || (isDn ? 3 : 1))),
-          color: dt.color || PALETTE[(idx + 4) % PALETTE.length]
-        };
-      });
-
-      const duties = Array.isArray(parsed.duties) ? parsed.duties.map(function(d) {
-        return {
-          id: d.id || genId('d'),
-          date: String(d.date || ''),
-          soldierId: String(d.soldierId || ''),
-          dutyTypeId: String(d.dutyTypeId || (dutyTypes[0] ? dutyTypes[0].id : 'chk'))
-        };
-      }).filter(function(d) { return d.date && d.soldierId; }) : [];
-
-      const tasks = Array.isArray(parsed.tasks) ? parsed.tasks.map(function(t) {
-        const isAll = t.recipientType === 'all_leaders' || t.targetType === 'all_commanders';
-        return {
-          id: t.id || genId('task'),
-          recipientType: isAll ? 'all_leaders' : 'squad',
-          squadId: isAll ? '' : String(t.squadId || t.targetSquadId || defSqId),
-          text: String(t.text || ''),
-          author: String(t.author || t.issuer || ''),
-          status: (t.status === 'done' || t.status === 'failed') ? t.status : 'received',
-          remark: String(t.remark !== undefined ? t.remark : (t.note || '')),
-          createdAt: String(t.createdAt || formatDateTimeNow())
-        };
-      }).filter(function(t) { return t.text.length > 0; }) : [];
-
-      const scheduledAbsences = Array.isArray(parsed.scheduledAbsences) ? parsed.scheduledAbsences.map(function(a) {
-        return {
-          id: a.id || genId('sched'),
-          soldierId: String(a.soldierId || ''),
-          category: mapLegacyStatus(a.category),
-          startDate: String(a.startDate || ''),
-          endDate: String(a.endDate || ''),
-          note: String(a.note || '')
-        };
-      }).filter(function(a) { return a.soldierId && a.startDate && a.category !== 'in_service' && a.category !== '__present__'; }) : [];
-
-      // Розхід (підтримка нового формату v3.0 та міграція з v2.7 rozkhidByDate)
-      const rozkhidManual = (parsed.rozkhidManual && typeof parsed.rozkhidManual === 'object') ? JSON.parse(JSON.stringify(parsed.rozkhidManual)) : {};
-      const rozkhidNumeric = (parsed.rozkhidNumeric && typeof parsed.rozkhidNumeric === 'object') ? JSON.parse(JSON.stringify(parsed.rozkhidNumeric)) : {};
-      const rozkhidCleared = (parsed.rozkhidCleared && typeof parsed.rozkhidCleared === 'object') ? JSON.parse(JSON.stringify(parsed.rozkhidCleared)) : {};
-
-      const rawLegacyRoz = parsed.rozkhidByDate || parsed.rozkhid;
-      if (rawLegacyRoz && typeof rawLegacyRoz === 'object') {
-        Object.keys(rawLegacyRoz).forEach(function(dk) {
-          const item = rawLegacyRoz[dk];
-          if (!item || typeof item !== 'object') return;
-          if (item.cleared) rozkhidCleared[dk] = true;
-          const rm = item.manual || item.overrides || {};
-          Object.keys(rm).forEach(function(sid) {
-            if (!rozkhidManual[dk]) rozkhidManual[dk] = {};
-            const mk = mapLegacyStatus(rm[sid]);
-            rozkhidManual[dk][sid] = mk === 'in_service' ? '__present__' : mk;
-          });
-          const ro = item.offsets || item.extra || {};
-          Object.keys(ro).forEach(function(k) {
-            const mk = mapLegacyStatus(k);
-            const num = Math.max(0, Number(ro[k]) || 0);
-            if (mk !== 'in_service' && mk !== '__present__' && num > 0) {
-              if (!rozkhidNumeric[dk]) rozkhidNumeric[dk] = {};
-              rozkhidNumeric[dk][mk] = num;
-            }
-          });
-        });
-      }
-
-      const pins = Object.assign({}, DEFAULT_PINS, (parsed.pins && typeof parsed.pins === 'object') ? parsed.pins : {});
-
-      return {
-        groupNumber: (typeof parsed.groupNumber === 'string' && parsed.groupNumber.trim()) ? parsed.groupNumber.trim() : '223',
-        squads: squads,
-        personnel: personnel,
-        dutyTypes: dutyTypes,
-        duties: duties,
-        tasks: tasks,
-        scheduledAbsences: scheduledAbsences,
-        rozkhidManual: rozkhidManual,
-        rozkhidNumeric: rozkhidNumeric,
-        rozkhidCleared: rozkhidCleared,
-        pins: pins,
-        lastBackupAt: parsed.lastBackupAt || null,
-        updatedAt: Number(parsed.updatedAt) || Date.now()
-      };
-    }
-
-    function loadLocalState() {
-      try {
-        let raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          for (let i = 0; i < LEGACY_KEYS.length; i++) {
-            const f = localStorage.getItem(LEGACY_KEYS[i]);
-            if (f) { raw = f; break; }
-          }
-        }
-        state = raw ? normalizeState(JSON.parse(raw)) : createFreshState();
-        state.squads.forEach(function(sq) {
-          if (ui.openPersonnelSquads[sq.id] === undefined) ui.openPersonnelSquads[sq.id] = true;
-        });
-        saveLocalState();
-      } catch (e) {
-        state = createFreshState();
-        saveLocalState();
-      }
-    }
-
-    function saveLocalState() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-      catch (e) { showToast('Помилка збереження у пам\'ять браузера', 'error'); }
-    }
-
-    // =========================================================================
-    // 4. FIREBASE REALTIME DATABASE REST API + AUTO-POLLING (v3.0.1)
+    // 4. FIREBASE REALTIME DATABASE REST API + AUTO-POLLING (v3.0.2)
     // =========================================================================
     function cleanFbUrl(url) {
       let s = String(url || '').trim();
@@ -852,8 +561,9 @@
       s = s.replace(/\s+/g, '');
       // Нижній регістр для протоколу (Https:// -> https://)
       s = s.replace(/^https?:\/\//i, function(m) { return m.toLowerCase(); });
-      // Прибираємо випадковий суфікс /platoon_data.json або .json та кінцеві слеші
+      // Прибираємо випадковий суфікс /platoon_data.json, /test_ping.json або .json та кінцеві слеші
       s = s.replace(/\/platoon_data\.json$/i, '');
+      s = s.replace(/\/test_ping\.json$/i, '');
       s = s.replace(/\.json$/i, '');
       s = s.replace(/\/+$/, '');
       return s;
@@ -864,16 +574,24 @@
       return clean ? (clean + '/platoon_data.json') : '';
     }
 
-    // Рекурсивне очищення ключів від заборонених у Firebase символів (. $ # [ ] /) та undefined -> null
+    function setDiag(type, text) {
+      lastSyncDiag = text ? { type: type, text: text } : null;
+      lastSyncError = type === 'err' ? text : '';
+    }
+
+    // Рекурсивне очищення ключів від заборонених у Firebase символів (. $ # [ ] /),
+    // порожніх ключів ("" -> "_empty") та undefined / NaN -> null
     function sanitizeForFirebase(val) {
       if (val === undefined) return null;
+      if (typeof val === 'number' && isNaN(val)) return null;
       if (val === null || typeof val !== 'object') return val;
       if (Array.isArray(val)) {
         return val.map(function(item) { return sanitizeForFirebase(item); });
       }
       const out = {};
       Object.keys(val).forEach(function(k) {
-        const safeKey = String(k).replace(/[.#$\[\]\/]/g, '_') || '_';
+        let safeKey = String(k).replace(/[.#$\[\]\/]/g, '_');
+        if (!safeKey) safeKey = '_empty';
         out[safeKey] = sanitizeForFirebase(val[k]);
       });
       return out;
@@ -886,11 +604,14 @@
           const parsed = JSON.parse(txt);
           if (parsed && parsed.error) msg = String(parsed.error);
         } catch (e) {
-          msg = txt ? txt.slice(0, 140) : '';
+          msg = txt ? txt.slice(0, 160) : '';
         }
-        return 'Помилка ' + res.status + (msg ? ': ' + msg : '');
+        const hint = (res.status === 401 || res.status === 403)
+          ? ' — перевірте Rules у Firebase та натисніть Publish'
+          : '';
+        return 'Помилка HTTP ' + res.status + (msg ? ': ' + msg : '') + hint;
       }).catch(function() {
-        return 'Помилка ' + res.status;
+        return 'Помилка HTTP ' + res.status;
       });
     }
 
@@ -944,6 +665,21 @@
       return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
     }
 
+    function objMapToArray(obj) {
+      if (!obj || typeof obj !== 'object') return [];
+      return Object.keys(obj).map(function(k) {
+        const v = obj[k];
+        if (!v || typeof v !== 'object') return null;
+        return Object.assign({ id: k }, v);
+      }).filter(Boolean);
+    }
+
+    function arrayToObjMap(arr) {
+      const out = {};
+      (arr || []).forEach(function(item) { if (item && item.id) out[item.id] = item; });
+      return out;
+    }
+
     function buildCloudPayload() {
       state.updatedAt = Date.now();
       saveLocalState();
@@ -966,7 +702,7 @@
       });
     }
 
-    // Відкладений авто-запис у хмару при змінах (debounced PUT)
+    // Відкладений авто-запис у хмару при локальних змінах (debounced PUT)
     function scheduleCloudPush() {
       if (!getFirebaseUrl()) { setSyncStatus('local'); return; }
       clearTimeout(fbPushDebounce);
@@ -975,27 +711,12 @@
 
     function fbWrite() {
       scheduleCloudPush();
-      return Promise.resolve(true);
+      return Promise.resolve({ ok: true });
     }
 
     function fbSyncMeta() {
       scheduleCloudPush();
-      return Promise.resolve(true);
-    }
-
-    function objMapToArray(obj) {
-      if (!obj || typeof obj !== 'object') return [];
-      return Object.keys(obj).map(function(k) {
-        const v = obj[k];
-        if (!v || typeof v !== 'object') return null;
-        return Object.assign({ id: k }, v);
-      }).filter(Boolean);
-    }
-
-    function arrayToObjMap(arr) {
-      const out = {};
-      (arr || []).forEach(function(item) { if (item && item.id) out[item.id] = item; });
-      return out;
+      return Promise.resolve({ ok: true });
     }
 
     function applyRemoteSnapshot(remote, forceApply) {
@@ -1036,29 +757,33 @@
       return fetch(endpoint)
         .then(function(res) {
           if (!res.ok) return parseFirebaseError(res).then(function(errMsg) { throw new Error(errMsg); });
-          return res.json();
+          return res.json().then(function(data) { return { status: res.status, data: data }; });
         })
-        .then(function(data) {
+        .then(function(result) {
           lastSyncAt = formatDateTimeNow();
-          lastSyncError = '';
           setSyncStatus('online');
-          const updated = applyRemoteSnapshot(data, Boolean(forceApply));
+          if (!silent) setDiag('ok', '✅ Дані отримано з хмари (HTTP ' + result.status + ')');
+          const updated = applyRemoteSnapshot(result.data, Boolean(forceApply));
           if (updated && sessionRole && !isUserActivelyEditing()) render();
-          return { ok: true, data: data };
+          return { ok: true, status: result.status, data: result.data };
         })
         .catch(function(err) {
-          lastSyncError = (err && err.message) ? err.message : 'Помилка мережі';
+          const msg = (err && err.message) ? err.message : 'Помилка мережі (Failed to fetch)';
           setSyncStatus('offline');
-          if (!silent && sessionRole && ui.activeTab === 'settings') render();
-          return { ok: false, error: lastSyncError };
+          if (!silent) {
+            setDiag('err', '❌ ' + msg);
+            if (sessionRole && ui.activeTab === 'settings') render();
+          }
+          return { ok: false, error: msg };
         });
     }
 
     function fbPushAll(silent) {
       const endpoint = getPlatoonEndpoint();
       if (!endpoint) {
-        if (!silent) showToast('Спочатку вкажіть посилання на базу Firebase', 'error');
-        return Promise.resolve({ ok: false, error: 'Не вказано URL Firebase' });
+        const msg = 'Спочатку вкажіть посилання на базу Firebase';
+        if (!silent) { setDiag('err', '❌ ' + msg); showToast(msg, 'error'); }
+        return Promise.resolve({ ok: false, error: msg });
       }
       if (!silent) setSyncStatus('syncing');
       const payload = buildCloudPayload();
@@ -1069,20 +794,58 @@
       })
         .then(function(res) {
           if (!res.ok) return parseFirebaseError(res).then(function(errMsg) { throw new Error(errMsg); });
-          return res.json();
+          return res.json().then(function() { return res.status; });
         })
-        .then(function() {
+        .then(function(status) {
           lastSyncAt = formatDateTimeNow();
-          lastSyncError = '';
           setSyncStatus('online');
+          setDiag('ok', '✅ Завантажено в хмару (HTTP ' + status + ')');
           if (!silent && sessionRole && ui.activeTab === 'settings') render();
-          return { ok: true };
+          return { ok: true, status: status };
         })
         .catch(function(err) {
-          lastSyncError = (err && err.message) ? err.message : 'Помилка мережі при записі';
+          const msg = (err && err.message) ? err.message : 'Помилка мережі при записі (Failed to fetch)';
           setSyncStatus('offline');
+          setDiag('err', '❌ ' + msg);
           if (sessionRole && ui.activeTab === 'settings') render();
-          return { ok: false, error: lastSyncError };
+          return { ok: false, error: msg };
+        });
+    }
+
+    function fbTestWrite() {
+      const base = getFirebaseUrl();
+      if (!base) {
+        const msg = 'Спочатку вставте та підключіть посилання Firebase';
+        setDiag('err', '❌ ' + msg);
+        showToast(msg, 'error');
+        render();
+        return;
+      }
+      setSyncStatus('syncing');
+      setDiag('info', '⏳ Виконується тест запису у /test_ping.json...');
+      render();
+      fetch(base + '/test_ping.json', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: true, ts: Date.now() })
+      })
+        .then(function(res) {
+          if (!res.ok) return parseFirebaseError(res).then(function(errMsg) { throw new Error(errMsg); });
+          return res.json().then(function() { return res.status; });
+        })
+        .then(function(status) {
+          lastSyncAt = formatDateTimeNow();
+          setSyncStatus('online');
+          setDiag('ok', '✅ Тест запису пройдено (HTTP ' + status + ') — Firebase дозволяє запис!');
+          showToast('Тест запису успішний (HTTP ' + status + ')');
+          render();
+        })
+        .catch(function(err) {
+          const msg = (err && err.message) ? err.message : 'Помилка мережі (Failed to fetch)';
+          setSyncStatus('offline');
+          setDiag('err', '❌ Тест запису не пройдено — ' + msg);
+          showToast(msg, 'error');
+          render();
         });
     }
 
@@ -1108,7 +871,7 @@
       const endpoint = getPlatoonEndpoint();
       if (!endpoint) { setSyncStatus('local'); return; }
 
-      fbPullAll(false, false);
+      fbPullAll(true, false);
 
       // Автоматичний фоновий поллінг кожні 15 секунд при активній вкладці
       fbPollTimer = setInterval(function() {
@@ -1130,161 +893,6 @@
       }
       fbPullAll(false, true).then(function(res) {
         showToast(res.ok ? 'Дані оновлено з хмари' : (res.error || 'Немає зв\'язку з Firebase'), res.ok ? 'success' : 'error');
-      });
-    }
-
-    function fbSyncMeta() {
-      return fbWrite('/meta', 'PUT', {
-        groupNumber: state.groupNumber,
-        squads: state.squads,
-        dutyTypes: state.dutyTypes,
-        updatedAt: Date.now()
-      });
-    }
-
-    function objMapToArray(obj) {
-      if (!obj || typeof obj !== 'object') return [];
-      return Object.keys(obj).map(function(k) {
-        const v = obj[k];
-        if (!v || typeof v !== 'object') return null;
-        return Object.assign({ id: k }, v);
-      }).filter(Boolean);
-    }
-
-    function arrayToObjMap(arr) {
-      const out = {};
-      (arr || []).forEach(function(item) { if (item && item.id) out[item.id] = item; });
-      return out;
-    }
-
-    function applyRemoteSnapshot(remote) {
-      if (!remote || typeof remote !== 'object') return false;
-      const hasData = remote.meta || remote.personnel || remote.duties || remote.tasks || remote.pins || remote.rozkhidManual;
-      if (!hasData) return false;
-
-      const meta = remote.meta || {};
-      const next = {
-        groupNumber: meta.groupNumber || state.groupNumber || '223',
-        squads: Array.isArray(meta.squads) && meta.squads.length ? meta.squads : state.squads,
-        dutyTypes: Array.isArray(meta.dutyTypes) && meta.dutyTypes.length ? meta.dutyTypes : state.dutyTypes,
-        pins: remote.pins ? Object.assign({}, DEFAULT_PINS, remote.pins) : state.pins,
-        personnel: remote.personnel ? objMapToArray(remote.personnel) : [],
-        duties: remote.duties ? objMapToArray(remote.duties) : [],
-        tasks: remote.tasks ? objMapToArray(remote.tasks).sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); }) : [],
-        scheduledAbsences: remote.scheduledAbsences ? objMapToArray(remote.scheduledAbsences) : [],
-        rozkhidManual: (remote.rozkhidManual && typeof remote.rozkhidManual === 'object') ? remote.rozkhidManual : {},
-        rozkhidNumeric: (remote.rozkhidNumeric && typeof remote.rozkhidNumeric === 'object') ? remote.rozkhidNumeric : {},
-        rozkhidCleared: (remote.rozkhidCleared && typeof remote.rozkhidCleared === 'object') ? remote.rozkhidCleared : {},
-        lastBackupAt: state.lastBackupAt
-      };
-      state = normalizeState(next);
-      saveLocalState();
-      return true;
-    }
-
-    function fbPullAll(silent) {
-      const base = getFirebaseUrl();
-      if (!base) { setSyncStatus('local'); return Promise.resolve(false); }
-      if (!silent) setSyncStatus('syncing');
-      return fetch(base + '/.json')
-        .then(function(res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function(data) {
-          lastSyncAt = formatDateTimeNow();
-          setSyncStatus('online');
-          const updated = applyRemoteSnapshot(data);
-          if (updated && sessionRole && !isUserActivelyEditing()) render();
-          return true;
-        })
-        .catch(function() {
-          setSyncStatus('offline');
-          return false;
-        });
-    }
-
-    function fbPushAll() {
-      const base = getFirebaseUrl();
-      if (!base) { showToast('Спочатку вкажіть посилання на базу Firebase', 'error'); return Promise.resolve(false); }
-      const payload = {
-        meta: {
-          groupNumber: state.groupNumber,
-          squads: state.squads,
-          dutyTypes: state.dutyTypes,
-          updatedAt: Date.now()
-        },
-        pins: state.pins,
-        personnel: arrayToObjMap(state.personnel),
-        duties: arrayToObjMap(state.duties),
-        tasks: arrayToObjMap(state.tasks),
-        scheduledAbsences: arrayToObjMap(state.scheduledAbsences),
-        rozkhidManual: state.rozkhidManual,
-        rozkhidNumeric: state.rozkhidNumeric,
-        rozkhidCleared: state.rozkhidCleared
-      };
-      return fbWrite('', 'PUT', payload);
-    }
-
-    function fbFetchPinsQuick() {
-      const base = getFirebaseUrl();
-      if (!base) return Promise.resolve();
-      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(function() { ctrl.abort(); }, 2500) : null;
-      return fetch(base + '/pins.json', ctrl ? { signal: ctrl.signal } : {})
-        .then(function(r) { return r.ok ? r.json() : null; })
-        .then(function(pins) {
-          if (timer) clearTimeout(timer);
-          if (pins && typeof pins === 'object') {
-            state.pins = Object.assign({}, DEFAULT_PINS, pins);
-            saveLocalState();
-          }
-        })
-        .catch(function() { if (timer) clearTimeout(timer); });
-    }
-
-    function startLiveSync() {
-      stopLiveSync();
-      const base = getFirebaseUrl();
-      if (!base) { setSyncStatus('local'); return; }
-
-      fbPullAll(false);
-
-      // SSE потік змін Firebase (EventSource)
-      if (typeof EventSource !== 'undefined') {
-        try {
-          fbEventSource = new EventSource(base + '/.json');
-          const onRemoteEvent = function() {
-            clearTimeout(fbPullDebounce);
-            fbPullDebounce = setTimeout(function() { fbPullAll(true); }, 350);
-          };
-          fbEventSource.addEventListener('put', onRemoteEvent);
-          fbEventSource.addEventListener('patch', onRemoteEvent);
-          fbEventSource.onerror = function() {
-            if (navigator.onLine === false) setSyncStatus('offline');
-          };
-        } catch (e) {}
-      }
-
-      // Резервний легкий поллінг кожні 15 секунд при активній вкладці
-      fbPollTimer = setInterval(function() {
-        if (document.visibilityState === 'visible') fbPullAll(true);
-      }, 15000);
-    }
-
-    function stopLiveSync() {
-      if (fbEventSource) { try { fbEventSource.close(); } catch (e) {} fbEventSource = null; }
-      if (fbPollTimer) { clearInterval(fbPollTimer); fbPollTimer = null; }
-      clearTimeout(fbPullDebounce);
-    }
-
-    function manualSyncFromHeader() {
-      if (!getFirebaseUrl()) {
-        showToast('Локальний режим. Підключіть Firebase у Налаштуваннях');
-        return;
-      }
-      fbPullAll(false).then(function(ok) {
-        showToast(ok ? 'Дані оновлено з хмари' : 'Немає зв\'язку з Firebase', ok ? 'success' : 'error');
       });
     }
 
@@ -2470,6 +2078,16 @@
 
       // Повне меню для Адміна (Командира групи)
       const pins = state.pins || DEFAULT_PINS;
+      const diagBoxHtml = lastSyncDiag
+        ? '<div class="text-xs" style="padding:9px 11px;border-radius:10px;line-height:1.4;' +
+            (lastSyncDiag.type === 'ok'
+              ? 'background:rgba(74,222,128,0.14);border:1px solid rgba(74,222,128,0.4);color:#bbf7d0'
+              : (lastSyncDiag.type === 'err'
+                ? 'background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.45);color:#fecaca'
+                : 'background:rgba(56,189,248,0.14);border:1px solid rgba(56,189,248,0.4);color:#bae6fd')) +
+          '">' + esc(lastSyncDiag.text) + '</div>'
+        : '';
+
       return versionCard +
         '<div class="card stack" style="border-color:rgba(56,189,248,0.4)">' +
           '<div class="section-title" style="color:var(--blue)">☁️ Синхронізація Firebase</div>' +
@@ -2478,8 +2096,11 @@
           '<button class="btn btn-primary btn-full" onclick="connectFirebaseFromInput()">Перевірити та підключити</button>' +
           '<div class="grid-2">' +
             '<button class="btn btn-sm btn-warn" onclick="pushLocalToCloudPrompt()">☁️ Завантажити мої дані в хмару</button>' +
-            '<button class="btn btn-sm btn-info" onclick="pullCloudToLocal()">⬇️ Завантажити з хмари</button></div>' +
-          '<button class="btn btn-sm btn-secondary btn-full" onclick="copyInviteLinkForKV()">🔗 Скопіювати посилання для КВ</button>' +
+            '<button class="btn btn-sm btn-secondary" onclick="fbTestWrite()">🧪 Тест запису</button></div>' +
+          '<div class="grid-2">' +
+            '<button class="btn btn-sm btn-info" onclick="pullCloudToLocal()">⬇️ Завантажити з хмари</button>' +
+            '<button class="btn btn-sm btn-secondary" onclick="copyInviteLinkForKV()">🔗 Посилання для КВ</button></div>' +
+          diagBoxHtml +
           '<div class="text-xs text-muted">Посилання для КВ автоматично підключає їхній телефон до вашої бази Firebase — їм залишиться лише ввести свій PIN.</div>' +
         '</div>' +
 
@@ -2563,26 +2184,28 @@
       fetch(endpoint)
         .then(function(r) {
           if (!r.ok) return parseFirebaseError(r).then(function(errMsg) { throw new Error(errMsg); });
-          return r.json();
+          return r.json().then(function(data) { return { status: r.status, data: data }; });
         })
-        .then(function(data) {
+        .then(function(result) {
           setFirebaseUrl(url);
           lastSyncAt = formatDateTimeNow();
-          lastSyncError = '';
           setSyncStatus('online');
-          if (data && typeof data === 'object' && (data.meta || data.personnel)) {
-            applyRemoteSnapshot(data, true);
+          if (result.data && typeof result.data === 'object' && (result.data.meta || result.data.personnel)) {
+            applyRemoteSnapshot(result.data, true);
+            setDiag('ok', '✅ Підключено (HTTP ' + result.status + '). Дані завантажено з хмари');
             showToast('Підключено! Дані завантажено з хмари');
           } else {
+            setDiag('ok', '✅ Підключено (HTTP ' + result.status + '). База порожня — натисніть «Завантажити мої дані в хмару»');
             showToast('Підключено! Натисніть «Завантажити мої дані в хмару»');
           }
           startLiveSync();
           render();
         })
         .catch(function(err) {
-          lastSyncError = (err && err.message) ? err.message : 'Помилка підключення до Firebase';
+          const msg = (err && err.message) ? err.message : 'Помилка підключення до Firebase';
           setSyncStatus('offline');
-          showToast(lastSyncError, 'error');
+          setDiag('err', '❌ ' + msg);
+          showToast(msg, 'error');
           render();
         });
     }
