@@ -2387,20 +2387,23 @@
       return PRIO_META[p] || PRIO_META.normal;
     }
 
-    function triggerTaskPhotoUpload(taskId) {
+    function triggerTaskPhotoUpload(taskId, sourceMode) {
       if (!canUpdateTasks()) return;
       pendingPhotoTaskId = taskId;
       var inp = document.getElementById('task-photo-file-input');
-      if (!inp) {
-        inp = document.createElement('input');
-        inp.type = 'file';
-        inp.id = 'task-photo-file-input';
-        inp.accept = 'image/*';
+      if (inp && inp.parentNode) inp.parentNode.removeChild(inp);
+      inp = document.createElement('input');
+      inp.type = 'file';
+      inp.id = 'task-photo-file-input';
+      inp.accept = 'image/*';
+      if (sourceMode === 'camera') {
         inp.setAttribute('capture', 'environment');
-        inp.style.display = 'none';
-        inp.onchange = handleTaskPhotoFileSelected;
-        document.body.appendChild(inp);
+      } else {
+        inp.removeAttribute('capture');
       }
+      inp.style.display = 'none';
+      inp.onchange = handleTaskPhotoFileSelected;
+      document.body.appendChild(inp);
       inp.value = '';
       inp.click();
     }
@@ -2603,9 +2606,14 @@
               '<div class="row-between">' +
                 '<span class="fw-bold text-xs">Фотодоказ виконання</span>' +
                 (canUpdate
-                  ? ('<button type="button" class="btn btn-xs ' + (t.requirePhoto && !t.photoProof ? 'btn-warn' : 'btn-secondary') + '" onclick="triggerTaskPhotoUpload(\'' + t.id + '\')">' +
-                      ico('upload', 12) + ' ' + (t.photoProof ? 'Замінити фото' : 'Вставити фото') +
-                    '</button>')
+                  ? ('<div class="row" style="gap:5px">' +
+                      '<button type="button" class="btn btn-xs ' + (t.requirePhoto && !t.photoProof ? 'btn-warn' : 'btn-secondary') + '" onclick="triggerTaskPhotoUpload(\'' + t.id + '\',\'camera\')">' +
+                        'Фото' +
+                      '</button>' +
+                      '<button type="button" class="btn btn-xs btn-info" onclick="triggerTaskPhotoUpload(\'' + t.id + '\',\'attach\')">' +
+                        ico('upload', 12) + ' ' + (t.photoProof ? 'Замінити' : 'Вкласти') +
+                      '</button>' +
+                    '</div>')
                   : '') +
               '</div>' +
               imgPreviewHtml +
