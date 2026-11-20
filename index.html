@@ -2387,44 +2387,20 @@
       return PRIO_META[p] || PRIO_META.normal;
     }
 
-    function openTaskPhotoSourceModal(taskId) {
+    function triggerTaskPhotoUpload(taskId) {
       if (!canUpdateTasks()) return;
-      var t = state.tasks.find(function(x) { return x.id === taskId; });
-      if (!t) return;
-      openModal(
-        '<div class="modal-header">' +
-          '<div><div class="modal-title">Фотодоказ виконання</div><div class="text-xs text-muted">Оберіть спосіб додавання фото</div></div>' +
-          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
-        '</div>' +
-        '<div class="modal-body stack">' +
-          '<button type="button" class="btn btn-primary btn-full" onclick="closeModal();triggerTaskPhotoUpload('' + taskId + '','camera')">' + ico('bolt', 15) + ' Сфотографувати (Камера)</button>' +
-          '<button type="button" class="btn btn-info btn-full" onclick="closeModal();triggerTaskPhotoUpload('' + taskId + '','attach')">' + ico('upload', 15) + ' Вкласти фото (Галерея / Файл)</button>' +
-          '<button type="button" class="btn btn-secondary btn-full" onclick="closeModal()">Скасувати</button>' +
-        '</div>'
-      );
-    }
-
-    function triggerTaskPhotoUpload(taskId, sourceMode) {
-      if (!canUpdateTasks()) return;
-      if (!sourceMode) {
-        openTaskPhotoSourceModal(taskId);
-        return;
-      }
       pendingPhotoTaskId = taskId;
       var inp = document.getElementById('task-photo-file-input');
-      if (inp && inp.parentNode) inp.parentNode.removeChild(inp);
-      inp = document.createElement('input');
-      inp.type = 'file';
-      inp.id = 'task-photo-file-input';
-      inp.accept = 'image/*';
-      if (sourceMode === 'camera') {
+      if (!inp) {
+        inp = document.createElement('input');
+        inp.type = 'file';
+        inp.id = 'task-photo-file-input';
+        inp.accept = 'image/*';
         inp.setAttribute('capture', 'environment');
-      } else {
-        inp.removeAttribute('capture');
+        inp.style.display = 'none';
+        inp.onchange = handleTaskPhotoFileSelected;
+        document.body.appendChild(inp);
       }
-      inp.style.display = 'none';
-      inp.onchange = handleTaskPhotoFileSelected;
-      document.body.appendChild(inp);
       inp.value = '';
       inp.click();
     }
@@ -2627,14 +2603,9 @@
               '<div class="row-between">' +
                 '<span class="fw-bold text-xs">Фотодоказ виконання</span>' +
                 (canUpdate
-                  ? ('<div class="row" style="gap:5px">' +
-                      '<button type="button" class="btn btn-xs ' + (t.requirePhoto && !t.photoProof ? 'btn-warn' : 'btn-secondary') + '" onclick="triggerTaskPhotoUpload(\'' + t.id + '\',\'camera\')">' +
-                        'Фото' +
-                      '</button>' +
-                      '<button type="button" class="btn btn-xs btn-info" onclick="triggerTaskPhotoUpload(\'' + t.id + '\',\'attach\')">' +
-                        ico('upload', 12) + ' ' + (t.photoProof ? 'Замінити' : 'Вкласти') +
-                      '</button>' +
-                    '</div>')
+                  ? ('<button type="button" class="btn btn-xs ' + (t.requirePhoto && !t.photoProof ? 'btn-warn' : 'btn-secondary') + '" onclick="triggerTaskPhotoUpload(\'' + t.id + '\')">' +
+                      ico('upload', 12) + ' ' + (t.photoProof ? 'Замінити фото' : 'Вставити фото') +
+                    '</button>')
                   : '') +
               '</div>' +
               imgPreviewHtml +
