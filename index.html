@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.4.2</title>
+  <title>Помічник взводу v3.5</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -431,6 +431,98 @@
     .btn-icon:active, .pill:active, .seg-btn:active, .cal-cell:active, .status-btn:active, .presence-btn:active, .step-btn:active, .sync-pill:active {
       transform: scale(0.95);
     }
+    /* Кольорові смужки статусу в задачах */
+    .task-card { border-left: 4px solid var(--blue); }
+    .task-card.st-done { border-left-color: #22c55e; }
+    .task-card.st-failed { border-left-color: var(--danger); }
+    .task-card.st-received { border-left-color: var(--blue); }
+
+    /* Тема: Нічна OLED (чисто чорний фон) */
+    [data-theme="oled"] {
+      --bg: #000000;
+      --bg-elev: #0a0a0a;
+      --card: #0e0e0e;
+      --card-hover: #171717;
+      --border: #1f1f1f;
+      --border-strong: #333333;
+      --text: #f1f5f9;
+      --muted: #8a94a6;
+    }
+    [data-theme="oled"] .header { background: rgba(0, 0, 0, 0.96); }
+    [data-theme="oled"] .nav { background: rgba(10, 10, 10, 0.97); }
+    [data-theme="oled"] .nav-badge { border-color: #0a0a0a; }
+    [data-theme="oled"] .cal-cell { background: rgba(20, 20, 20, 0.75); }
+    [data-theme="oled"] .acc-header { background: #070707; }
+
+    /* Тема: Денна світла (високий контраст для сонця) */
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --bg-elev: #e2e8f0;
+      --card: #ffffff;
+      --card-hover: #f8fafc;
+      --border: #cbd5e1;
+      --border-strong: #94a3b8;
+      --text: #0f172a;
+      --muted: #475569;
+      --olive: #3f6a33;
+      --accent: #16a34a;
+      --blue: #0284c7;
+      --amber: #d97706;
+      --danger: #dc2626;
+    }
+    [data-theme="light"] input[type="date"] { color-scheme: light; }
+    [data-theme="light"] .header { background: rgba(255, 255, 255, 0.95); }
+    [data-theme="light"] .nav { background: rgba(255, 255, 255, 0.97); }
+    [data-theme="light"] .nav-badge { border-color: #ffffff; }
+    [data-theme="light"] .brand-title,
+    [data-theme="light"] .modal-title,
+    [data-theme="light"] .date-bar-title,
+    [data-theme="light"] .soldier-name,
+    [data-theme="light"] .kpi-val,
+    [data-theme="light"] .num-key,
+    [data-theme="light"] .step-btn,
+    [data-theme="light"] .input,
+    [data-theme="light"] .select,
+    [data-theme="light"] .textarea { color: #0f172a; }
+    [data-theme="light"] .section-title { color: #334155; }
+    [data-theme="light"] .acc-header { background: #f8fafc; }
+    [data-theme="light"] .acc-header.open .chevron { color: #0f172a; }
+    [data-theme="light"] .cal-cell { background: #f8fafc; color: #0f172a; }
+    [data-theme="light"] .cal-cell.selected { background: rgba(63, 106, 51, 0.16); color: #14532d; }
+    [data-theme="light"] .soldier-expand { background: #f8fafc; }
+    [data-theme="light"] .info-banner { color: #0369a1; background: rgba(2, 132, 199, 0.1); border-color: rgba(2, 132, 199, 0.28); }
+    [data-theme="light"] .btn-info { color: #0369a1; background: rgba(2, 132, 199, 0.12); border-color: rgba(2, 132, 199, 0.35); }
+    [data-theme="light"] .btn-warn { color: #b45309; background: rgba(217, 119, 6, 0.12); border-color: rgba(217, 119, 6, 0.35); }
+    [data-theme="light"] .btn-danger { color: #b91c1c; background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.3); }
+    [data-theme="light"] .role-pill { color: #15803d; background: rgba(22, 163, 74, 0.12); }
+    [data-theme="light"] .role-pill.kg { color: #a16207; background: rgba(202, 138, 4, 0.14); }
+    [data-theme="light"] .role-pill.kv { color: #0369a1; background: rgba(2, 132, 199, 0.12); }
+    [data-theme="light"] .sync-pill.online { color: #15803d; }
+    [data-theme="light"] .sync-pill.offline { color: #b91c1c; }
+    [data-theme="light"] .sync-pill.syncing { color: #0369a1; }
+    [data-theme="light"] .badge-kg { color: #a16207; background: rgba(202, 138, 4, 0.16); }
+    [data-theme="light"] .badge-kv { color: #1d4ed8; background: rgba(37, 99, 235, 0.14); }
+    [data-theme="light"] .badge-ok { color: #15803d; background: rgba(22, 163, 74, 0.14); }
+    [data-theme="light"] .badge-info { color: #0369a1; background: rgba(2, 132, 199, 0.14); }
+    [data-theme="light"] .badge-warn { color: #b45309; background: rgba(217, 119, 6, 0.14); }
+    [data-theme="light"] .badge-err { color: #b91c1c; background: rgba(220, 38, 38, 0.14); }
+    [data-theme="light"] .name-chip { color: #92400e; background: rgba(217, 119, 6, 0.12); }
+    [data-theme="light"] .status-btn.st-received { color: #0369a1; background: rgba(2, 132, 199, 0.14); }
+    [data-theme="light"] .status-btn.st-done { color: #15803d; background: rgba(22, 163, 74, 0.14); }
+    [data-theme="light"] .status-btn.st-failed { color: #b91c1c; background: rgba(220, 38, 38, 0.14); }
+    [data-theme="light"] .presence-btn.active-ok { color: #15803d; background: rgba(22, 163, 74, 0.14); }
+    [data-theme="light"] .presence-btn.active-warn { color: #b45309; background: rgba(217, 119, 6, 0.14); }
+    [data-theme="light"] .diag-ok { color: #166534; background: rgba(22, 163, 74, 0.12); }
+    [data-theme="light"] .diag-err { color: #991b1b; background: rgba(220, 38, 38, 0.12); }
+    [data-theme="light"] .diag-info { color: #075985; background: rgba(2, 132, 199, 0.12); }
+    [data-theme="light"] .toast { background: #ffffff; color: #0f172a; box-shadow: 0 8px 24px rgba(15,23,42,0.16); }
+    [data-theme="light"] .toast.error { background: #fef2f2; color: #991b1b; }
+    [data-theme="light"] .task-card [style*="color:#fff"],
+    [data-theme="light"] .perm-block [style*="color:#fff"],
+    [data-theme="light"] .card [style*="color:#fff"],
+    [data-theme="light"] .pin-screen [style*="color:#fff"] { color: #0f172a !important; }
+    [data-theme="light"] .duty-group-box { background: #f8fafc !important; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -653,11 +745,12 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.4.2';
+    var APP_VERSION = 'v3.5';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
     var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role_v321';
+    var THEME_STORAGE_KEY = 'pomichnyk_vzvodu_theme';
 
     var ROLES_META = {
       admin: { key: 'admin', label: 'Адмін', short: 'Адмін', icon: 'shield', squadId: null, cssClass: '' },
@@ -766,7 +859,10 @@
       tag: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
       users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
       alert: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-      phone: '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>'
+      phone: '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+      sun: '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+      moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+      palette: '<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>'
     };
 
     function ico(name, size, extraCls) {
@@ -819,6 +915,21 @@
     function safeSSGet(key) { try { return sessionStorage.getItem(key); } catch (e) { return null; } }
     function safeSSSet(key, val) { try { sessionStorage.setItem(key, val); } catch (e) {} }
     function safeSSRemove(key) { try { sessionStorage.removeItem(key); } catch (e) {} }
+
+    var currentTheme = safeLSGet(THEME_STORAGE_KEY) || 'dark';
+    function applyTheme(themeName, persist) {
+      var t = (themeName === 'light' || themeName === 'oled') ? themeName : 'dark';
+      currentTheme = t;
+      if (t === 'dark') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', t);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', t === 'light' ? '#f1f5f9' : (t === 'oled' ? '#000000' : '#0f172a'));
+      if (persist) {
+        safeLSSet(THEME_STORAGE_KEY, t);
+        render();
+      }
+    }
+    applyTheme(currentTheme, false);
 
     // =========================================================================
     // 3. СТАН ЗАСТОСУНКУ, МІГРАЦІЯ ТА ДОСТУПИ
@@ -1804,7 +1915,7 @@
         var listHtml = assigned.length
           ? assigned.map(function(s) {
               var sq = getSquadById(s.squadId);
-              return '<div class="row-between" style="padding:7px 9px;border-radius:9px;background:var(--bg);border:1px solid var(--border)">' +
+              return '<div class="row-between" style="padding:7px 9px;border-radius:9px;background:var(--bg);border:1px solid var(--border);border-left:4px solid ' + esc(sq ? sq.color : 'var(--accent)') + '">' +
                 '<div class="min0">' +
                   '<div class="fw-bold text-sm">' + esc(s.rank) + ' ' + esc(s.name) + '</div>' +
                   '<div class="text-xs text-muted">' + esc(sq ? sq.name : '') + '</div>' +
@@ -1814,7 +1925,7 @@
             }).join('')
           : '<div class="text-xs text-muted">Не призначено</div>';
 
-        return '<div class="stack-sm" style="padding:10px;border-radius:11px;background:rgba(11,16,21,0.5);border:1px solid var(--border)">' +
+        return '<div class="stack-sm duty-group-box" style="padding:10px;border-radius:11px;background:rgba(11,16,21,0.5);border:1px solid var(--border)">' +
           '<div class="row-between">' +
             '<div class="row"><span class="dot" style="background:' + esc(dt.color) + '"></span><span class="fw-800">' + esc(dt.shortName) + '</span><span class="text-xs text-muted">(' + esc(dt.name) + ' • ' + assigned.length + '/' + (dt.maxCount || 1) + ')</span></div>' +
             (editable ? '<button type="button" class="btn btn-xs btn-primary" onclick="openAssignDutyModal(\'' + dt.id + '\')">+ Призначити</button>' : '') +
@@ -2092,7 +2203,7 @@
             ? '<span class="badge badge-err">Не виконано</span>'
             : '<span class="badge badge-info">Отримав задачу</span>';
 
-        return '<div class="task-card">' +
+        return '<div class="task-card st-' + esc(t.status) + '">' +
           '<div class="row-between">' +
             '<span class="badge badge-warn">' + esc(t.target) + '</span>' +
             '<div class="row" style="gap:6px">' + stBadge +
@@ -2673,6 +2784,17 @@
           '<button type="button" class="btn btn-sm btn-secondary btn-full" onclick="logoutSession()">' + ico('logout', 14) + ' Вийти / Змінити роль (PIN)</button>' +
         '</div>';
 
+      // 1.5. Тема оформлення (для всіх, зберігається локально на телефоні)
+      var themeCard =
+        '<div class="card stack-sm">' +
+          '<div class="section-title">' + ico('palette', 14) + ' Тема оформлення</div>' +
+          '<div class="grid-3">' +
+            '<button type="button" class="btn btn-sm ' + (currentTheme === 'dark' ? 'btn-primary' : 'btn-secondary') + '" onclick="applyTheme(\'dark\',true)">' + ico('moon', 13) + ' Темна</button>' +
+            '<button type="button" class="btn btn-sm ' + (currentTheme === 'light' ? 'btn-primary' : 'btn-secondary') + '" onclick="applyTheme(\'light\',true)">' + ico('sun', 13) + ' Світла</button>' +
+            '<button type="button" class="btn btn-sm ' + (currentTheme === 'oled' ? 'btn-primary' : 'btn-secondary') + '" onclick="applyTheme(\'oled\',true)">OLED</button>' +
+          '</div>' +
+        '</div>';
+
       // 2. Блок синхронізації Firebase
       var diagCls = fbDiag.type === 'ok' ? 'diag-ok' : fbDiag.type === 'err' ? 'diag-err' : 'diag-info';
       var fbCard =
@@ -2712,7 +2834,7 @@
         '</div>';
 
       // Для НЕ-Адміна повертаємо лише ці 3 чисті блоки
-      if (!admin) return versionCard + fbCard + backupCard;
+      if (!admin) return versionCard + themeCard + fbCard + backupCard;
 
       // 4. [ТІЛЬКИ АДМІН] PIN-коди доступу (5 ролей)
       var pinsCard =
@@ -2808,7 +2930,7 @@
           '<button type="button" class="btn btn-danger btn-full" onclick="confirmClearAllData()">' + ico('trash', 15) + ' Очистити всі дані</button>' +
         '</div>';
 
-      return versionCard + fbCard + pinsCard + permsCard + groupCard + dtCard + sqCard + backupCard + dangerCard;
+      return versionCard + themeCard + fbCard + pinsCard + permsCard + groupCard + dtCard + sqCard + backupCard + dangerCard;
     }
 
     function savePinsSettings() {
