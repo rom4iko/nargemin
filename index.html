@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.15-theme-safe-tasks</title>
+  <title>Помічник взводу v3.16-dark-task-title</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -857,7 +857,13 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
-    [data-theme="light"] .task-acc-title {
+    html:not([data-theme="light"]) .task-card .task-acc-title {
+      color: #f8fafc;
+    }
+    [data-theme="oled"] .task-card .task-acc-title {
+      color: #ffffff;
+    }
+    [data-theme="light"] .task-card .task-acc-title {
       color: #0f172a;
     }
     .task-acc-chev {
@@ -887,9 +893,7 @@
       border-top: 1px dashed var(--border);
       animation: expandFade 0.18s ease-out;
     }
-    html:not([data-theme="dark"]):not([data-theme="oled"]) .task-acc-title {
-      color: #0f172a;
-    }
+
 
     .hidden { display: none !important; }
   </style>
@@ -1077,7 +1081,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.15-theme-safe-tasks';
+    var APP_VERSION = 'v3.16-dark-task-title';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
