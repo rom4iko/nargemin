@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.3.3</title>
+  <title>Помічник взводу v3.4</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -377,6 +377,18 @@
     .color-row { display: flex; flex-wrap: wrap; gap: 8px; }
     .color-swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; }
     .color-swatch.selected { border-color: #fff; transform: scale(1.1); }
+    .svg-ico { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .svg-ico.spin { animation: icoSpin 1s linear infinite; }
+    @keyframes icoSpin { to { transform: rotate(360deg); } }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .status-dot.online { background: #4ade80; box-shadow: 0 0 6px rgba(74, 222, 128, 0.75); }
+    .status-dot.offline { background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.65); }
+    .status-dot.local { background: #94a3b8; }
+    .role-pill { display: inline-flex; align-items: center; gap: 4px; }
+    .section-title { display: flex; align-items: center; gap: 6px; }
+    .field-label { display: flex; align-items: center; gap: 5px; }
+    .modal-title { display: flex; align-items: center; gap: 7px; }
+    .seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -399,13 +411,13 @@
         <div class="min0">
           <div class="brand-title">Помічник взводу</div>
           <div class="header-meta">
-            <span id="header-role-pill" class="role-pill">🛡️ Адмін</span>
+            <span id="header-role-pill" class="role-pill"><svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Адмін</span>
           </div>
         </div>
       </div>
       <div class="row" style="gap:6px;flex-shrink:0">
-        <button id="header-sync-pill" class="sync-pill" onclick="onHeaderSyncPillClick()" title="Хто онлайн / Синхронізація">⚪ Локально</button>
-        <button class="btn-icon btn-icon-sm" onclick="logoutSession()" title="Вийти / Змінити PIN" aria-label="Вийти">🚪</button>
+        <button id="header-sync-pill" class="sync-pill" onclick="onHeaderSyncPillClick()" title="Хто онлайн / Синхронізація"><span class="status-dot local"></span> Локально</button>
+        <button class="btn-icon btn-icon-sm" onclick="logoutSession()" title="Вийти / Змінити PIN" aria-label="Вийти"><svg class="svg-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
       </div>
     </header>
 
@@ -599,18 +611,18 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.3.3';
+    var APP_VERSION = 'v3.4';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
     var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role_v321';
 
     var ROLES_META = {
-      admin: { key: 'admin', label: 'Адмін', short: '🛡️ Адмін', squadId: null, cssClass: '' },
-      kg:    { key: 'kg',    label: 'КГ (Командир групи)', short: '⭐ КГ', squadId: 'cmd', cssClass: 'kg' },
-      kv1:   { key: 'kv1',   label: 'КВ 1-го відділення', short: '🔹 КВ 1', squadId: 'sq1', cssClass: 'kv' },
-      kv2:   { key: 'kv2',   label: 'КВ 2-го відділення', short: '🔹 КВ 2', squadId: 'sq2', cssClass: 'kv' },
-      kv3:   { key: 'kv3',   label: 'КВ 3-го відділення', short: '🔹 КВ 3', squadId: 'sq3', cssClass: 'kv' }
+      admin: { key: 'admin', label: 'Адмін', short: 'Адмін', icon: 'shield', squadId: null, cssClass: '' },
+      kg:    { key: 'kg',    label: 'КГ (Командир групи)', short: 'КГ', icon: 'star', squadId: 'cmd', cssClass: 'kg' },
+      kv1:   { key: 'kv1',   label: 'КВ 1-го відділення', short: 'КВ 1', icon: 'chevronBadge', squadId: 'sq1', cssClass: 'kv' },
+      kv2:   { key: 'kv2',   label: 'КВ 2-го відділення', short: 'КВ 2', icon: 'chevronBadge', squadId: 'sq2', cssClass: 'kv' },
+      kv3:   { key: 'kv3',   label: 'КВ 3-го відділення', short: 'КВ 3', icon: 'chevronBadge', squadId: 'sq3', cssClass: 'kv' }
     };
 
     var DEFAULT_PINS = { admin: '1111', kg: '1222', kv1: '1001', kv2: '2002', kv3: '3003' };
@@ -685,6 +697,41 @@
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    var SVG_ICONS = {
+      shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+      star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+      chevronBadge: '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
+      logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+      calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+      chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+      eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+      copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+      bolt: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+      clear: '<path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/>',
+      edit: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+      trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+      cloud: '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+      cloudUp: '<polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+      upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+      refresh: '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+      link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+      save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+      lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+      sliders: '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+      tag: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+      users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+      alert: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+      phone: '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>'
+    };
+
+    function ico(name, size, extraCls) {
+      var s = size || 15;
+      var body = SVG_ICONS[name] || '';
+      var cls = 'svg-ico' + (extraCls ? (' ' + extraCls) : '');
+      return '<svg class="' + cls + '" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>';
     }
 
     function showToast(msg, isError) {
@@ -1106,10 +1153,10 @@
       pill.className = 'sync-pill ' + (fbStatus === 'online' ? 'online' : fbStatus === 'offline' ? 'offline' : fbStatus === 'syncing' ? 'syncing' : '');
       if (fbStatus === 'online') {
         var onlineCnt = getOnlineRolesList().length;
-        pill.textContent = onlineCnt > 0 ? ('🟢 ' + onlineCnt + ' онлайн') : '🟢 Онлайн';
-      } else if (fbStatus === 'offline') pill.textContent = '🔴 Офлайн';
-      else if (fbStatus === 'syncing') pill.textContent = '🔄 Синхр...';
-      else pill.textContent = '⚪ Локально';
+        pill.innerHTML = '<span class="status-dot online"></span> ' + (onlineCnt > 0 ? (onlineCnt + ' онлайн') : 'Онлайн');
+      } else if (fbStatus === 'offline') pill.innerHTML = '<span class="status-dot offline"></span> Офлайн';
+      else if (fbStatus === 'syncing') pill.innerHTML = ico('refresh', 13, 'spin') + ' Синхр...';
+      else pill.innerHTML = '<span class="status-dot local"></span> Локально';
     }
 
     function fbSendPresenceHeartbeat() {
@@ -1183,7 +1230,7 @@
           var isMe = rk === currentRole;
           var isOnline = (isMe && fbStatus === 'online') || (lastSeen > 0 && (now - lastSeen) <= PRESENCE_ONLINE_MS);
           var badge = isOnline
-            ? '<span class="badge badge-ok">🟢 Онлайн</span>'
+            ? '<span class="badge badge-ok"><span class="status-dot online"></span> Онлайн</span>'
             : '<span class="text-xs text-muted">' + esc(formatLastSeenUA(lastSeen)) + '</span>';
           return '<div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">' +
             '<div class="fw-bold text-sm">' + esc(meta.label) + (isMe ? ' <span class="text-xs text-muted">(ви)</span>' : '') + '</div>' +
@@ -1199,7 +1246,7 @@
           '</div>' +
           '<div class="modal-body">' +
             '<div class="stack-sm">' + rows + '</div>' +
-            '<button type="button" class="btn btn-info btn-full" onclick="closeModal();manualSyncFromHeader()">🔄 Оновити дані з хмари</button>' +
+            '<button type="button" class="btn btn-info btn-full" onclick="closeModal();manualSyncFromHeader()">' + ico('refresh', 15) + ' Оновити дані з хмари</button>' +
           '</div>'
         );
       });
@@ -1580,8 +1627,8 @@
       }).join('');
 
       var fbNote = fbUrl
-        ? '<span class="badge badge-ok">☁️ База підключена</span>'
-        : '<span class="badge badge-info">📱 Локальний режим</span>';
+        ? '<span class="badge badge-ok">' + ico('cloud', 13) + ' База підключена</span>'
+        : '<span class="badge badge-info">' + ico('phone', 13) + ' Локальний режим</span>';
 
       el.innerHTML =
         '<div class="pin-logo">' +
@@ -1639,7 +1686,7 @@
       var rp = document.getElementById('header-role-pill');
       if (rp) {
         rp.className = 'role-pill ' + meta.cssClass;
-        rp.textContent = meta.short;
+        rp.innerHTML = ico(meta.icon || 'shield', 12) + ' ' + esc(meta.short);
       }
 
       document.getElementById('pin-screen').classList.add('hidden');
@@ -1667,8 +1714,8 @@
     function renderDutiesTab() {
       var sub =
         '<div class="seg-control">' +
-          '<button type="button" class="seg-btn ' + (ui.dutiesSubtab === 'calendar' ? 'active' : '') + '" onclick="ui.dutiesSubtab=\'calendar\';render()">📅 Графік</button>' +
-          '<button type="button" class="seg-btn ' + (ui.dutiesSubtab === 'stats' ? 'active' : '') + '" onclick="ui.dutiesSubtab=\'stats\';render()">📊 Облік</button>' +
+          '<button type="button" class="seg-btn ' + (ui.dutiesSubtab === 'calendar' ? 'active' : '') + '" onclick="ui.dutiesSubtab=\'calendar\';render()">' + ico('calendar', 14) + ' Графік</button>' +
+          '<button type="button" class="seg-btn ' + (ui.dutiesSubtab === 'stats' ? 'active' : '') + '" onclick="ui.dutiesSubtab=\'stats\';render()">' + ico('chart', 14) + ' Облік</button>' +
         '</div>';
 
       if (ui.dutiesSubtab === 'stats') return sub + renderDutiesStats();
@@ -1739,8 +1786,8 @@
           '<div class="row-between">' +
             '<div class="fw-800">Наряд на ' + fmtUA(ui.selectedDate) + '</div>' +
             '<div class="row" style="gap:6px">' +
-              '<button type="button" class="btn btn-sm btn-secondary" onclick="openDutyPreviewModal(\'' + ui.selectedDate + '\')">👁️ Перегляд</button>' +
-              '<button type="button" class="btn btn-sm btn-info" onclick="copyDutyForDate(\'' + ui.selectedDate + '\')">📋 Скопіювати</button>' +
+              '<button type="button" class="btn btn-sm btn-secondary" onclick="openDutyPreviewModal(\'' + ui.selectedDate + '\')">' + ico('eye', 14) + ' Перегляд</button>' +
+              '<button type="button" class="btn btn-sm btn-info" onclick="copyDutyForDate(\'' + ui.selectedDate + '\')">' + ico('copy', 14) + ' Скопіювати</button>' +
             '</div>' +
           '</div>' +
           (!editable ? '<div class="info-banner">Режим перегляду нарядів (редагування дозволяється Адміном).</div>' : '') +
@@ -1920,7 +1967,7 @@
           '<pre class="preview-pre">' + esc(txt) + '</pre>' +
         '</div>' +
         '<div class="modal-footer">' +
-          '<button type="button" class="btn btn-primary btn-full" onclick="copyDutyForDate(\'' + iso + '\');closeModal()">📋 Скопіювати наряд</button>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="copyDutyForDate(\'' + iso + '\');closeModal()">' + ico('copy', 15) + ' Скопіювати наряд</button>' +
         '</div>'
       );
     }
@@ -1993,7 +2040,7 @@
         return true;
       });
 
-      var copyBtn = '<button type="button" class="btn btn-sm btn-info btn-full" onclick="copyActiveTasks()">📋 Скопіювати активні задачі</button>';
+      var copyBtn = '<button type="button" class="btn btn-sm btn-info btn-full" onclick="copyActiveTasks()">' + ico('copy', 14) + ' Скопіювати активні задачі</button>';
 
       var cards = filtered.length ? filtered.map(function(t) {
         var showRemark = t.status === 'failed' || Boolean(t.remark) || Boolean(ui.tasksExpandedRemarks[t.id]);
@@ -2126,9 +2173,9 @@
         '<div class="row wrap">' +
           '<button type="button" class="btn btn-xs btn-secondary" onclick="ui.rozkhidDate=todayISO();render()">Сьогодні</button>' +
           '<button type="button" class="btn btn-xs btn-secondary" onclick="ui.rozkhidDate=shiftISO(todayISO(),1);render()">Завтра</button>' +
-          (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(null)">📅 Запланувати на дату</button>' : '') +
-          (mode === 'all' ? '<button type="button" class="btn btn-xs btn-primary" onclick="applyScheduledAndDutiesToRozkhid(\'' + iso + '\',true)">⚡ Автопідтягнути</button>' : '') +
-          (mode === 'all' ? '<button type="button" class="btn btn-xs btn-danger" onclick="clearRozkhidForDate(\'' + iso + '\')">🧹 Очистити</button>' : '') +
+          (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(null)">' + ico('calendar', 13) + ' Запланувати на дату</button>' : '') +
+          (mode === 'all' ? '<button type="button" class="btn btn-xs btn-primary" onclick="applyScheduledAndDutiesToRozkhid(\'' + iso + '\',true)">' + ico('bolt', 13) + ' Автопідтягнути</button>' : '') +
+          (mode === 'all' ? '<button type="button" class="btn btn-xs btn-danger" onclick="clearRozkhidForDate(\'' + iso + '\')">' + ico('clear', 13) + ' Очистити</button>' : '') +
         '</div>';
 
       // Згортуваний список запланованих на майбутні дати
@@ -2156,7 +2203,7 @@
         schedBanner =
           '<div class="card-flush">' +
             '<div class="acc-header ' + (ui.rozkhidSchedOpen ? 'open' : '') + '" onclick="ui.rozkhidSchedOpen=!ui.rozkhidSchedOpen;render()">' +
-              '<div class="row"><span class="chevron">▶</span><span class="fw-800 text-sm">📅 Заплановано на майбутні дати (' + upcoming.length + ')</span></div>' +
+              '<div class="row"><span class="chevron">▶</span><span class="fw-800 text-sm row" style="gap:6px">' + ico('calendar', 14) + ' Заплановано на майбутні дати (' + upcoming.length + ')</span></div>' +
             '</div>' +
             (ui.rozkhidSchedOpen ? '<div class="acc-body stack-sm" style="padding:10px">' + schedItems + '</div>' : '') +
           '</div>';
@@ -2205,7 +2252,7 @@
             '<label class="toggle-pill"><input type="checkbox" ' + (ui.rozkhidHideZeros ? 'checked' : '') + ' onchange="ui.rozkhidHideZeros=this.checked;render()" /><span>Приховати нулі</span></label>' +
           '</div>' +
           '<pre class="preview-pre">' + esc(buildRozkhidText(iso)) + '</pre>' +
-          '<button type="button" class="btn btn-primary btn-full" onclick="copyText(buildRozkhidText(\'' + iso + '\'),\'Розхід скопійовано\')">📋 Скопіювати розхід</button>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="copyText(buildRozkhidText(\'' + iso + '\'),\'Розхід скопійовано\')">' + ico('copy', 15) + ' Скопіювати розхід</button>' +
         '</div>';
 
       return dateBar +
@@ -2338,7 +2385,7 @@
       var defDate = ui.rozkhidDate || todayISO();
       openModal(
         '<div class="modal-header">' +
-          '<div class="modal-title">📅 Запланувати відсутність</div>' +
+          '<div class="modal-title">' + ico('calendar', 17) + ' Запланувати відсутність</div>' +
           '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
         '</div>' +
         '<div class="modal-body">' +
@@ -2448,7 +2495,7 @@
               var cat = ROZKHID_CATS.find(function(c) { return c.key === sa.catKey; });
               var rng = sa.toDate && sa.toDate !== sa.fromDate ? (fmtUA(sa.fromDate) + ' – ' + fmtUA(sa.toDate)) : fmtUA(sa.fromDate);
               return '<div class="row-between text-xs" style="padding:6px 8px;border-radius:8px;background:var(--bg);border:1px solid var(--border)">' +
-                '<span>📅 ' + esc(cat ? cat.label : sa.catKey) + ': ' + rng + (sa.note ? (' (' + esc(sa.note) + ')') : '') + '</span>' +
+                '<span class="row" style="gap:5px">' + ico('calendar', 12) + ' ' + esc(cat ? cat.label : sa.catKey) + ': ' + rng + (sa.note ? (' (' + esc(sa.note) + ')') : '') + '</span>' +
                 (canPres ? '<button type="button" style="color:#f87171;font-weight:800;padding:2px 6px" onclick="deleteScheduledAbsence(\'' + sa.id + '\')">✕</button>' : '') +
               '</div>';
             }).join('') + '</div>' : '';
@@ -2460,9 +2507,9 @@
                 upHtml +
                 (s.note ? '<div class="text-xs text-muted">Примітка: ' + esc(s.note) + '</div>' : '') +
                 '<div class="row wrap">' +
-                  (canPres ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(\'' + s.id + '\')">📅 Запланувати на дату</button>' : '') +
-                  (pMode === 'all' ? '<button type="button" class="btn btn-xs btn-secondary" onclick="openSoldierModal(\'' + s.id + '\')">✏️ Редагувати</button>' : '') +
-                  (pMode === 'all' ? '<button type="button" class="btn btn-xs btn-danger" onclick="confirmDeleteSoldier(\'' + s.id + '\')">🗑️ Видалити</button>' : '') +
+                  (canPres ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(\'' + s.id + '\')">' + ico('calendar', 13) + ' Запланувати на дату</button>' : '') +
+                  (pMode === 'all' ? '<button type="button" class="btn btn-xs btn-secondary" onclick="openSoldierModal(\'' + s.id + '\')">' + ico('edit', 13) + ' Редагувати</button>' : '') +
+                  (pMode === 'all' ? '<button type="button" class="btn btn-xs btn-danger" onclick="confirmDeleteSoldier(\'' + s.id + '\')">' + ico('trash', 13) + ' Видалити</button>' : '') +
                 '</div>' +
               '</div>';
           }
@@ -2581,14 +2628,14 @@
               '<div class="text-xs text-muted" style="margin-top:3px">Активна роль: <b style="color:#fff">' + esc(roleMeta.label) + '</b>' + (fbLastSyncText ? (' • Синхр.: ' + fbLastSyncText) : '') + '</div>' +
             '</div>' +
           '</div>' +
-          '<button type="button" class="btn btn-sm btn-secondary btn-full" onclick="logoutSession()">🚪 Вийти / Змінити роль (PIN)</button>' +
+          '<button type="button" class="btn btn-sm btn-secondary btn-full" onclick="logoutSession()">' + ico('logout', 14) + ' Вийти / Змінити роль (PIN)</button>' +
         '</div>';
 
       // 2. Блок синхронізації Firebase
       var diagCls = fbDiag.type === 'ok' ? 'diag-ok' : fbDiag.type === 'err' ? 'diag-err' : 'diag-info';
       var fbCard =
         '<div class="card stack">' +
-          '<div class="section-title">☁️ Синхронізація Firebase</div>' +
+          '<div class="section-title">' + ico('cloud', 14) + ' Синхронізація Firebase</div>' +
           '<div class="field">' +
             '<label class="field-label" for="set-fb-url">Посилання на Firebase Realtime Database</label>' +
             '<input id="set-fb-url" class="input" type="url" value="' + esc(fbUrl) + '" placeholder="https://your-db-default-rtdb.europe-west1.firebasedatabase.app" />' +
@@ -2596,12 +2643,12 @@
           '<button type="button" class="btn btn-primary btn-full" onclick="fbConnectFromSettings()">Перевірити та підключити</button>' +
           (admin ? (
             '<div class="grid-2">' +
-              '<button type="button" class="btn btn-sm btn-warn" onclick="fbPushAll(false)">☁️ Завантажити в хмару</button>' +
-              '<button type="button" class="btn btn-sm btn-info" onclick="fbPullAll(true,false)">⬇️ Завантажити з хмари</button>' +
+              '<button type="button" class="btn btn-sm btn-warn" onclick="fbPushAll(false)">' + ico('cloudUp', 14) + ' Завантажити в хмару</button>' +
+              '<button type="button" class="btn btn-sm btn-info" onclick="fbPullAll(true,false)">' + ico('download', 14) + ' Завантажити з хмари</button>' +
             '</div>' +
-            '<button type="button" class="btn btn-sm btn-secondary btn-full" onclick="copyShareLinkForKV()">🔗 Посилання для КВ</button>'
+            '<button type="button" class="btn btn-sm btn-secondary btn-full" onclick="copyShareLinkForKV()">' + ico('link', 14) + ' Посилання для КВ</button>'
           ) : (
-            '<button type="button" class="btn btn-sm btn-info btn-full" onclick="fbPullAll(true,false)">⬇️ Оновити дані з хмари</button>'
+            '<button type="button" class="btn btn-sm btn-info btn-full" onclick="fbPullAll(true,false)">' + ico('refresh', 14) + ' Оновити дані з хмари</button>'
           )) +
           '<div id="fb-diag-box" class="diag-box ' + diagCls + '">' + esc(fbDiag.text) + '</div>' +
         '</div>';
@@ -2609,15 +2656,15 @@
       // 3. Резервне копіювання (для всіх — експорт JSON/CSV; для Адміна ще й відновлення)
       var backupCard =
         '<div class="card stack">' +
-          '<div class="section-title">💾 Резервна копія та експорт</div>' +
+          '<div class="section-title">' + ico('save', 14) + ' Резервна копія та експорт</div>' +
           '<div class="grid-2">' +
-            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportBackupJSON()">⬇️ Бекап (JSON)</button>' +
-            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportPersonnelCSV()">📊 Склад (CSV)</button>' +
+            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportBackupJSON()">' + ico('download', 14) + ' Бекап (JSON)</button>' +
+            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportPersonnelCSV()">' + ico('chart', 14) + ' Склад (CSV)</button>' +
           '</div>' +
           (admin ? (
             '<div class="grid-2">' +
-              '<button type="button" class="btn btn-sm btn-info" onclick="document.getElementById(\'import-json-input\').click()">⬆️ Імпорт з файлу</button>' +
-              '<button type="button" class="btn btn-sm btn-info" onclick="openTextBackupModal()">📋 Бекап текстом</button>' +
+              '<button type="button" class="btn btn-sm btn-info" onclick="document.getElementById(\'import-json-input\').click()">' + ico('upload', 14) + ' Імпорт з файлу</button>' +
+              '<button type="button" class="btn btn-sm btn-info" onclick="openTextBackupModal()">' + ico('copy', 14) + ' Бекап текстом</button>' +
             '</div>'
           ) : '') +
         '</div>';
@@ -2628,13 +2675,13 @@
       // 4. [ТІЛЬКИ АДМІН] PIN-коди доступу (5 ролей)
       var pinsCard =
         '<div class="card stack">' +
-          '<div class="section-title">🔐 PIN-коди доступу (4 цифри)</div>' +
+          '<div class="section-title">' + ico('lock', 14) + ' PIN-коди доступу (4 цифри)</div>' +
           '<div class="grid-2">' +
-            '<div class="field"><label class="field-label">🛡️ Адмін</label><input id="pin-admin" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.admin) + '" /></div>' +
-            '<div class="field"><label class="field-label">⭐ КГ (Ком. групи)</label><input id="pin-kg" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kg) + '" /></div>' +
-            '<div class="field"><label class="field-label">🔹 КВ 1-го відд.</label><input id="pin-kv1" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kv1) + '" /></div>' +
-            '<div class="field"><label class="field-label">🔹 КВ 2-го відд.</label><input id="pin-kv2" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kv2) + '" /></div>' +
-            '<div class="field"><label class="field-label">🔹 КВ 3-го відд.</label><input id="pin-kv3" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kv3) + '" /></div>' +
+            '<div class="field"><label class="field-label">' + ico('shield', 13) + ' Адмін</label><input id="pin-admin" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.admin) + '" /></div>' +
+            '<div class="field"><label class="field-label">' + ico('star', 13) + ' КГ (Ком. групи)</label><input id="pin-kg" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kg) + '" /></div>' +
+            '<div class="field"><label class="field-label">' + ico('chevronBadge', 13) + ' КВ 1-го відд.</label><input id="pin-kv1" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kv1) + '" /></div>' +
+            '<div class="field"><label class="field-label">' + ico('chevronBadge', 13) + ' КВ 2-го відд.</label><input id="pin-kv2" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kv2) + '" /></div>' +
+            '<div class="field"><label class="field-label">' + ico('chevronBadge', 13) + ' КВ 3-го відд.</label><input id="pin-kv3" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kv3) + '" /></div>' +
           '</div>' +
           '<button type="button" class="btn btn-primary btn-full" onclick="savePinsSettings()">Зберегти PIN-коди</button>' +
         '</div>';
@@ -2672,14 +2719,14 @@
 
       var permsCard =
         '<div class="card stack">' +
-          '<div class="section-title">⚖️ Права доступу ролей</div>' +
+          '<div class="section-title">' + ico('sliders', 14) + ' Права доступу ролей</div>' +
           permBlocks +
         '</div>';
 
       // 6. [ТІЛЬКИ АДМІН] Номер групи, види нарядів, відділення
       var groupCard =
         '<div class="card stack">' +
-          '<div class="section-title">🏷️ Основні параметри</div>' +
+          '<div class="section-title">' + ico('tag', 14) + ' Основні параметри</div>' +
           '<div class="row">' +
             '<input id="set-group-num" class="input min0" type="text" value="' + esc(state.groupNumber) + '" placeholder="Номер групи (напр. 223)" />' +
             '<button type="button" class="btn btn-primary" onclick="saveGroupNumber()">Зберегти</button>' +
@@ -2695,7 +2742,7 @@
 
       var dtCard =
         '<div class="card stack">' +
-          '<div class="row-between"><div class="section-title">🛡️ Види нарядів</div><button type="button" class="btn btn-xs btn-primary" onclick="openAddDutyTypeModal()">+ Додати</button></div>' +
+          '<div class="row-between"><div class="section-title">' + ico('shield', 14) + ' Види нарядів</div><button type="button" class="btn btn-xs btn-primary" onclick="openAddDutyTypeModal()">+ Додати</button></div>' +
           dutyTypesHtml +
         '</div>';
 
@@ -2709,14 +2756,14 @@
 
       var sqCard =
         '<div class="card stack">' +
-          '<div class="row-between"><div class="section-title">👥 Відділення</div><button type="button" class="btn btn-xs btn-primary" onclick="openAddSquadModal()">+ Додати</button></div>' +
+          '<div class="row-between"><div class="section-title">' + ico('users', 14) + ' Відділення</div><button type="button" class="btn btn-xs btn-primary" onclick="openAddSquadModal()">+ Додати</button></div>' +
           squadsHtml +
         '</div>';
 
       var dangerCard =
         '<div class="card stack">' +
-          '<div class="section-title" style="color:#fca5a5">⚠️ Небезпечна зона</div>' +
-          '<button type="button" class="btn btn-danger btn-full" onclick="confirmClearAllData()">🗑️ Очистити всі дані</button>' +
+          '<div class="section-title" style="color:#fca5a5">' + ico('alert', 14) + ' Небезпечна зона</div>' +
+          '<button type="button" class="btn btn-danger btn-full" onclick="confirmClearAllData()">' + ico('trash', 15) + ' Очистити всі дані</button>' +
         '</div>';
 
       return versionCard + fbCard + pinsCard + permsCard + groupCard + dtCard + sqCard + backupCard + dangerCard;
@@ -2901,9 +2948,9 @@
       openModal(
         '<div class="modal-header"><div class="modal-title">Резервна копія текстом</div><button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<div class="modal-body">' +
-          '<button type="button" class="btn btn-info btn-full" onclick="copyText(document.getElementById(\'txt-backup\').value,\'JSON скопійовано\')">📋 Скопіювати поточний JSON</button>' +
+          '<button type="button" class="btn btn-info btn-full" onclick="copyText(document.getElementById(\'txt-backup\').value,\'JSON скопійовано\')">' + ico('copy', 15) + ' Скопіювати поточний JSON</button>' +
           '<textarea id="txt-backup" class="textarea" style="min-height:150px;font-family:monospace;font-size:11.5px">' + esc(jsonStr) + '</textarea>' +
-          '<button type="button" class="btn btn-primary btn-full" onclick="restoreFromTextBackup()">⬆️ Відновити з тексту</button>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="restoreFromTextBackup()">' + ico('upload', 15) + ' Відновити з тексту</button>' +
         '</div>'
       );
     }
