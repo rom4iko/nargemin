@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.4</title>
+  <title>Помічник взводу v3.4.1</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -389,6 +389,48 @@
     .field-label { display: flex; align-items: center; gap: 5px; }
     .modal-title { display: flex; align-items: center; gap: 7px; }
     .seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    /* Плавні iOS-переходи та анімації */
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes modalBackdropIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes modalSheetUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes modalPopIn {
+      from { opacity: 0; transform: scale(0.95) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes toastDrop {
+      from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes expandFade {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .main.tab-enter { animation: tabFadeIn 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
+    .modal-backdrop.open { animation: modalBackdropIn 0.18s ease-out; }
+    .modal-backdrop.open .modal-box { animation: modalSheetUp 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
+    @media (min-width: 520px) {
+      .modal-backdrop.open .modal-box { animation: modalPopIn 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
+    }
+    .toast { animation: toastDrop 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+    .soldier-expand { animation: expandFade 0.18s ease-out; }
+    .nav-btn { transition: color 0.18s ease, transform 0.12s ease; position: relative; }
+    .nav-btn:active { transform: scale(0.92); }
+    .nav-btn.active svg { transform: translateY(-1px); transition: transform 0.18s ease; }
+    .btn, .btn-icon, .pill, .seg-btn, .cal-cell, .status-btn, .presence-btn, .step-btn, .sync-pill {
+      transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.1s ease;
+    }
+    .btn-icon:active, .pill:active, .seg-btn:active, .cal-cell:active, .status-btn:active, .presence-btn:active, .step-btn:active, .sync-pill:active {
+      transform: scale(0.95);
+    }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -611,7 +653,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.4';
+    var APP_VERSION = 'v3.4.1';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -3008,6 +3050,12 @@
     function switchTab(tab) {
       ui.tab = tab;
       render();
+      var main = document.getElementById('main-content');
+      if (main) {
+        main.classList.remove('tab-enter');
+        void main.offsetWidth;
+        main.classList.add('tab-enter');
+      }
       window.scrollTo(0, 0);
     }
 
