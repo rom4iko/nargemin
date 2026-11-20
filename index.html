@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.7-focus</title>
+  <title>Помічник взводу v3.5</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -523,99 +523,6 @@
     [data-theme="light"] .pin-screen [style*="color:#fff"] { color: #0f172a !important; }
     [data-theme="light"] .duty-group-box { background: #f8fafc !important; }
 
-    /* =========================================================================
-       ФОКУСНИЙ МІНІМАЛІЗМ БЕЗ ЗАЙВИХ РАМОК (v3.7-focus)
-       ========================================================================= */
-    .header {
-      background: var(--bg);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border-bottom: none;
-      padding: calc(10px + var(--safe-top)) 16px 6px;
-    }
-    .nav {
-      background: var(--bg);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border-top: none;
-      box-shadow: 0 -1px 0 var(--border);
-    }
-    .nav-btn.active { background: transparent; color: var(--accent); }
-    .nav-btn.active::after {
-      content: '';
-      width: 18px;
-      height: 3px;
-      border-radius: 999px;
-      background: var(--accent);
-      margin-top: 2px;
-    }
-    .main { padding: 8px 16px 16px; gap: 16px; }
-
-    /* Прибираємо зайві рамки — залишаємо м'яку поверхню та легкі розділювачі */
-    .card, .card-flush {
-      border: none;
-      background: var(--bg-elev);
-      border-radius: 16px;
-      box-shadow: none;
-      padding: 14px;
-    }
-    .card-flush { padding: 4px 0; }
-    .acc-header { background: transparent; min-height: 44px; padding: 8px 14px; }
-    .acc-body { border-top: none; }
-    .soldier-item { border-bottom: 1px solid var(--border); background: transparent; }
-    .soldier-row { padding: 10px 14px; }
-    .soldier-expand { background: transparent; border-top: none; padding: 4px 14px 12px; }
-    .checkbox-row { background: transparent; border-bottom: 1px solid var(--border); }
-    .checkbox-row:last-child { border-bottom: none; }
-
-    .focus-hero {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: var(--bg-elev);
-    }
-    .focus-hero-stat {
-      font-size: 24px;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .rozkhid-row {
-      border: none;
-      background: transparent;
-      border-bottom: 1px solid var(--border);
-      border-radius: 0;
-      padding: 10px 4px;
-    }
-    .rozkhid-row:last-child { border-bottom: none; }
-    .rozkhid-row.has-count { border-left: 3px solid var(--amber); padding-left: 10px; }
-
-    .task-card {
-      border: none;
-      background: var(--bg-elev);
-      border-radius: 16px;
-      box-shadow: none;
-      padding: 14px;
-    }
-    .date-bar { border: none; background: var(--bg-elev); border-radius: 14px; }
-    .kpi-box { border: none; background: var(--bg-elev); border-radius: 14px; }
-    .perm-block { border: none; background: var(--bg); border-radius: 14px; }
-    .input, .select, .textarea { border: 1px solid transparent; background: var(--bg); border-radius: 12px; }
-    .input:focus, .select:focus, .textarea:focus { border-color: var(--accent); }
-
-    [data-theme="light"] .card,
-    [data-theme="light"] .card-flush,
-    [data-theme="light"] .focus-hero,
-    [data-theme="light"] .task-card,
-    [data-theme="light"] .date-bar,
-    [data-theme="light"] .kpi-box { background: #ffffff; }
-    [data-theme="light"] .input,
-    [data-theme="light"] .select,
-    [data-theme="light"] .textarea { background: #f1f5f9; }
-
     .hidden { display: none !important; }
   </style>
 </head>
@@ -838,7 +745,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.7-focus';
+    var APP_VERSION = 'v3.5';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -2327,19 +2234,7 @@
         '</div>';
       }).join('') : '<div class="card empty-state">Задач за обраним фільтром немає.</div>';
 
-      var activeTasksCnt = visibleTasks.filter(function(t) { return t.status !== 'done'; }).length;
-      var focusTaskHero =
-        '<div class="focus-hero">' +
-          '<div>' +
-            '<div class="text-xs text-muted">Активні задачі</div>' +
-            '<div class="focus-hero-stat" style="color:' + (activeTasksCnt > 0 ? 'var(--amber)' : 'var(--accent)') + '">' + activeTasksCnt + '</div>' +
-          '</div>' +
-          '<div style="text-align:right">' +
-            '<div class="text-xs text-muted">Усього видимих</div>' +
-            '<div class="focus-hero-stat">' + visibleTasks.length + '</div>' +
-          '</div>' +
-        '</div>';
-      return focusTaskHero + createForm + recPills + statusPills + copyBtn + cards;
+      return createForm + recPills + statusPills + copyBtn + cards;
     }
 
     function createNewTask() {
@@ -2431,7 +2326,7 @@
         '<div class="row wrap">' +
           '<button type="button" class="btn btn-xs btn-secondary" onclick="ui.rozkhidDate=todayISO();render()">Сьогодні</button>' +
           '<button type="button" class="btn btn-xs btn-secondary" onclick="ui.rozkhidDate=shiftISO(todayISO(),1);render()">Завтра</button>' +
-          (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(null)">' + ico('calendar', 13) + ' Запланувати</button>' : '') +
+          (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(null)">' + ico('calendar', 13) + ' Запланувати на дату</button>' : '') +
           (mode === 'all' ? '<button type="button" class="btn btn-xs btn-primary" onclick="applyScheduledAndDutiesToRozkhid(\'' + iso + '\',true)">' + ico('bolt', 13) + ' Автопідтягнути</button>' : '') +
           (mode === 'all' ? '<button type="button" class="btn btn-xs btn-danger" onclick="clearRozkhidForDate(\'' + iso + '\')">' + ico('clear', 13) + ' Очистити</button>' : '') +
         '</div>';
@@ -2467,16 +2362,11 @@
           '</div>';
       }
 
+      // Підсумок З/с та Вн
       var kpi =
-        '<div class="focus-hero">' +
-          '<div>' +
-            '<div class="text-xs text-muted">В наявності (Вн)</div>' +
-            '<div class="focus-hero-stat" style="color:var(--accent)">' + present + ' <span class="text-xs text-muted" style="font-weight:600">/ ' + total + ' з/с</span></div>' +
-          '</div>' +
-          '<div style="text-align:right">' +
-            '<div class="text-xs text-muted">Відсутні</div>' +
-            '<div class="focus-hero-stat" style="color:' + (absentSum > 0 ? 'var(--amber)' : 'var(--muted)') + '">' + absentSum + '</div>' +
-          '</div>' +
+        '<div class="grid-2">' +
+          '<div class="kpi-box"><div class="kpi-val">' + total + '</div><div class="kpi-lbl">З/с (За списком)</div></div>' +
+          '<div class="kpi-box"><div class="kpi-val" style="color:var(--accent)">' + present + '</div><div class="kpi-lbl">Вн (В наявності)</div></div>' +
         '</div>';
 
       // 11 категорій
