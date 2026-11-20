@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.6-ios-soft</title>
+  <title>Помічник взводу v3.5</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -523,132 +523,6 @@
     [data-theme="light"] .pin-screen [style*="color:#fff"] { color: #0f172a !important; }
     [data-theme="light"] .duty-group-box { background: #f8fafc !important; }
 
-    /* =========================================================================
-       ВАРІАНТ 3: М'ЯКИЙ IOS / ПЛАВАЮЧІ ПАНЕЛІ
-       ========================================================================= */
-    .header {
-      margin: 10px 12px 2px;
-      border-radius: 22px;
-      background: rgba(22, 31, 42, 0.82);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
-    }
-    .nav {
-      bottom: calc(12px + var(--safe-bottom));
-      left: 14px;
-      right: 14px;
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border-top: none;
-      padding-bottom: 0;
-      pointer-events: none;
-    }
-    .nav-inner {
-      max-width: 560px;
-      height: 64px;
-      border-radius: 24px;
-      background: rgba(22, 31, 42, 0.86);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.48);
-      padding: 5px;
-      pointer-events: auto;
-    }
-    .nav-btn.active {
-      background: rgba(74, 222, 128, 0.16);
-      border-radius: 19px;
-    }
-    .app { padding-bottom: calc(96px + var(--safe-bottom)); }
-
-    /* М'які картки без жорстких рамок, з делікатним розділенням */
-    .card {
-      border-radius: 22px;
-      border-color: rgba(255, 255, 255, 0.06);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
-      padding: 16px;
-    }
-    .card-flush {
-      border-radius: 22px;
-      border-color: rgba(255, 255, 255, 0.06);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
-    }
-    .btn { border-radius: 16px; }
-    .btn-sm { border-radius: 13px; }
-    .btn-xs { border-radius: 11px; }
-    .input, .select, .textarea {
-      border-radius: 15px;
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-    .date-bar {
-      border-radius: 20px;
-      border-color: rgba(255, 255, 255, 0.07);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    }
-    .rozkhid-row {
-      border-radius: 16px;
-      border-color: rgba(255, 255, 255, 0.06);
-      padding: 11px 12px;
-    }
-    .kpi-box {
-      border-radius: 18px;
-      border-color: rgba(255, 255, 255, 0.06);
-      padding: 12px;
-    }
-    .task-card {
-      border-radius: 22px;
-      border-color: rgba(255, 255, 255, 0.06);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
-      padding: 15px;
-    }
-    .modal-box { border-radius: 26px 26px 0 0; }
-    @media (min-width: 520px) { .modal-box { border-radius: 24px; } }
-    .pill { border-radius: 999px; }
-
-    /* Плаваюча панель головної дії на екрані */
-    .floating-action-bar {
-      position: sticky;
-      bottom: calc(84px + var(--safe-bottom));
-      z-index: 25;
-      padding: 8px 10px;
-      border-radius: 20px;
-      background: rgba(19, 27, 36, 0.88);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.42);
-    }
-
-    /* Адаптація світлої та OLED тем під м'який iOS-стиль */
-    [data-theme="oled"] .header,
-    [data-theme="oled"] .nav-inner,
-    [data-theme="oled"] .floating-action-bar { background: rgba(14, 14, 14, 0.88); }
-    [data-theme="light"] .header {
-      background: rgba(255, 255, 255, 0.84);
-      border-color: rgba(15, 23, 42, 0.08);
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-    }
-    [data-theme="light"] .nav-inner {
-      background: rgba(255, 255, 255, 0.88);
-      border-color: rgba(15, 23, 42, 0.09);
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
-    }
-    [data-theme="light"] .card,
-    [data-theme="light"] .card-flush,
-    [data-theme="light"] .task-card,
-    [data-theme="light"] .date-bar {
-      border-color: rgba(15, 23, 42, 0.07);
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
-    }
-    [data-theme="light"] .floating-action-bar {
-      background: rgba(255, 255, 255, 0.88);
-      border-color: rgba(15, 23, 42, 0.09);
-      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
-    }
-
     .hidden { display: none !important; }
   </style>
 </head>
@@ -871,7 +745,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.6-ios-soft';
+    var APP_VERSION = 'v3.5';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -2319,7 +2193,7 @@
         return true;
       });
 
-      var copyBtn = '<div class="floating-action-bar"><button type="button" class="btn btn-sm btn-info btn-full" onclick="copyActiveTasks()">' + ico('copy', 14) + ' Скопіювати активні задачі</button></div>';
+      var copyBtn = '<button type="button" class="btn btn-sm btn-info btn-full" onclick="copyActiveTasks()">' + ico('copy', 14) + ' Скопіювати активні задачі</button>';
 
       var cards = filtered.length ? filtered.map(function(t) {
         var showRemark = t.status === 'failed' || Boolean(t.remark) || Boolean(ui.tasksExpandedRemarks[t.id]);
@@ -2449,10 +2323,10 @@
           '<div class="date-bar-title">' + esc(state.groupNumber) + ' • ' + fmtUA(iso) + '</div>' +
           '<button type="button" class="btn-icon btn-icon-sm" onclick="shiftRozkhidDate(1)">▶</button>' +
         '</div>' +
-        '<div class="floating-action-bar row wrap">' +
+        '<div class="row wrap">' +
           '<button type="button" class="btn btn-xs btn-secondary" onclick="ui.rozkhidDate=todayISO();render()">Сьогодні</button>' +
           '<button type="button" class="btn btn-xs btn-secondary" onclick="ui.rozkhidDate=shiftISO(todayISO(),1);render()">Завтра</button>' +
-          (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(null)">' + ico('calendar', 13) + ' Запланувати</button>' : '') +
+          (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(null)">' + ico('calendar', 13) + ' Запланувати на дату</button>' : '') +
           (mode === 'all' ? '<button type="button" class="btn btn-xs btn-primary" onclick="applyScheduledAndDutiesToRozkhid(\'' + iso + '\',true)">' + ico('bolt', 13) + ' Автопідтягнути</button>' : '') +
           (mode === 'all' ? '<button type="button" class="btn btn-xs btn-danger" onclick="clearRozkhidForDate(\'' + iso + '\')">' + ico('clear', 13) + ' Очистити</button>' : '') +
         '</div>';
