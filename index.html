@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.9-hub-nav</title>
+  <title>Помічник взводу v3.10-tasks-photo-prio</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -722,6 +722,81 @@
       justify-content: center;
     }
 
+    /* =========================================================================
+       ПРІОРИТЕТНІСТЬ ЗАДАЧ ТА ФОТОДОКАЗИ ВИКОНАННЯ (v3.10)
+       ========================================================================= */
+    .prio-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .prio-high {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+    }
+    .prio-normal {
+      background: rgba(56, 189, 248, 0.16);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .prio-low {
+      background: rgba(148, 163, 184, 0.16);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+    .task-card.prio-high-card {
+      border-top: 2px solid rgba(239, 68, 68, 0.55);
+    }
+    .photo-proof-box {
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .photo-proof-box.required-missing {
+      border-color: rgba(245, 158, 11, 0.65);
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .photo-thumb {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .photo-full-img {
+      width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #000;
+    }
+    html:not([data-theme="dark"]):not([data-theme="oled"]) .prio-high {
+      background: rgba(194, 59, 46, 0.12);
+      color: #991b1b;
+      border-color: rgba(194, 59, 46, 0.35);
+    }
+    html:not([data-theme="dark"]):not([data-theme="oled"]) .prio-normal {
+      background: rgba(47, 111, 219, 0.12);
+      color: #1e40af;
+      border-color: rgba(47, 111, 219, 0.3);
+    }
+    html:not([data-theme="dark"]):not([data-theme="oled"]) .prio-low {
+      background: rgba(100, 116, 139, 0.12);
+      color: #334155;
+      border-color: rgba(100, 116, 139, 0.3);
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -908,7 +983,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.9-hub-nav';
+    var APP_VERSION = 'v3.10-tasks-photo-prio';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -1241,6 +1316,7 @@
         var matchedRec = TASK_RECIPIENTS.find(function(r) {
           return r.targetRole === inferredRole || r.label === t.target;
         });
+        var normPrio = (t.priority === 'high' || t.priority === 'low' || t.priority === 'normal') ? t.priority : 'normal';
         return {
           id: String(t.id || genId('task')),
           text: String(t.text),
@@ -1248,6 +1324,10 @@
           targetRole: inferredRole || (matchedRec ? matchedRec.targetRole : 'all'),
           targetSquadId: sqId || (matchedRec ? matchedRec.targetSquadId : 'all'),
           author: String(t.author || t.issuer || ''),
+          priority: normPrio,
+          requirePhoto: Boolean(t.requirePhoto),
+          photoProof: typeof t.photoProof === 'string' ? t.photoProof : '',
+          photoUpdatedAt: String(t.photoUpdatedAt || ''),
           status: (t.status === 'done' || t.status === 'failed' || t.status === 'received') ? t.status : 'received',
           remark: String(t.remark || t.note || ''),
           createdAt: t.createdAt || fmtTimeNow()
@@ -2294,8 +2374,114 @@
     }
 
     // =========================================================================
-    // 9. ВКЛАДКА 2: ЗАДАЧІ (ВИПРАВЛЕНА АДРЕСНА ВИДИМІСТЬ + ЗАУВАЖЕННЯ)
+    // 9. ВКЛАДКА 2: ЗАДАЧІ (ПРІОРИТЕТНІСТЬ + ФОТОДОКАЗИ + АДРЕСНА ВИДИМІСТЬ)
     // =========================================================================
+    var PRIO_META = {
+      high:   { label: 'Високий пріоритет', short: 'Терміново', rank: 0, cls: 'prio-high' },
+      normal: { label: 'Звичайний пріоритет', short: 'Звичайний', rank: 1, cls: 'prio-normal' },
+      low:    { label: 'Низький пріоритет', short: 'Низький', rank: 2, cls: 'prio-low' }
+    };
+    var pendingPhotoTaskId = null;
+
+    function getPriorityMeta(p) {
+      return PRIO_META[p] || PRIO_META.normal;
+    }
+
+    function triggerTaskPhotoUpload(taskId) {
+      if (!canUpdateTasks()) return;
+      pendingPhotoTaskId = taskId;
+      var inp = document.getElementById('task-photo-file-input');
+      if (!inp) {
+        inp = document.createElement('input');
+        inp.type = 'file';
+        inp.id = 'task-photo-file-input';
+        inp.accept = 'image/*';
+        inp.setAttribute('capture', 'environment');
+        inp.style.display = 'none';
+        inp.onchange = handleTaskPhotoFileSelected;
+        document.body.appendChild(inp);
+      }
+      inp.value = '';
+      inp.click();
+    }
+
+    function handleTaskPhotoFileSelected(ev) {
+      var tid = pendingPhotoTaskId;
+      pendingPhotoTaskId = null;
+      var file = ev && ev.target && ev.target.files ? ev.target.files[0] : null;
+      if (!tid || !file) return;
+      if (file.size > 12 * 1024 * 1024) {
+        showToast('Файл завеликий (макс. 12 МБ)', true);
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function() {
+        var img = new Image();
+        img.onload = function() {
+          try {
+            var maxSide = 960;
+            var w = img.width || 1;
+            var h = img.height || 1;
+            if (w > maxSide || h > maxSide) {
+              if (w >= h) { h = Math.round(h * (maxSide / w)); w = maxSide; }
+              else { w = Math.round(w * (maxSide / h)); h = maxSide; }
+            }
+            var canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            if (!ctx) { showToast('Не вдалося обробити фото', true); return; }
+            ctx.drawImage(img, 0, 0, w, h);
+            var dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+            var t = state.tasks.find(function(x) { return x.id === tid; });
+            if (t) {
+              t.photoProof = dataUrl;
+              t.photoUpdatedAt = fmtTimeNow();
+              t.status = 'done';
+              saveState(true);
+              showToast('Фотодоказ прикріплено, задачу позначено як виконану');
+              render();
+            }
+          } catch (err) {
+            showToast('Помилка стиснення фото', true);
+          }
+        };
+        img.onerror = function() { showToast('Не вдалося прочитати зображення', true); };
+        img.src = String(reader.result || '');
+      };
+      reader.onerror = function() { showToast('Помилка читання файлу', true); };
+      reader.readAsDataURL(file);
+    }
+
+    function removeTaskPhoto(taskId) {
+      if (!canUpdateTasks()) return;
+      var t = state.tasks.find(function(x) { return x.id === taskId; });
+      if (!t) return;
+      t.photoProof = '';
+      t.photoUpdatedAt = '';
+      saveState(true);
+      showToast('Фотодоказ видалено');
+      render();
+    }
+
+    function openTaskPhotoPreview(taskId) {
+      var t = state.tasks.find(function(x) { return x.id === taskId; });
+      if (!t || !t.photoProof) return;
+      openModal(
+        '<div class="modal-header">' +
+          '<div><div class="modal-title">Фотодоказ виконання</div><div class="text-xs text-muted">' + esc(t.target) + (t.photoUpdatedAt ? (' • ' + esc(t.photoUpdatedAt)) : '') + '</div></div>' +
+          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<img class="photo-full-img" src="' + t.photoProof + '" alt="Фотодоказ виконання задачі" />' +
+          '<div class="text-sm" style="white-space:pre-wrap">' + esc(t.text) + '</div>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+          '<button type="button" class="btn btn-secondary btn-full" onclick="closeModal()">Закрити</button>' +
+        '</div>'
+      );
+    }
+
     function renderTasksTab() {
       var canCreate = canCreateTasks();
       var canUpdate = canUpdateTasks();
@@ -2308,9 +2494,19 @@
         createForm =
           '<div class="card stack">' +
             '<div class="section-title">Поставити задачу</div>' +
-            '<div class="field">' +
-              '<label class="field-label" for="task-rec">Кому</label>' +
-              '<select id="task-rec" class="select">' + opts + '</select>' +
+            '<div class="grid-2">' +
+              '<div class="field">' +
+                '<label class="field-label" for="task-rec">Кому</label>' +
+                '<select id="task-rec" class="select">' + opts + '</select>' +
+              '</div>' +
+              '<div class="field">' +
+                '<label class="field-label" for="task-prio">Пріоритетність</label>' +
+                '<select id="task-prio" class="select">' +
+                  '<option value="normal">Звичайний</option>' +
+                  '<option value="high">Високий (Терміново)</option>' +
+                  '<option value="low">Низький</option>' +
+                '</select>' +
+              '</div>' +
             '</div>' +
             '<div class="field">' +
               '<label class="field-label" for="task-text">Текст задачі</label>' +
@@ -2320,6 +2516,10 @@
               '<label class="field-label" for="task-author">Хто поставив</label>' +
               '<input id="task-author" class="input" type="text" placeholder="Прізвище або посада..." />' +
             '</div>' +
+            '<label class="toggle-pill">' +
+              '<input id="task-req-photo" type="checkbox" />' +
+              '<span>Обов\'язковий фотодоказ після виконання</span>' +
+            '</label>' +
             '<button type="button" class="btn btn-primary btn-full" onclick="createNewTask()">+ Поставити задачу</button>' +
           '</div>';
       }
@@ -2350,26 +2550,75 @@
         return '<button type="button" class="pill ' + (ui.tasksFilterStatus === sf.key ? 'active' : '') + '" onclick="ui.tasksFilterStatus=\'' + sf.key + '\';render()">' + esc(sf.label) + '</button>';
       }).join('') + '</div>';
 
-      var filtered = visibleTasks.filter(function(t) {
-        if (canSeeAll && ui.tasksFilterRecipient !== 'all' && t.targetRole !== ui.tasksFilterRecipient) return false;
-        if (ui.tasksFilterStatus === 'active') return t.status !== 'done';
-        if (ui.tasksFilterStatus !== 'all' && t.status !== ui.tasksFilterStatus) return false;
-        return true;
-      });
+      var filtered = visibleTasks
+        .filter(function(t) {
+          if (canSeeAll && ui.tasksFilterRecipient !== 'all' && t.targetRole !== ui.tasksFilterRecipient) return false;
+          if (ui.tasksFilterStatus === 'active') return t.status !== 'done';
+          if (ui.tasksFilterStatus !== 'all' && t.status !== ui.tasksFilterStatus) return false;
+          return true;
+        })
+        .sort(function(a, b) {
+          var aDone = a.status === 'done' ? 1 : 0;
+          var bDone = b.status === 'done' ? 1 : 0;
+          if (aDone !== bDone) return aDone - bDone;
+          var ra = getPriorityMeta(a.priority).rank;
+          var rb = getPriorityMeta(b.priority).rank;
+          if (ra !== rb) return ra - rb;
+          return 0;
+        });
 
       var copyBtn = '<button type="button" class="btn btn-sm btn-info btn-full" onclick="copyActiveTasks()">' + ico('copy', 14) + ' Скопіювати активні задачі</button>';
 
       var cards = filtered.length ? filtered.map(function(t) {
         var showRemark = t.status === 'failed' || Boolean(t.remark) || Boolean(ui.tasksExpandedRemarks[t.id]);
+        var pm = getPriorityMeta(t.priority);
         var stBadge = t.status === 'done'
           ? '<span class="badge badge-ok">Виконано</span>'
           : t.status === 'failed'
             ? '<span class="badge badge-err">Не виконано</span>'
             : '<span class="badge badge-info">Отримав задачу</span>';
 
-        return '<div class="task-card st-' + esc(t.status) + '">' +
-          '<div class="row-between">' +
-            '<span class="badge badge-warn">' + esc(t.target) + '</span>' +
+        var photoRequirementBadge = t.requirePhoto
+          ? '<span class="badge badge-warn">Фото обов\'язкове</span>'
+          : '<span class="badge badge-info">Фото не обов\'язкове</span>';
+
+        var showPhotoBlock = Boolean(t.requirePhoto) || Boolean(t.photoProof) || t.status === 'done';
+        var missingReqPhoto = Boolean(t.requirePhoto) && t.status === 'done' && !t.photoProof;
+        var photoBlockHtml = '';
+        if (showPhotoBlock) {
+          var imgPreviewHtml = t.photoProof
+            ? ('<img class="photo-thumb" src="' + t.photoProof + '" alt="Фотодоказ" onclick="openTaskPhotoPreview(\'' + t.id + '\')" />' +
+               '<div class="row-between text-xs text-muted">' +
+                 '<span>Додано: ' + esc(t.photoUpdatedAt || 'так') + '</span>' +
+                 (canUpdate ? '<button type="button" style="color:#f87171;font-weight:700" onclick="removeTaskPhoto(\'' + t.id + '\')">Видалити фото</button>' : '') +
+               '</div>')
+            : ('<div class="text-xs ' + (missingReqPhoto ? 'fw-bold" style="color:#fcd34d' : 'text-muted') + '">' +
+                (t.requirePhoto
+                  ? 'Для цієї задачі потрібен фотодоказ виконання.'
+                  : 'Фотодоказ не обов\'язковий, але можна прикріпити після виконання.') +
+               '</div>');
+
+          photoBlockHtml =
+            '<div class="photo-proof-box ' + (missingReqPhoto ? 'required-missing' : '') + '">' +
+              '<div class="row-between">' +
+                '<span class="fw-bold text-xs">Фотодоказ виконання</span>' +
+                (canUpdate
+                  ? ('<button type="button" class="btn btn-xs ' + (t.requirePhoto && !t.photoProof ? 'btn-warn' : 'btn-secondary') + '" onclick="triggerTaskPhotoUpload(\'' + t.id + '\')">' +
+                      ico('upload', 12) + ' ' + (t.photoProof ? 'Замінити фото' : 'Вставити фото') +
+                    '</button>')
+                  : '') +
+              '</div>' +
+              imgPreviewHtml +
+            '</div>';
+        }
+
+        return '<div class="task-card st-' + esc(t.status) + (t.priority === 'high' ? ' prio-high-card' : '') + '">' +
+          '<div class="row-between wrap">' +
+            '<div class="row wrap" style="gap:5px">' +
+              '<span class="badge badge-warn">' + esc(t.target) + '</span>' +
+              '<span class="prio-badge ' + pm.cls + '">' + esc(pm.short) + '</span>' +
+              photoRequirementBadge +
+            '</div>' +
             '<div class="row" style="gap:6px">' + stBadge +
               (canCreate ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')" title="Видалити">✕</button>' : '') +
             '</div>' +
@@ -2379,6 +2628,7 @@
             '<span>' + (t.author ? ('Поставив: ' + esc(t.author)) : '') + '</span>' +
             '<span>' + esc(t.createdAt) + '</span>' +
           '</div>' +
+          photoBlockHtml +
           (canUpdate ? (
             '<div class="status-group">' +
               '<button type="button" class="status-btn ' + (t.status === 'received' ? 'st-received' : '') + '" onclick="setTaskStatus(\'' + t.id + '\',\'received\')">Отримав задачу</button>' +
@@ -2404,11 +2654,14 @@
     function createNewTask() {
       if (!canCreateTasks()) return;
       var recEl = document.getElementById('task-rec');
+      var prioEl = document.getElementById('task-prio');
       var txtEl = document.getElementById('task-text');
       var authEl = document.getElementById('task-author');
+      var reqPhotoEl = document.getElementById('task-req-photo');
       var text = txtEl ? txtEl.value.trim() : '';
       if (!text) { showToast('Введіть текст задачі', true); return; }
       var rec = TASK_RECIPIENTS[Number(recEl ? recEl.value : 0)] || TASK_RECIPIENTS[0];
+      var prioVal = prioEl && (prioEl.value === 'high' || prioEl.value === 'low') ? prioEl.value : 'normal';
       state.tasks.unshift({
         id: genId('task'),
         text: text,
@@ -2416,6 +2669,10 @@
         targetRole: rec.targetRole,
         targetSquadId: rec.targetSquadId,
         author: authEl ? authEl.value.trim() : '',
+        priority: prioVal,
+        requirePhoto: Boolean(reqPhotoEl && reqPhotoEl.checked),
+        photoProof: '',
+        photoUpdatedAt: '',
         status: 'received',
         remark: '',
         createdAt: fmtTimeNow()
@@ -2429,6 +2686,13 @@
       if (!canUpdateTasks()) return;
       var t = state.tasks.find(function(x) { return x.id === taskId; });
       if (!t) return;
+      if (status === 'done' && t.requirePhoto && !t.photoProof) {
+        t.status = status;
+        saveState(true);
+        showToast('Ця задача вимагає фотодоказ — прикріпіть фото після виконання', true);
+        render();
+        return;
+      }
       t.status = status;
       if (status === 'failed') ui.tasksExpandedRemarks[taskId] = true;
       saveState(true);
@@ -2460,7 +2724,9 @@
       var lines = ['Активні задачі (' + fmtUA(todayISO()) + '):'];
       list.forEach(function(t, i) {
         var st = t.status === 'failed' ? 'НЕ ВИКОНАНО' : 'В роботі';
-        var line = (i + 1) + '. [' + t.target + '] ' + t.text + ' — ' + st;
+        var pm = getPriorityMeta(t.priority);
+        var line = (i + 1) + '. [' + pm.short + '] [' + t.target + '] ' + t.text + ' — ' + st;
+        if (t.requirePhoto) line += ' [Фото обов\'язкове]';
         if (t.author) line += ' (від: ' + t.author + ')';
         if (t.remark) line += ' | Зауваження: ' + t.remark;
         lines.push(line);
