@@ -1,136 +1,1021 @@
 <!DOCTYPE html>
-<html lang="uk" class="dark">
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Облік нарядів взводу</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            tactical: {
-              bg: '#0f1419',
-              card: '#1a2129',
-              cardHover: '#222b35',
-              border: '#2a3441',
-              olive: '#5c8a47',
-              oliveHover: '#4d753b',
-              emerald: '#4caf50',
-              text: '#e6edf3',
-              muted: '#8b949e'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
-          }
-        }
-      }
-    };
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="theme-color" content="#0e1318" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Помічник взводу</title>
   <style>
-    /* Базові стилі для плавної прокрутки та відсутності горизонтального скролу */
+    /* =====================================================================
+       БАЗОВІ ЗМІННІ ТА СКИДАННЯ (100% АВТОНОМНИЙ CSS БЕЗ ЗОВНІШНІХ CDN)
+       ===================================================================== */
+    :root {
+      --bg: #0e1318;
+      --card: #161d25;
+      --card-2: #1c2530;
+      --border: #273240;
+      --text: #e8eef5;
+      --muted: #8b99a8;
+      --accent: #4d7c3f;
+      --accent-bright: #5e964d;
+      --accent-soft: rgba(94, 150, 77, 0.16);
+      --green: #22c55e;
+      --blue: #3b82f6;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --cyan: #06b6d4;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --nav-h: 66px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     html, body {
-      background-color: #0f1419;
-      color: #e6edf3;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      overscroll-behavior-y: none;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
       -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+      overflow-x: hidden;
+      min-height: 100vh;
     }
-    /* Приховування скролбару для горизонтальних фільтрів */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      outline: none;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
+
+    button {
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Контейнер застосунку */
+    .app-shell {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: calc(var(--nav-h) + 22px);
+    }
+
+    /* Верхня шапка */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(14, 19, 24, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(94, 150, 77, 0.45);
+      color: #84cc16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Банер демо-даних */
+    .demo-banner {
+      margin: 12px 14px 0;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: #fde68a;
+    }
+
+    .demo-banner.hidden { display: none; }
+
+    /* Основний контент */
+    .main-content {
+      flex: 1;
+      padding: 14px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Нижня навігація */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: rgba(22, 29, 37, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .bottom-nav-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      height: var(--nav-h);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      position: relative;
+      transition: color 0.15s;
+    }
+
+    .nav-btn.active {
+      color: #4ade80;
+    }
+
+    .nav-btn.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 22%;
+      right: 22%;
+      height: 3px;
+      border-radius: 0 0 4px 4px;
+      background: #4ade80;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 7px;
+      right: calc(50% - 20px);
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      border-radius: 999px;
+      background: var(--amber);
+      color: #111;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Картки та секції */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .card-flush {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 11px 14px;
+      background: rgba(14, 19, 24, 0.55);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Підвкладки (сегментований перемикач) */
+    .subtabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+    }
+
+    .subtab-btn {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+
+    .subtab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Горизонтальні вкладки-пілюлі (відділення / статуси) */
+    .pills-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
       scrollbar-width: none;
     }
-    /* Плавна поява модальних вікон */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+    .pills-row::-webkit-scrollbar { display: none; }
+
+    .pill-btn {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+      min-height: 36px;
+    }
+
+    .pill-btn.active {
+      background: var(--card-2);
+      color: #fff;
+      border-color: var(--pill-color, #4ade80);
+      box-shadow: inset 0 0 0 1px var(--pill-color, #4ade80);
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .pill-count {
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    /* Кнопки */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 42px;
+    }
+
+    .btn-sm {
+      padding: 7px 11px;
+      font-size: 12px;
+      min-height: 34px;
+      border-radius: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .btn-primary:hover { background: var(--accent-bright); }
+
+    .btn-secondary {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #24303e; }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.14);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.22); }
+
+    .btn-danger-solid {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { color: #fff; background: var(--card-2); }
+    .btn-icon.danger { color: #f87171; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.25); }
+
+    .btn-full { width: 100%; }
+
+    /* Поля вводу */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .input, .select, .textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 12px;
+      font-size: 14px;
+      color: #fff;
+      transition: border-color 0.15s;
+    }
+
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: var(--accent-bright);
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 82px;
+    }
+
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-wrap .input {
+      padding-left: 38px;
+      padding-right: 36px;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Чекбокс-картка */
+    .checkbox-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .checkbox-card input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #f59e0b;
+      cursor: pointer;
+    }
+
+    /* Бейджі */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-kv {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .badge-status-active { background: rgba(34, 197, 94, 0.14); color: #4ade80; border-color: rgba(34, 197, 94, 0.3); }
+    .badge-status-leave { background: rgba(59, 130, 246, 0.14); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+    .badge-status-medical { background: rgba(239, 68, 68, 0.14); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+    .badge-status-trip { background: rgba(245, 158, 11, 0.14); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+
+    .badge-warn {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .badge-rec {
+      background: rgba(34, 197, 94, 0.16);
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    /* Перемикач місяця */
+    .month-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px;
+    }
+
+    .month-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #fff;
+      text-align: center;
+      flex: 1;
+    }
+
+    /* Календар */
+    .cal-weekdays, .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-weekdays {
+      margin-bottom: 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .cal-weekdays .wknd { color: rgba(251, 191, 36, 0.85); }
+
+    .cal-cell {
+      min-height: 48px;
+      border-radius: 9px;
+      background: rgba(14, 19, 24, 0.65);
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 2px;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .cal-cell:hover { background: var(--card-2); }
+
+    .cal-cell.today {
+      border-color: rgba(74, 222, 128, 0.55);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .cal-cell.selected {
+      background: rgba(94, 150, 77, 0.25);
+      border-color: #4ade80;
+      box-shadow: inset 0 0 0 1px #4ade80;
+    }
+
+    .cal-day-num {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .cal-cell.today .cal-day-num { color: #4ade80; }
+
+    .cal-dots {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 3px;
+      min-height: 8px;
+      max-width: 100%;
+    }
+
+    .cal-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    /* Картка бійця */
+    .soldier-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--sq-color, #4ade80);
+      border-bottom: 1px solid rgba(39, 50, 64, 0.65);
+      background: var(--card);
+    }
+    .soldier-row:last-child { border-bottom: none; }
+    .soldier-row.is-kv {
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.09) 0%, rgba(22, 29, 37, 1) 70%);
+    }
+
+    .soldier-info { min-width: 0; flex: 1; }
+
+    .soldier-name-line {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .soldier-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .soldier-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* KPI сітка */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .kpi-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Смужка прогресу навантаження */
+    .bar-track {
+      height: 5px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.25s;
+    }
+
+    /* Картка задачі */
+    .task-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--sq-color, #8b99a8);
+      border-radius: var(--radius);
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-card.status-done {
+      opacity: 0.85;
+    }
+
+    .task-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .task-text {
+      font-size: 14px;
+      color: #fff;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+    }
+
+    .task-card.status-done .task-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .task-status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .status-tap-btn {
+      padding: 9px 6px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      text-align: center;
+      transition: all 0.15s;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-tap-btn.active-received {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+
+    .status-tap-btn.active-done {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #22c55e;
+      color: #86efac;
+    }
+
+    .status-tap-btn.active-failed {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #fca5a5;
+    }
+
+    /* Блок зауважень під задачею */
+    .note-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 9px;
+      background: rgba(14, 19, 24, 0.65);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .note-toggle-btn.has-note {
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fde68a;
+    }
+
+    .note-box {
+      background: rgba(14, 19, 24, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Швидкі підказки (chips) */
+    .chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip-btn {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .chip-btn:hover { border-color: var(--accent-bright); }
+
+    /* Палітра кольорів */
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s;
+    }
+
+    .color-swatch.selected {
+      border-color: #fff;
+      transform: scale(1.12);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+    }
+
+    /* Модальні вікна */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(0, 0, 0, 0.76);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    @media (min-width: 560px) {
+      .modal-backdrop { align-items: center; padding: 16px; }
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.18s ease-out;
+    }
+
+    @media (min-width: 560px) {
+      .modal-panel { border-radius: 18px; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .animate-fade-in {
-      animation: fadeIn 0.18s ease-out forwards;
+
+    .modal-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
     }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Сповіщення (Toast) */
+    .toast-wrap {
+      position: fixed;
+      top: 66px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: #1d2834;
+      border: 1px solid rgba(74, 222, 128, 0.55);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      animation: slideUp 0.18s ease-out;
+    }
+
+    .toast.error {
+      background: #331619;
+      border-color: rgba(239, 68, 68, 0.6);
+      color: #fecaca;
+    }
+
+    /* Допоміжні утиліти */
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .row-gap { display: flex; align-items: center; gap: 8px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stack { display: flex; flex-direction: column; gap: 10px; }
+    .empty-state { text-align: center; padding: 26px 14px; color: var(--muted); font-size: 13px; }
+    .text-xs { font-size: 11px; }
+    .text-sm { font-size: 13px; }
+    .text-muted { color: var(--muted); }
+    .hidden { display: none !important; }
   </style>
 </head>
-<body class="min-h-screen bg-tactical-bg text-tactical-text antialiased selection:bg-tactical-olive selection:text-white">
-
-  <!-- Головний контейнер (mobile-first, до 600px по центру на ПК) -->
-  <div id="app" class="max-w-[600px] mx-auto min-h-screen flex flex-col relative pb-24">
-
+<body>
+  <div class="app-shell">
     <!-- Верхня шапка -->
-    <header class="sticky top-0 z-30 bg-tactical-bg/95 backdrop-blur border-b border-tactical-border px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-tactical-olive/20 border border-tactical-olive/50 flex items-center justify-center text-tactical-emerald">
-          <!-- Іконка щита -->
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
           </svg>
         </div>
         <div>
-          <h1 class="text-base font-bold leading-tight tracking-tight text-white">Облік нарядів взводу</h1>
-          <p class="text-[11px] text-tactical-muted leading-tight">Локальний журнал • Офлайн</p>
+          <div class="brand-title">Помічник взводу</div>
+          <div class="brand-sub">Наряди • Задачі • Особовий склад</div>
         </div>
       </div>
-      <div id="header-right-action"></div>
+      <div id="header-right"></div>
     </header>
 
-    <!-- Банер демо-даних (показується лише якщо активні початкові демо-дані) -->
-    <div id="demo-banner" class="hidden mx-4 mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3">
-      <div class="text-xs text-amber-200 leading-snug">
-        <span class="font-semibold text-amber-400">Демо-режим:</span> завантажено тестові дані взводу.
-      </div>
-      <button onclick="promptClearDemo()" class="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold border border-amber-500/40 transition">
-        Очистити
-      </button>
+    <!-- Банер демо-режиму -->
+    <div id="demo-banner" class="demo-banner hidden">
+      <span><strong>Демо-дані:</strong> завантажено тестовий взвод для ознайомлення.</span>
+      <button class="btn btn-sm btn-secondary" onclick="promptClearDemo()">Очистити</button>
     </div>
 
     <!-- Основний контент активної вкладки -->
-    <main id="main-content" class="flex-1 px-4 pt-3 space-y-4">
-      <!-- Рендериться динамічно через JS -->
-    </main>
+    <main id="main-content" class="main-content"></main>
 
-    <!-- Фіксована нижня навігація (4 вкладки) -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-tactical-card/95 backdrop-blur border-t border-tactical-border">
-      <div class="max-w-[600px] mx-auto grid grid-cols-4 h-16">
-        <button onclick="switchTab('schedule')" id="nav-schedule" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
+    <!-- Нижня фіксована навігація -->
+    <nav class="bottom-nav" aria-label="Головна навігація">
+      <div class="bottom-nav-inner">
+        <button class="nav-btn" id="nav-duties" onclick="switchTab('duties')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
-          <span>Графік</span>
+          <span>Наряди</span>
         </button>
-        <button onclick="switchTab('stats')" id="nav-stats" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <line x1="18" y1="20" x2="18" y2="10"></line>
-            <line x1="12" y1="20" x2="12" y2="4"></line>
-            <line x1="6" y1="20" x2="6" y2="14"></line>
+
+        <button class="nav-btn" id="nav-tasks" onclick="switchTab('tasks')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
-          <span>Облік</span>
+          <span>Задачі</span>
+          <span id="nav-tasks-badge" class="nav-badge hidden">0</span>
         </button>
-        <button onclick="switchTab('personnel')" id="nav-personnel" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+
+        <button class="nav-btn" id="nav-personnel" onclick="switchTab('personnel')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
           <span>Склад</span>
         </button>
-        <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+
+        <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
           <span>Налаштування</span>
         </button>
@@ -138,107 +1023,159 @@
     </nav>
   </div>
 
-  <!-- Контейнер для модальних вікон -->
-  <div id="modal-root" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4">
-    <div id="modal-box" class="w-full max-w-[560px] max-h-[90vh] bg-tactical-card border-t sm:border border-tactical-border rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
-      <!-- Контент модального вікна -->
-    </div>
+  <!-- Модальне вікно -->
+  <div id="modal-root" class="modal-backdrop">
+    <div id="modal-panel" class="modal-panel"></div>
   </div>
 
-  <!-- Контейнер для сповіщень (Toast) -->
-  <div id="toast-root" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2 w-[90%] max-w-[400px]"></div>
+  <!-- Контейнер сповіщень -->
+  <div id="toast-root" class="toast-wrap"></div>
 
   <!-- Прихований інпут для імпорту JSON -->
   <input type="file" id="import-json-input" accept=".json,application/json" class="hidden" onchange="handleImportJSON(event)" />
 
   <script>
     // =========================================================================
-    // КОНСТАНТИ ТА СТАН ЗАСТОСУНКУ
+    // КОНСТАНТИ ТА ДОВІДНИКИ
     // =========================================================================
-    const STORAGE_KEY = 'platoon_duty_tracker_v1';
+    const STORAGE_KEY = 'platoon_assistant_v2';
 
     const MONTHS_UK = [
       'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
       'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
     ];
 
-    const MONTHS_GENITIVE_UK = [
+    const MONTHS_GEN_UK = [
       'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
       'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'
     ];
 
-    const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+    const WEEKDAYS_UK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
 
-    const STATUS_OPTIONS = [
-      { id: 'active', label: 'В строю', badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
-      { id: 'leave', label: 'Відпустка', badge: 'bg-blue-500/15 text-blue-400 border-blue-500/30' },
-      { id: 'medical', label: 'Лікування', badge: 'bg-red-500/15 text-red-400 border-red-500/30' },
-      { id: 'trip', label: 'Відрядження', badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30' }
+    const SQUAD_PALETTE = [
+      '#22c55e', // 1-ше: Смарагдово-зелений
+      '#3b82f6', // 2-ге: Синій
+      '#f59e0b', // 3-тє: Бурштиново-помаранчевий
+      '#a855f7', // Фіолетовий
+      '#06b6d4', // Бірюзовий
+      '#f43f5e', // Малиновий
+      '#84cc16', // Лаймовий
+      '#ec4899'  // Рожевий
     ];
 
-    const DUTY_COLORS = [
-      { id: 'emerald', label: 'Зелений', dot: 'bg-emerald-400', badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
-      { id: 'amber', label: 'Бурштиновий', dot: 'bg-amber-400', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
-      { id: 'blue', label: 'Синій', dot: 'bg-blue-400', badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
-      { id: 'red', label: 'Червоний', dot: 'bg-red-400', badge: 'bg-red-500/15 text-red-300 border-red-500/30' },
-      { id: 'purple', label: 'Фіолетовий', dot: 'bg-purple-400', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
-      { id: 'slate', label: 'Сірий', dot: 'bg-slate-400', badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30' }
+    const STATUS_LIST = [
+      { id: 'active', label: 'В строю', cls: 'badge-status-active' },
+      { id: 'leave', label: 'Відпустка', cls: 'badge-status-leave' },
+      { id: 'medical', label: 'Лікування', cls: 'badge-status-medical' },
+      { id: 'trip', label: 'Відрядження', cls: 'badge-status-trip' }
     ];
+
+    const TASK_STATUSES = [
+      { id: 'received', label: 'Отримав задачу', short: 'Отримав' },
+      { id: 'done', label: 'Виконано', short: 'Виконано' },
+      { id: 'failed', label: 'Не виконано', short: 'Не виконано' }
+    ];
+
+    const ISSUER_PRESETS = ['Ком. взводу', 'Зам. ком. взводу', 'Ком. роти'];
 
     const DEFAULT_DUTY_TYPES = [
-      { id: 'dt_1', name: 'Черговий', color: 'amber' },
-      { id: 'dt_2', name: 'Днювальний', color: 'emerald' },
-      { id: 'dt_3', name: 'КПП', color: 'blue' },
-      { id: 'dt_4', name: 'Патруль', color: 'red' },
-      { id: 'dt_5', name: 'Господарчий', color: 'slate' }
+      { id: 'dt_1', name: 'Черговий по підрозділу' },
+      { id: 'dt_2', name: 'Днювальний' },
+      { id: 'dt_3', name: 'КПП' },
+      { id: 'dt_4', name: 'Патруль' },
+      { id: 'dt_5', name: 'Наряд по їдальні' }
     ];
 
-    // Глобальний стан
+    // =========================================================================
+    // СТАН ДАНИХ ТА UI
+    // =========================================================================
     let state = {
       isDemo: false,
-      squads: [],       // [{ id, name }]
-      soldiers: [],     // [{ id, name, rank, squadId, status }]
-      dutyTypes: [],    // [{ id, name, color }]
-      duties: []        // [{ id, date: 'YYYY-MM-DD', soldierId, dutyTypeId }]
+      squads: [],     // [{ id, name, shortName, color }]
+      soldiers: [],   // [{ id, name, rank, squadId, isCommander, status }]
+      dutyTypes: [],  // [{ id, name }]
+      duties: [],     // [{ id, date: 'YYYY-MM-DD', soldierId, dutyTypeId }]
+      tasks: []       // [{ id, targetType: 'squad'|'all_commanders'|'all_platoon', targetSquadId, text, issuer, deadline, status, note, createdAt }]
     };
 
-    // UI стан
-    const today = new Date();
+    const nowDate = new Date();
     let ui = {
-      activeTab: 'schedule',
-      year: today.getFullYear(),
-      month: today.getMonth(), // 0-11
-      selectedDate: formatDateISO(today),
+      activeTab: 'duties',       // 'duties' | 'tasks' | 'personnel' | 'settings'
+      dutiesSubTab: 'schedule',  // 'schedule' | 'stats'
+      year: nowDate.getFullYear(),
+      month: nowDate.getMonth(),
+      selectedDate: toISODate(nowDate),
       scheduleSquadFilter: 'all',
       statsSquadFilter: 'all',
-      statsSort: 'squad' // 'squad' | 'month_asc' | 'month_desc' | 'total_desc'
+      statsSort: 'squad',        // 'squad' | 'month_asc' | 'month_desc' | 'total_desc'
+      personnelSquadFilter: 'all',
+      personnelSearch: '',
+      tasksTargetFilter: 'all',  // 'all' | squadId
+      tasksStatusFilter: 'all',  // 'all' | 'received' | 'done' | 'failed'
+      openNotes: {}              // { [taskId]: boolean }
+    };
+
+    // Стан модального вікна призначення наряду
+    let assignModal = {
+      date: '',
+      dutyTypeId: '',
+      onlyActive: true
     };
 
     // =========================================================================
-    // УТИЛІТИ
+    // ДОПОМІЖНІ УТИЛІТИ
     // =========================================================================
-    function generateId(prefix = 'id') {
+    function genId(prefix = 'id') {
       return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
     }
 
-    function formatDateISO(dateObj) {
-      const y = dateObj.getFullYear();
-      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const d = String(dateObj.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+    function toISODate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
 
-    function formatDateHuman(isoStr) {
-      const [y, m, d] = isoStr.split('-').map(Number);
-      return `${d} ${MONTHS_GENITIVE_UK[m - 1]} ${y}`;
+    function addDaysISO(iso, delta) {
+      const [y, m, d] = iso.split('-').map(Number);
+      const dt = new Date(y, m - 1, d + delta);
+      return toISODate(dt);
+    }
+
+    function diffDaysISO(isoA, isoB) {
+      const [ya, ma, da] = isoA.split('-').map(Number);
+      const [yb, mb, db] = isoB.split('-').map(Number);
+      const a = Date.UTC(ya, ma - 1, da);
+      const b = Date.UTC(yb, mb - 1, db);
+      return Math.round((a - b) / 86400000);
+    }
+
+    function formatDateHuman(iso) {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-').map(Number);
+      return `${d} ${MONTHS_GEN_UK[m - 1]} ${y}`;
+    }
+
+    function formatDateShort(iso) {
+      if (!iso) return 'Не було';
+      const [y, m, d] = iso.split('-').map(Number);
+      return `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`;
+    }
+
+    function formatDeadline(val) {
+      if (!val) return '';
+      const [datePart, timePart] = val.split('T');
+      const [y, m, d] = datePart.split('-').map(Number);
+      const base = `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`;
+      return timePart ? `${base} о ${timePart.slice(0, 5)}` : base;
     }
 
     function getMonthPrefix(year, month) {
       return `${year}-${String(month + 1).padStart(2, '0')}`;
     }
 
-    function escapeHtml(str) {
-      if (!str) return '';
+    function esc(str) {
+      if (str === null || str === undefined) return '';
       return String(str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -247,80 +1184,193 @@
         .replace(/'/g, '&#039;');
     }
 
-    function getStatusObj(statusId) {
-      return STATUS_OPTIONS.find(s => s.id === statusId) || STATUS_OPTIONS[0];
+    // Автоматичне форматування ПІБ з великої літери (з підтримкою ініціалів "п.о." -> "П.О." та дефісів)
+    function formatFullName(raw) {
+      if (!raw) return '';
+      return raw
+        .trim()
+        .replace(/\s+/g, ' ')
+        .split(' ')
+        .map(word =>
+          word
+            .split('-')
+            .map(part =>
+              part
+                .split('.')
+                .map(seg => seg ? seg.charAt(0).toUpperCase() + seg.slice(1) : '')
+                .join('.')
+            )
+            .join('-')
+        )
+        .join(' ');
     }
 
-    function getColorObj(colorId) {
-      return DUTY_COLORS.find(c => c.id === colorId) || DUTY_COLORS[0];
+    // Копіювання в буфер обміну (працює надійно в мобільних браузерах та iframe)
+    function copyToClipboard(text, successMsg = 'Скопійовано у буфер обміну') {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '-9999px';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) {
+          showToast(successMsg);
+          return;
+        }
+      } catch (e) {
+        // fallback below
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          () => showToast(successMsg),
+          () => showToast('Не вдалося скопіювати текст', 'error')
+        );
+      } else {
+        showToast('Не вдалося скопіювати текст', 'error');
+      }
     }
 
-    function getDutyTypeById(id) {
-      return state.dutyTypes.find(dt => dt.id === id) || { id, name: 'Наряд', color: 'slate' };
+    function getStatusObj(id) {
+      return STATUS_LIST.find(s => s.id === id) || STATUS_LIST[0];
     }
 
     function getSquadById(id) {
-      return state.squads.find(s => s.id === id) || { id, name: 'Без відділення' };
+      return state.squads.find(s => s.id === id) || { id, name: 'Без відділення', color: '#64748b' };
+    }
+
+    function getSquadShortLabel(sq, idx) {
+      if (!sq) return 'Відд.';
+      const m = sq.name.match(/^(\d+)/);
+      if (m) return `${m[1]}-ше відд.`.replace('2-ше', '2-ге').replace('3-ше', '3-тє');
+      return sq.name.length > 12 ? sq.name.slice(0, 11) + '…' : sq.name;
+    }
+
+    function getSquadCmdShort(sq) {
+      if (!sq) return 'Ком. відд.';
+      const m = sq.name.match(/^(\d+)/);
+      if (m) return `Ком. ${m[1]} відд.`;
+      return `Ком. ${sq.name.slice(0, 9)}`;
     }
 
     function getSoldierById(id) {
       return state.soldiers.find(s => s.id === id);
     }
 
-    // Підрахунок нарядів бійця за вказаний місяць та всього
-    function getSoldierCounts(soldierId, year, month) {
+    function getDutyTypeById(id) {
+      return state.dutyTypes.find(d => d.id === id) || { id, name: 'Наряд' };
+    }
+
+    function getSquadCommander(squadId) {
+      return state.soldiers.find(s => s.squadId === squadId && s.isCommander) || null;
+    }
+
+    // Сортування бійців у межах відділення: КВ завжди перший, далі за алфавітом
+    function sortSquadMembers(list) {
+      return [...list].sort((a, b) => {
+        if (a.isCommander && !b.isCommander) return -1;
+        if (!a.isCommander && b.isCommander) return 1;
+        return a.name.localeCompare(b.name, 'uk');
+      });
+    }
+
+    // Підрахунок нарядів бійця (місяць, всього, дата останнього наряду)
+    function getSoldierStats(soldierId, year, month, beforeOrOnDate = null) {
       const prefix = getMonthPrefix(year, month);
       let monthCount = 0;
       let totalCount = 0;
+      let lastDate = null;
+
       for (const d of state.duties) {
-        if (d.soldierId === soldierId) {
-          totalCount++;
-          if (d.date.startsWith(prefix)) {
-            monthCount++;
-          }
+        if (d.soldierId !== soldierId) continue;
+        totalCount++;
+        if (d.date.startsWith(prefix)) monthCount++;
+        if (!beforeOrOnDate || d.date <= beforeOrOnDate) {
+          if (!lastDate || d.date > lastDate) lastDate = d.date;
         }
       }
-      return { monthCount, totalCount };
+      return { monthCount, totalCount, lastDate };
     }
 
     // =========================================================================
     // ЗБЕРЕЖЕННЯ ТА ДЕМО-ДАНІ
     // =========================================================================
     function createDemoData() {
-      const y = today.getFullYear();
-      const m = today.getMonth();
-      const prefix = getMonthPrefix(y, m);
-      const daysInMonth = new Date(y, m + 1, 0).getDate();
-      const day = (n) => `${prefix}-${String(Math.min(n, daysInMonth)).padStart(2, '0')}`;
+      const todayISO = toISODate(nowDate);
+      const yesterdayISO = addDaysISO(todayISO, -1);
+      const threeDaysAgoISO = addDaysISO(todayISO, -3);
+      const fiveDaysAgoISO = addDaysISO(todayISO, -5);
+      const tomorrowISO = addDaysISO(todayISO, 1);
 
       return {
         isDemo: true,
         squads: [
-          { id: 'sq_1', name: '1-ше відділення' },
-          { id: 'sq_2', name: '2-ге відділення' },
-          { id: 'sq_3', name: '3-тє відділення' }
+          { id: 'sq_1', name: '1-ше відділення', color: '#22c55e' },
+          { id: 'sq_2', name: '2-ге відділення', color: '#3b82f6' },
+          { id: 'sq_3', name: '3-тє відділення', color: '#f59e0b' }
         ],
         soldiers: [
-          { id: 's_1', name: 'Іваненко О.П.', rank: 'мол. сержант', squadId: 'sq_1', status: 'active' },
-          { id: 's_2', name: 'Петренко В.М.', rank: 'солдат', squadId: 'sq_1', status: 'active' },
-          { id: 's_3', name: 'Коваленко Д.І.', rank: 'ст. солдат', squadId: 'sq_1', status: 'leave' },
-          { id: 's_4', name: 'Бондаренко С.В.', rank: 'сержант', squadId: 'sq_2', status: 'active' },
-          { id: 's_5', name: 'Ткаченко А.О.', rank: 'солдат', squadId: 'sq_2', status: 'active' },
-          { id: 's_6', name: 'Мельник Р.С.', rank: 'солдат', squadId: 'sq_2', status: 'medical' },
-          { id: 's_7', name: 'Шевченко М.Ю.', rank: 'мол. сержант', squadId: 'sq_3', status: 'active' },
-          { id: 's_8', name: 'Кравченко І.А.', rank: 'солдат', squadId: 'sq_3', status: 'active' },
-          { id: 's_9', name: 'Олійник В.Г.', rank: 'ст. солдат', squadId: 'sq_3', status: 'trip' }
+          { id: 's_1', name: 'Іваненко О.П.', rank: 'мол. сержант', squadId: 'sq_1', isCommander: true, status: 'active' },
+          { id: 's_2', name: 'Коваленко Д.І.', rank: 'ст. солдат', squadId: 'sq_1', isCommander: false, status: 'active' },
+          { id: 's_3', name: 'Петренко В.М.', rank: 'солдат', squadId: 'sq_1', isCommander: false, status: 'leave' },
+
+          { id: 's_4', name: 'Бондаренко С.В.', rank: 'сержант', squadId: 'sq_2', isCommander: true, status: 'active' },
+          { id: 's_5', name: 'Мельник Р.С.', rank: 'солдат', squadId: 'sq_2', isCommander: false, status: 'active' },
+          { id: 's_6', name: 'Ткаченко А.О.', rank: 'солдат', squadId: 'sq_2', isCommander: false, status: 'medical' },
+
+          { id: 's_7', name: 'Шевченко М.Ю.', rank: 'мол. сержант', squadId: 'sq_3', isCommander: true, status: 'active' },
+          { id: 's_8', name: 'Кравченко І.А.', rank: 'солдат', squadId: 'sq_3', isCommander: false, status: 'active' },
+          { id: 's_9', name: 'Олійник В.Г.', rank: 'ст. солдат', squadId: 'sq_3', isCommander: false, status: 'trip' }
         ],
         dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
         duties: [
-          { id: 'd_1', date: day(2), soldierId: 's_1', dutyTypeId: 'dt_1' },
-          { id: 'd_2', date: day(2), soldierId: 's_2', dutyTypeId: 'dt_2' },
-          { id: 'd_3', date: day(5), soldierId: 's_4', dutyTypeId: 'dt_1' },
-          { id: 'd_4', date: day(5), soldierId: 's_5', dutyTypeId: 'dt_3' },
-          { id: 'd_5', date: day(8), soldierId: 's_7', dutyTypeId: 'dt_4' },
-          { id: 'd_6', date: day(8), soldierId: 's_8', dutyTypeId: 'dt_2' },
-          { id: 'd_7', date: day(today.getDate()), soldierId: 's_1', dutyTypeId: 'dt_3' },
-          { id: 'd_8', date: day(today.getDate()), soldierId: 's_5', dutyTypeId: 'dt_2' }
+          { id: 'd_1', date: fiveDaysAgoISO, soldierId: 's_1', dutyTypeId: 'dt_1' },
+          { id: 'd_2', date: fiveDaysAgoISO, soldierId: 's_2', dutyTypeId: 'dt_2' },
+          { id: 'd_3', date: threeDaysAgoISO, soldierId: 's_4', dutyTypeId: 'dt_1' },
+          { id: 'd_4', date: threeDaysAgoISO, soldierId: 's_5', dutyTypeId: 'dt_3' },
+          { id: 'd_5', date: yesterdayISO, soldierId: 's_7', dutyTypeId: 'dt_4' },
+          { id: 'd_6', date: yesterdayISO, soldierId: 's_8', dutyTypeId: 'dt_2' },
+          { id: 'd_7', date: todayISO, soldierId: 's_2', dutyTypeId: 'dt_3' },
+          { id: 'd_8', date: todayISO, soldierId: 's_5', dutyTypeId: 'dt_2' }
+        ],
+        tasks: [
+          {
+            id: 't_1',
+            targetType: 'squad',
+            targetSquadId: 'sq_1',
+            text: 'Провести перевірку наявності та стану закріпленого майна відділення, подати доповідь.',
+            issuer: 'Ком. взводу',
+            deadline: `${tomorrowISO}T18:00`,
+            status: 'received',
+            note: '',
+            createdAt: todayISO
+          },
+          {
+            id: 't_2',
+            targetType: 'squad',
+            targetSquadId: 'sq_2',
+            text: 'Організувати обслуговування спорядження та поповнення аптечок особового складу.',
+            issuer: 'Зам. ком. взводу',
+            deadline: `${todayISO}T19:00`,
+            status: 'done',
+            note: 'Виконано в повному обсязі, усе укомплектовано.',
+            createdAt: yesterdayISO
+          },
+          {
+            id: 't_3',
+            targetType: 'squad',
+            targetSquadId: 'sq_3',
+            text: 'Підготувати список особового складу на отримання зимового комплекту речового майна.',
+            issuer: 'Ком. взводу',
+            deadline: `${todayISO}T17:00`,
+            status: 'failed',
+            note: 'Немає уточнених розмірів по Олійнику В.Г. (у відрядженні), чекаємо на зв\'язок.',
+            createdAt: yesterdayISO
+          }
         ]
       };
     }
@@ -338,8 +1388,11 @@
           isDemo: Boolean(parsed.isDemo),
           squads: Array.isArray(parsed.squads) ? parsed.squads : [],
           soldiers: Array.isArray(parsed.soldiers) ? parsed.soldiers : [],
-          dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length ? parsed.dutyTypes : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
-          duties: Array.isArray(parsed.duties) ? parsed.duties : []
+          dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
+            ? parsed.dutyTypes
+            : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+          duties: Array.isArray(parsed.duties) ? parsed.duties : [],
+          tasks: Array.isArray(parsed.tasks) ? parsed.tasks : []
         };
       } catch (e) {
         console.error('Помилка читання localStorage:', e);
@@ -351,7 +1404,7 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch (e) {
-        console.error('Помилка збереження в localStorage:', e);
+        console.error('Помилка збереження:', e);
         showToast('Не вдалося зберегти дані у пам\'ять браузера', 'error');
       }
     }
@@ -359,14 +1412,11 @@
     // =========================================================================
     // СПОВІЩЕННЯ ТА МОДАЛЬНІ ВІКНА
     // =========================================================================
-    function showToast(message, type = 'success') {
+    function showToast(msg, type = 'success') {
       const root = document.getElementById('toast-root');
       const el = document.createElement('div');
-      const styles = type === 'error'
-        ? 'bg-red-900/95 border-red-500/50 text-red-100'
-        : 'bg-tactical-card border-tactical-olive/60 text-white';
-      el.className = `px-4 py-2.5 rounded-xl border shadow-lg text-sm font-medium text-center animate-fade-in ${styles}`;
-      el.textContent = message;
+      el.className = `toast ${type === 'error' ? 'error' : ''}`;
+      el.textContent = msg;
       root.appendChild(el);
       setTimeout(() => {
         el.style.opacity = '0';
@@ -375,44 +1425,36 @@
       }, 2400);
     }
 
-    function openModal(htmlContent) {
+    function openModal(html) {
       const root = document.getElementById('modal-root');
-      const box = document.getElementById('modal-box');
-      box.innerHTML = htmlContent;
-      root.classList.remove('hidden');
-      root.classList.add('flex');
+      const panel = document.getElementById('modal-panel');
+      panel.innerHTML = html;
+      root.classList.add('open');
     }
 
     function closeModal() {
-      const root = document.getElementById('modal-root');
-      root.classList.add('hidden');
-      root.classList.remove('flex');
+      document.getElementById('modal-root').classList.remove('open');
     }
 
-    // Закриття модалки по кліку на фон
     document.getElementById('modal-root').addEventListener('click', (e) => {
       if (e.target.id === 'modal-root') closeModal();
     });
 
-    function showConfirm(title, message, confirmText, onConfirm, isDanger = true) {
-      const btnClass = isDanger
-        ? 'bg-red-600 hover:bg-red-700 text-white'
-        : 'bg-tactical-olive hover:bg-tactical-oliveHover text-white';
+    function showConfirm(title, message, confirmLabel, onConfirm, danger = true) {
       openModal(`
-        <div class="p-5 space-y-4">
-          <h3 class="text-lg font-bold text-white">${escapeHtml(title)}</h3>
-          <p class="text-sm text-tactical-muted leading-relaxed">${escapeHtml(message)}</p>
-          <div class="flex gap-2.5 pt-2">
-            <button onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-tactical-bg border border-tactical-border text-sm font-semibold text-tactical-text hover:bg-tactical-cardHover transition">
-              Скасувати
-            </button>
-            <button id="confirm-action-btn" class="flex-1 py-3 rounded-xl text-sm font-semibold transition ${btnClass}">
-              ${escapeHtml(confirmText)}
-            </button>
+        <div class="modal-header">
+          <div class="modal-title">${esc(title)}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="text-sm text-muted" style="line-height:1.5">${esc(message)}</p>
+          <div class="grid-2" style="margin-top:4px">
+            <button class="btn btn-secondary" onclick="closeModal()">Скасувати</button>
+            <button id="confirm-ok-btn" class="btn ${danger ? 'btn-danger-solid' : 'btn-primary'}">${esc(confirmLabel)}</button>
           </div>
         </div>
       `);
-      document.getElementById('confirm-action-btn').onclick = () => {
+      document.getElementById('confirm-ok-btn').onclick = () => {
         closeModal();
         onConfirm();
       };
@@ -421,30 +1463,31 @@
     function promptClearDemo() {
       showConfirm(
         'Очистити демо-дані?',
-        'Тестові відділення, бійці та наряди будуть видалені. Ви зможете одразу додати свій склад взводу.',
-        'Очистити та почати з нуля',
+        'Тестовий склад, наряди та задачі будуть видалені. Залишаться 3 порожні відділення з кольорами — можна одразу вносити свій взвод.',
+        'Очистити',
         () => {
           state = {
             isDemo: false,
             squads: [
-              { id: generateId('sq'), name: '1-ше відділення' },
-              { id: generateId('sq'), name: '2-ге відділення' },
-              { id: generateId('sq'), name: '3-тє відділення' }
+              { id: genId('sq'), name: '1-ше відділення', color: '#22c55e' },
+              { id: genId('sq'), name: '2-ге відділення', color: '#3b82f6' },
+              { id: genId('sq'), name: '3-тє відділення', color: '#f59e0b' }
             ],
             soldiers: [],
             dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
-            duties: []
+            duties: [],
+            tasks: []
           };
           saveState();
           render();
-          showToast('Демо-дані очищено. Додайте бійців у вкладці «Склад»');
+          showToast('Демо-дані очищено');
         },
         false
       );
     }
 
     // =========================================================================
-    // НАВІГАЦІЯ ТА ПЕРЕМИКАЧ МІСЯЦЯ
+    // НАВІГАЦІЯ ТА ЗАГАЛЬНІ КОМПОНЕНТИ
     // =========================================================================
     function switchTab(tab) {
       ui.activeTab = tab;
@@ -452,167 +1495,168 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
+    function switchDutiesSubTab(sub) {
+      ui.dutiesSubTab = sub;
+      render();
+    }
+
     function changeMonth(delta) {
       ui.month += delta;
-      if (ui.month < 0) {
-        ui.month = 11;
-        ui.year--;
-      } else if (ui.month > 11) {
-        ui.month = 0;
-        ui.year++;
-      }
-      // Оновлюємо вибрану дату на 1-ше число нового місяця (або сьогодні, якщо це поточний місяць)
-      if (ui.year === today.getFullYear() && ui.month === today.getMonth()) {
-        ui.selectedDate = formatDateISO(today);
+      if (ui.month < 0) { ui.month = 11; ui.year--; }
+      else if (ui.month > 11) { ui.month = 0; ui.year++; }
+
+      if (ui.year === nowDate.getFullYear() && ui.month === nowDate.getMonth()) {
+        ui.selectedDate = toISODate(nowDate);
       } else {
         ui.selectedDate = `${ui.year}-${String(ui.month + 1).padStart(2, '0')}-01`;
       }
       render();
     }
 
-    function renderMonthSwitcher() {
+    function goToToday() {
+      const t = new Date();
+      ui.year = t.getFullYear();
+      ui.month = t.getMonth();
+      ui.selectedDate = toISODate(t);
+      render();
+    }
+
+    function renderMonthBar(showTodayBtn = true) {
       return `
-        <div class="flex items-center justify-between bg-tactical-card border border-tactical-border rounded-xl p-1.5">
-          <button onclick="changeMonth(-1)" class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-tactical-cardHover active:scale-95 transition text-tactical-text" aria-label="Попередній місяць">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <div class="month-bar">
+          <button class="btn-icon" onclick="changeMonth(-1)" aria-label="Попередній місяць">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <div class="text-sm font-bold tracking-wide text-white uppercase">
-            ${MONTHS_UK[ui.month]} ${ui.year}
-          </div>
-          <button onclick="changeMonth(1)" class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-tactical-cardHover active:scale-95 transition text-tactical-text" aria-label="Наступний місяць">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <div class="month-title">${MONTHS_UK[ui.month]} ${ui.year}</div>
+          ${showTodayBtn ? `<button class="btn btn-sm btn-secondary" onclick="goToToday()">Сьогодні</button>` : ''}
+          <button class="btn-icon" onclick="changeMonth(1)" aria-label="Наступний місяць">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       `;
     }
 
-    function renderSquadPills(activeFilter, onSelectFnName) {
-      const pills = [
-        { id: 'all', name: 'Усі' },
-        ...state.squads
-      ];
-      return `
-        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          ${pills.map(p => {
-            const isActive = activeFilter === p.id;
-            const cls = isActive
-              ? 'bg-tactical-olive text-white border-tactical-olive'
-              : 'bg-tactical-card text-tactical-muted border-tactical-border hover:text-white';
-            return `
-              <button onclick="${onSelectFnName}('${p.id}')" class="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition ${cls}">
-                ${escapeHtml(p.name)}
-              </button>
-            `;
-          }).join('')}
-        </div>
+    function renderSquadTabs(activeId, handlerName, showCounts = false) {
+      const totalSoldiers = state.soldiers.length;
+      const allBtn = `
+        <button class="pill-btn ${activeId === 'all' ? 'active' : ''}" style="--pill-color:#4ade80" onclick="${handlerName}('all')">
+          <span>Усі</span>
+          ${showCounts ? `<span class="pill-count">${totalSoldiers}</span>` : ''}
+        </button>
       `;
+      const squadBtns = state.squads.map((sq, idx) => {
+        const cnt = state.soldiers.filter(s => s.squadId === sq.id).length;
+        return `
+          <button class="pill-btn ${activeId === sq.id ? 'active' : ''}" style="--pill-color:${sq.color}" onclick="${handlerName}('${sq.id}')">
+            <span class="pill-dot" style="background:${sq.color}"></span>
+            <span>${esc(getSquadShortLabel(sq, idx))}</span>
+            ${showCounts ? `<span class="pill-count">${cnt}</span>` : ''}
+          </button>
+        `;
+      }).join('');
+      return `<div class="pills-row">${allBtn}${squadBtns}</div>`;
     }
 
     // =========================================================================
-    // ВКЛАДКА 1: ГРАФІК (SCHEDULE)
+    // РОЗДІЛ 1: НАРЯДИ (ГРАФІК + ОБЛІК)
     // =========================================================================
+    function renderDutiesTab() {
+      const subTabsHtml = `
+        <div class="subtabs">
+          <button class="subtab-btn ${ui.dutiesSubTab === 'schedule' ? 'active' : ''}" onclick="switchDutiesSubTab('schedule')">Графік</button>
+          <button class="subtab-btn ${ui.dutiesSubTab === 'stats' ? 'active' : ''}" onclick="switchDutiesSubTab('stats')">Облік</button>
+        </div>
+      `;
+      return subTabsHtml + (ui.dutiesSubTab === 'schedule' ? renderScheduleView() : renderStatsView());
+    }
+
     function setScheduleSquadFilter(id) {
       ui.scheduleSquadFilter = id;
       render();
     }
 
-    function selectCalendarDate(isoDate) {
-      ui.selectedDate = isoDate;
+    function selectCalendarDate(iso) {
+      ui.selectedDate = iso;
       render();
     }
 
-    function renderScheduleTab() {
-      const year = ui.year;
-      const month = ui.month;
-      const firstDay = new Date(year, month, 1);
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      // Понеділок = 0 ... Неділя = 6
-      let startOffset = firstDay.getDay() - 1;
-      if (startOffset < 0) startOffset = 6;
+    function renderScheduleView() {
+      const y = ui.year;
+      const m = ui.month;
+      const firstDay = new Date(y, m, 1);
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      let offset = firstDay.getDay() - 1;
+      if (offset < 0) offset = 6;
 
-      const todayIso = formatDateISO(today);
-      const monthPrefix = getMonthPrefix(year, month);
+      const todayISO = toISODate(nowDate);
+      const monthPrefix = getMonthPrefix(y, m);
 
-      // Фільтруємо наряди поточного місяця за вибраним відділенням
-      const filteredDutiesByDate = {};
+      // Групуємо наряди поточного місяця по датах (з урахуванням фільтра відділення)
+      const byDate = {};
       for (const d of state.duties) {
         if (!d.date.startsWith(monthPrefix)) continue;
         const soldier = getSoldierById(d.soldierId);
         if (!soldier) continue;
         if (ui.scheduleSquadFilter !== 'all' && soldier.squadId !== ui.scheduleSquadFilter) continue;
-        if (!filteredDutiesByDate[d.date]) filteredDutiesByDate[d.date] = [];
-        filteredDutiesByDate[d.date].push(d);
+        if (!byDate[d.date]) byDate[d.date] = [];
+        byDate[d.date].push({ duty: d, soldier });
       }
 
-      // Генерація клітинок календаря
-      let calendarCells = '';
-      for (let i = 0; i < startOffset; i++) {
-        calendarCells += `<div class="h-12 rounded-lg"></div>`;
+      let cells = '';
+      for (let i = 0; i < offset; i++) {
+        cells += `<div></div>`;
       }
       for (let day = 1; day <= daysInMonth; day++) {
         const iso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
-        const dayDuties = filteredDutiesByDate[iso] || [];
-        const isSelected = ui.selectedDate === iso;
-        const isToday = todayIso === iso;
+        const items = byDate[iso] || [];
+        const isToday = iso === todayISO;
+        const isSelected = iso === ui.selectedDate;
 
-        let cellClass = 'bg-tactical-bg/60 border-transparent text-tactical-text hover:bg-tactical-cardHover';
-        if (isSelected) {
-          cellClass = 'bg-tactical-olive/25 border-tactical-olive text-white ring-1 ring-tactical-olive';
-        } else if (isToday) {
-          cellClass = 'bg-tactical-cardHover border-tactical-muted/50 text-white';
-        }
-
-        // Кольорові крапки (макс 4)
-        const dotsHtml = dayDuties.slice(0, 4).map(d => {
-          const dt = getDutyTypeById(d.dutyTypeId);
-          const col = getColorObj(dt.color);
-          return `<span class="w-1.5 h-1.5 rounded-full ${col.dot}"></span>`;
+        const dots = items.slice(0, 5).map(item => {
+          const sq = getSquadById(item.soldier.squadId);
+          return `<span class="cal-dot" style="background:${sq.color}"></span>`;
         }).join('');
 
-        calendarCells += `
-          <button onclick="selectCalendarDate('${iso}')" class="h-12 rounded-lg border flex flex-col items-center justify-between py-1.5 transition relative ${cellClass}">
-            <span class="text-xs font-semibold leading-none ${isToday && !isSelected ? 'text-tactical-emerald' : ''}">${day}</span>
-            <div class="flex items-center justify-center gap-0.5 h-2">
-              ${dotsHtml}
-              ${dayDuties.length > 4 ? `<span class="text-[9px] text-tactical-muted leading-none">+</span>` : ''}
-            </div>
+        cells += `
+          <button class="cal-cell ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="selectCalendarDate('${iso}')">
+            <span class="cal-day-num">${day}</span>
+            <div class="cal-dots">${dots}${items.length > 5 ? '<span style="font-size:9px;color:#8b99a8;line-height:6px">+</span>' : ''}</div>
           </button>
         `;
       }
 
       // Наряди на вибраний день
-      const selectedDayDuties = (state.duties.filter(d => {
-        if (d.date !== ui.selectedDate) return false;
-        const s = getSoldierById(d.soldierId);
-        if (!s) return false;
-        if (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter) return false;
-        return true;
-      }));
+      const dayDuties = state.duties
+        .filter(d => {
+          if (d.date !== ui.selectedDate) return false;
+          const s = getSoldierById(d.soldierId);
+          if (!s) return false;
+          if (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter) return false;
+          return true;
+        });
 
-      const dayDutiesListHtml = selectedDayDuties.length === 0
-        ? `<div class="text-center py-6 text-sm text-tactical-muted">На цю дату нарядів не призначено.</div>`
-        : `<div class="space-y-2">
-            ${selectedDayDuties.map(d => {
-              const soldier = getSoldierById(d.soldierId);
-              const squad = getSquadById(soldier.squadId);
+      const dayListHtml = dayDuties.length === 0
+        ? `<div class="empty-state">На ${formatDateHuman(ui.selectedDate)} нарядів не призначено.</div>`
+        : `<div class="stack">
+            ${dayDuties.map(d => {
+              const s = getSoldierById(d.soldierId);
+              const sq = getSquadById(s.squadId);
               const dt = getDutyTypeById(d.dutyTypeId);
-              const col = getColorObj(dt.color);
               return `
-                <div class="flex items-center justify-between p-3 rounded-xl bg-tactical-bg border border-tactical-border">
-                  <div class="min-w-0 pr-2">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold border ${col.badge}">${escapeHtml(dt.name)}</span>
-                      <span class="text-sm font-semibold text-white truncate">${escapeHtml(soldier.name)}</span>
+                <div class="soldier-row" style="--sq-color:${sq.color}; border-radius:10px; border:1px solid var(--border); border-left:4px solid ${sq.color};">
+                  <div class="soldier-info">
+                    <div class="soldier-name-line">
+                      <span class="badge" style="background:${sq.color}22; color:${sq.color}; border-color:${sq.color}55">${esc(dt.name)}</span>
+                      <span class="soldier-name">${esc(s.name)}</span>
+                      ${s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
                     </div>
-                    <div class="text-xs text-tactical-muted mt-1">
-                      ${escapeHtml(squad.name)}${soldier.rank ? ' • ' + escapeHtml(soldier.rank) : ''}
+                    <div class="soldier-meta">
+                      <span>${esc(sq.name)}</span>
+                      ${s.rank ? `<span>• ${esc(s.rank)}</span>` : ''}
                     </div>
                   </div>
-                  <button onclick="removeDuty('${d.id}')" class="w-9 h-9 shrink-0 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition" title="Видалити наряд">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
+                  <button class="btn-icon danger" onclick="removeDuty('${d.id}')" title="Видалити наряд">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                   </button>
                 </div>
               `;
@@ -620,191 +1664,206 @@
           </div>`;
 
       return `
-        ${renderMonthSwitcher()}
-        ${renderSquadPills(ui.scheduleSquadFilter, 'setScheduleSquadFilter')}
+        ${renderMonthBar(true)}
+        ${renderSquadTabs(ui.scheduleSquadFilter, 'setScheduleSquadFilter', false)}
 
-        <!-- Календарна сітка -->
-        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3">
-          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-            ${WEEKDAYS_SHORT.map((w, idx) => `<div class="text-[11px] font-semibold ${idx >= 5 ? 'text-amber-400/80' : 'text-tactical-muted'}">${w}</div>`).join('')}
+        <div class="card">
+          <div class="cal-weekdays">
+            ${WEEKDAYS_UK.map((w, i) => `<div class="${i >= 5 ? 'wknd' : ''}">${w}</div>`).join('')}
           </div>
-          <div class="grid grid-cols-7 gap-1">
-            ${calendarCells}
-          </div>
+          <div class="cal-grid">${cells}</div>
         </div>
 
-        <!-- Деталі вибраного дня -->
-        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-4 space-y-3">
-          <div class="flex items-center justify-between gap-2">
+        <div class="card stack">
+          <div class="row-between">
             <div>
-              <h2 class="text-sm font-bold text-white">${formatDateHuman(ui.selectedDate)}</h2>
-              <p class="text-xs text-tactical-muted">Призначено нарядів: ${selectedDayDuties.length}</p>
+              <div style="font-size:15px;font-weight:700;color:#fff">${formatDateHuman(ui.selectedDate)}</div>
+              <div class="text-xs text-muted">Призначено нарядів: ${dayDuties.length}</div>
             </div>
-            <button onclick="openAssignDutyModal('${ui.selectedDate}')" class="px-3.5 py-2.5 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              <span>Призначити наряд</span>
-            </button>
+            <button class="btn btn-sm btn-primary" onclick="openAssignDutyModal('${ui.selectedDate}')">+ Призначити</button>
           </div>
-          ${dayDutiesListHtml}
+          ${dayListHtml}
+          ${dayDuties.length > 0 ? `
+            <button class="btn btn-secondary btn-full" onclick="copyDayDuties('${ui.selectedDate}')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Скопіювати наряд на день</span>
+            </button>
+          ` : ''}
         </div>
       `;
     }
 
-    function removeDuty(dutyId) {
-      state.duties = state.duties.filter(d => d.id !== dutyId);
+    function copyDayDuties(isoDate) {
+      const dayDuties = state.duties.filter(d => {
+        if (d.date !== isoDate) return false;
+        const s = getSoldierById(d.soldierId);
+        if (!s) return false;
+        if (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter) return false;
+        return true;
+      });
+      if (!dayDuties.length) return;
+
+      const lines = [`Наряд на ${formatDateHuman(isoDate)}:`];
+      dayDuties.forEach((d, idx) => {
+        const s = getSoldierById(d.soldierId);
+        const sq = getSquadById(s.squadId);
+        const dt = getDutyTypeById(d.dutyTypeId);
+        lines.push(`${idx + 1}. ${dt.name} — ${s.name}${s.rank ? ' (' + s.rank + ')' : ''} [${getSquadShortLabel(sq)}]`);
+      });
+      copyToClipboard(lines.join('\n'), 'Список нарядів скопійовано для месенджера');
+    }
+
+    function removeDuty(id) {
+      state.duties = state.duties.filter(d => d.id !== id);
       saveState();
       render();
       showToast('Наряд видалено');
     }
 
-    // Модальне вікно призначення наряду
-    let assignModalState = { date: '', dutyTypeId: '' };
-
+    // Модальне вікно розумного призначення наряду
     function openAssignDutyModal(isoDate) {
       if (state.soldiers.length === 0) {
-        showToast('Спочатку додайте військовослужбовців у вкладці «Склад»', 'error');
+        showToast('Спочатку додайте бійців у розділі «Склад»', 'error');
         return;
       }
-      assignModalState.date = isoDate;
-      assignModalState.dutyTypeId = state.dutyTypes[0]?.id || '';
+      assignModal.date = isoDate;
+      assignModal.dutyTypeId = state.dutyTypes[0]?.id || '';
+      assignModal.onlyActive = true;
       renderAssignDutyModal();
     }
 
-    function selectAssignDutyType(dtId) {
-      assignModalState.dutyTypeId = dtId;
+    function setAssignDutyType(id) {
+      assignModal.dutyTypeId = id;
+      renderAssignDutyModal();
+    }
+
+    function toggleAssignOnlyActive() {
+      assignModal.onlyActive = !assignModal.onlyActive;
       renderAssignDutyModal();
     }
 
     function renderAssignDutyModal() {
-      const [y, m] = assignModalState.date.split('-').map(Number);
+      const [y, m] = assignModal.date.split('-').map(Number);
       const targetYear = y;
       const targetMonth = m - 1;
+      const yesterdayISO = addDaysISO(assignModal.date, -1);
 
-      // Знаходимо мінімальну кількість нарядів за місяць серед активних бійців для підсвітки
-      const activeCounts = state.soldiers
-        .filter(s => s.status === 'active')
-        .map(s => getSoldierCounts(s.id, targetYear, targetMonth).monthCount);
-      const minMonthCount = activeCounts.length ? Math.min(...activeCounts) : 0;
+      const busyTodaySet = new Set(state.duties.filter(d => d.date === assignModal.date).map(d => d.soldierId));
+      const busyYestSet = new Set(state.duties.filter(d => d.date === yesterdayISO).map(d => d.soldierId));
 
-      // Бійці, які вже в наряді на цю дату
-      const busyTodayIds = new Set(state.duties.filter(d => d.date === assignModalState.date).map(d => d.soldierId));
+      let candidates = state.soldiers
+        .filter(s => !assignModal.onlyActive || s.status === 'active')
+        .map(s => {
+          const st = getSoldierStats(s.id, targetYear, targetMonth, yesterdayISO);
+          const isToday = busyTodaySet.has(s.id);
+          const isYesterday = busyYestSet.has(s.id);
+          const restDays = st.lastDate ? diffDaysISO(assignModal.date, st.lastDate) : 9999;
+          return { ...s, stats: st, isToday, isYesterday, restDays };
+        });
 
-      // Групуємо бійців по відділеннях, всередині сортуємо за найменшою кількістю нарядів за місяць
-      const groupsHtml = state.squads.map(sq => {
-        const members = state.soldiers
-          .filter(s => s.squadId === sq.id)
-          .map(s => ({
-            ...s,
-            counts: getSoldierCounts(s.id, targetYear, targetMonth)
-          }))
-          .sort((a, b) => {
-            // Активні зверху
-            if (a.status === 'active' && b.status !== 'active') return -1;
-            if (a.status !== 'active' && b.status === 'active') return 1;
-            // Потім менше за місяць, потім менше всього
-            if (a.counts.monthCount !== b.counts.monthCount) return a.counts.monthCount - b.counts.monthCount;
-            return a.counts.totalCount - b.counts.totalCount;
-          });
+      // Розумне сортування:
+      // 1. Вільні сьогодні зверху
+      // 2. В строю зверху
+      // 3. Не був учора зверху
+      // 4. Менше нарядів за поточний місяць
+      // 5. Найбільший час відпочинку (restDays desc)
+      // 6. Менше нарядів за весь час
+      candidates.sort((a, b) => {
+        if (a.isToday !== b.isToday) return a.isToday ? 1 : -1;
+        if ((a.status === 'active') !== (b.status === 'active')) return a.status === 'active' ? -1 : 1;
+        if (a.isYesterday !== b.isYesterday) return a.isYesterday ? 1 : -1;
+        if (a.stats.monthCount !== b.stats.monthCount) return a.stats.monthCount - b.stats.monthCount;
+        if (a.restDays !== b.restDays) return b.restDays - a.restDays;
+        return a.stats.totalCount - b.stats.totalCount;
+      });
 
-        if (members.length === 0) return '';
+      const bestMonthCount = candidates.length ? Math.min(...candidates.filter(c => !c.isToday && !c.isYesterday && c.status === 'active').map(c => c.stats.monthCount)) : -1;
 
-        return `
-          <div class="space-y-1.5">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-tactical-muted px-1 pt-2">${escapeHtml(sq.name)}</div>
-            ${members.map(s => {
-              const st = getStatusObj(s.status);
-              const isLowLoad = s.status === 'active' && s.counts.monthCount === minMonthCount;
-              const isBusy = busyTodayIds.has(s.id);
-              return `
-                <button onclick="confirmAssignDuty('${s.id}')" class="w-full text-left p-3 rounded-xl border transition flex items-center justify-between gap-2 ${
-                  isLowLoad
-                    ? 'bg-tactical-olive/10 border-tactical-olive/40 hover:bg-tactical-olive/20'
-                    : 'bg-tactical-bg border-tactical-border hover:bg-tactical-cardHover'
-                } ${s.status !== 'active' ? 'opacity-65' : ''}">
-                  <div class="min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span class="text-sm font-semibold text-white">${escapeHtml(s.name)}</span>
-                      ${isLowLoad ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-tactical-olive/30 text-emerald-300 font-semibold">Рекомендовано</span>` : ''}
-                      ${isBusy ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">Вже в наряді</span>` : ''}
-                    </div>
-                    <div class="flex items-center gap-2 mt-1">
-                      ${s.status !== 'active' ? `<span class="text-[10px] px-1.5 py-0.5 rounded border font-semibold ${st.badge}">${st.label}</span>` : ''}
-                      ${s.rank ? `<span class="text-xs text-tactical-muted">${escapeHtml(s.rank)}</span>` : ''}
-                    </div>
+      const listHtml = candidates.length === 0
+        ? `<div class="empty-state">Немає доступних бійців. Зніміть фільтр «Тільки в строю».</div>`
+        : candidates.map(c => {
+            const sq = getSquadById(c.squadId);
+            const stObj = getStatusObj(c.status);
+            const isRec = c.status === 'active' && !c.isToday && !c.isYesterday && c.stats.monthCount === bestMonthCount;
+            const restLabel = c.stats.lastDate
+              ? (c.restDays === 1 ? 'Вчора' : `${c.restDays} дн. тому`)
+              : 'Ще не ходив';
+
+            return `
+              <button class="soldier-row" onclick="confirmAssignDuty('${c.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left; border-radius:10px; border:1px solid ${isRec ? 'rgba(34,197,94,0.45)' : 'var(--border)'}; border-left:4px solid ${sq.color}; opacity:${c.status !== 'active' ? '0.6' : '1'}">
+                <div class="soldier-info">
+                  <div class="soldier-name-line">
+                    <span class="soldier-name">${esc(c.name)}</span>
+                    ${c.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
+                    ${isRec ? `<span class="badge badge-rec">Рекомендовано</span>` : ''}
+                    ${c.isToday ? `<span class="badge badge-warn">Вже сьогодні</span>` : ''}
+                    ${!c.isToday && c.isYesterday ? `<span class="badge badge-warn">Був учора</span>` : ''}
+                    ${c.status !== 'active' ? `<span class="badge ${stObj.cls}">${stObj.label}</span>` : ''}
                   </div>
-                  <div class="shrink-0 text-right">
-                    <div class="text-xs font-bold ${isLowLoad ? 'text-tactical-emerald' : 'text-white'}">${s.counts.monthCount} <span class="text-[10px] font-normal text-tactical-muted">міс</span></div>
-                    <div class="text-[11px] text-tactical-muted">${s.counts.totalCount} всього</div>
+                  <div class="soldier-meta">
+                    <span style="color:${sq.color};font-weight:600">${esc(getSquadShortLabel(sq))}</span>
+                    <span>• Ост. наряд: ${restLabel}</span>
                   </div>
-                </button>
-              `;
-            }).join('')}
-          </div>
-        `;
-      }).join('');
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <div style="font-size:15px;font-weight:800;color:${isRec ? '#4ade80' : '#fff'}">${c.stats.monthCount} <span class="text-xs text-muted" style="font-weight:500">міс</span></div>
+                  <div class="text-xs text-muted">${c.stats.totalCount} всього</div>
+                </div>
+              </button>
+            `;
+          }).join('');
 
       openModal(`
-        <div class="p-4 border-b border-tactical-border flex items-center justify-between shrink-0">
+        <div class="modal-header">
           <div>
-            <h3 class="text-base font-bold text-white">Призначити наряд</h3>
-            <p class="text-xs text-tactical-muted">${formatDateHuman(assignModalState.date)}</p>
+            <div class="modal-title">Призначити наряд</div>
+            <div class="text-xs text-muted">${formatDateHuman(assignModal.date)}</div>
           </div>
-          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
-
-        <div class="p-4 overflow-y-auto space-y-4">
-          <!-- Вибір типу наряду -->
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-2">1. Оберіть вид наряду:</label>
-            <div class="flex flex-wrap gap-2">
-              ${state.dutyTypes.map(dt => {
-                const col = getColorObj(dt.color);
-                const selected = assignModalState.dutyTypeId === dt.id;
-                return `
-                  <button onclick="selectAssignDutyType('${dt.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 ${
-                    selected
-                      ? 'bg-tactical-olive text-white border-tactical-olive ring-2 ring-tactical-olive/40'
-                      : 'bg-tactical-bg text-tactical-text border-tactical-border hover:bg-tactical-cardHover'
-                  }">
-                    <span class="w-2 h-2 rounded-full ${col.dot}"></span>
-                    <span>${escapeHtml(dt.name)}</span>
-                  </button>
-                `;
-              }).join('')}
+        <div class="modal-body">
+          <div class="field">
+            <div class="field-label">1. Оберіть вид наряду:</div>
+            <div class="chips-wrap">
+              ${state.dutyTypes.map(dt => `
+                <button class="btn btn-sm ${assignModal.dutyTypeId === dt.id ? 'btn-primary' : 'btn-secondary'}" onclick="setAssignDutyType('${dt.id}')">
+                  ${esc(dt.name)}
+                </button>
+              `).join('')}
             </div>
           </div>
 
-          <!-- Вибір військовослужбовця -->
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1">2. Оберіть військовослужбовця (відсортовано за навантаженням):</label>
-            <div class="space-y-2">
-              ${groupsHtml || '<div class="text-sm text-tactical-muted py-4 text-center">Немає бійців</div>'}
-            </div>
+          <div class="row-between">
+            <div class="field-label">2. Оберіть бійця (розумний підбір):</div>
+            <button class="btn btn-sm btn-secondary" onclick="toggleAssignOnlyActive()">
+              ${assignModal.onlyActive ? 'Тільки в строю ✓' : 'Показано всіх'}
+            </button>
           </div>
+
+          <div class="stack">${listHtml}</div>
         </div>
       `);
     }
 
     function confirmAssignDuty(soldierId) {
-      if (!assignModalState.dutyTypeId) {
+      if (!assignModal.dutyTypeId) {
         showToast('Оберіть вид наряду', 'error');
         return;
       }
       state.duties.push({
-        id: generateId('duty'),
-        date: assignModalState.date,
+        id: genId('d'),
+        date: assignModal.date,
         soldierId,
-        dutyTypeId: assignModalState.dutyTypeId
+        dutyTypeId: assignModal.dutyTypeId
       });
+      state.isDemo = false;
       saveState();
       closeModal();
       render();
       showToast('Наряд призначено');
     }
 
-    // =========================================================================
-    // ВКЛАДКА 2: ОБЛІК (STATISTICS & ACCOUNTING)
-    // =========================================================================
+    // Підвкладка «ОБЛІК»
     function setStatsSquadFilter(id) {
       ui.statsSquadFilter = id;
       render();
@@ -815,132 +1874,128 @@
       render();
     }
 
-    function renderStatsTab() {
-      const year = ui.year;
-      const month = ui.month;
-      const monthPrefix = getMonthPrefix(year, month);
+    function renderStatsView() {
+      const y = ui.year;
+      const m = ui.month;
 
-      // Фільтруємо бійців
-      const filteredSoldiers = state.soldiers
+      const filtered = state.soldiers
         .filter(s => ui.statsSquadFilter === 'all' || s.squadId === ui.statsSquadFilter)
         .map(s => ({
           ...s,
-          counts: getSoldierCounts(s.id, year, month)
+          stats: getSoldierStats(s.id, y, m)
         }));
 
-      const totalDutiesMonth = filteredSoldiers.reduce((acc, s) => acc + s.counts.monthCount, 0);
-      const activeSoldiersCount = filteredSoldiers.filter(s => s.status === 'active').length;
-      const avgPerSoldier = activeSoldiersCount > 0 ? (totalDutiesMonth / activeSoldiersCount).toFixed(1) : '0.0';
-      const maxMonthCount = Math.max(1, ...filteredSoldiers.map(s => s.counts.monthCount));
+      const totalMonth = filtered.reduce((sum, s) => sum + s.stats.monthCount, 0);
+      const activeCnt = filtered.filter(s => s.status === 'active').length;
+      const avg = activeCnt > 0 ? (totalMonth / activeCnt).toFixed(1) : '0.0';
+      const maxMonth = Math.max(1, ...filtered.map(s => s.stats.monthCount));
 
-      // Сортування
       let listHtml = '';
-      if (filteredSoldiers.length === 0) {
-        listHtml = `<div class="bg-tactical-card border border-tactical-border rounded-2xl p-6 text-center text-sm text-tactical-muted">Немає даних для відображення.</div>`;
+      if (filtered.length === 0) {
+        listHtml = `<div class="card empty-state">Немає даних для обліку.</div>`;
       } else if (ui.statsSort === 'squad') {
         const squadsToShow = ui.statsSquadFilter === 'all'
           ? state.squads
           : state.squads.filter(sq => sq.id === ui.statsSquadFilter);
 
         listHtml = squadsToShow.map(sq => {
-          const members = filteredSoldiers.filter(s => s.squadId === sq.id);
-          if (members.length === 0) return '';
+          const members = sortSquadMembers(filtered.filter(s => s.squadId === sq.id));
+          if (!members.length) return '';
           return `
-            <div class="bg-tactical-card border border-tactical-border rounded-2xl overflow-hidden">
-              <div class="px-4 py-2.5 bg-tactical-bg/60 border-b border-tactical-border flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-tactical-muted">${escapeHtml(sq.name)}</span>
-                <span class="text-[11px] text-tactical-muted">Міс. / Всього</span>
+            <div class="card-flush">
+              <div class="card-header">
+                <div class="row-gap">
+                  <span class="pill-dot" style="background:${sq.color}"></span>
+                  <span class="section-title">${esc(sq.name)}</span>
+                </div>
+                <span class="text-xs text-muted">Міс. / Всього</span>
               </div>
-              <div class="divide-y divide-tactical-border/60">
-                ${members.map(s => renderStatsSoldierRow(s, maxMonthCount, false)).join('')}
+              <div>
+                ${members.map(s => renderStatsRow(s, sq, maxMonth, false)).join('')}
               </div>
             </div>
           `;
         }).join('');
       } else {
-        const sorted = [...filteredSoldiers].sort((a, b) => {
-          if (ui.statsSort === 'month_asc') return a.counts.monthCount - b.counts.monthCount || a.counts.totalCount - b.counts.totalCount;
-          if (ui.statsSort === 'month_desc') return b.counts.monthCount - a.counts.monthCount || b.counts.totalCount - a.counts.totalCount;
-          return b.counts.totalCount - a.counts.totalCount || b.counts.monthCount - a.counts.monthCount;
+        const sorted = [...filtered].sort((a, b) => {
+          if (ui.statsSort === 'month_asc') return a.stats.monthCount - b.stats.monthCount || a.stats.totalCount - b.stats.totalCount;
+          if (ui.statsSort === 'month_desc') return b.stats.monthCount - a.stats.monthCount || b.stats.totalCount - a.stats.totalCount;
+          return b.stats.totalCount - a.stats.totalCount || b.stats.monthCount - a.stats.monthCount;
         });
         listHtml = `
-          <div class="bg-tactical-card border border-tactical-border rounded-2xl overflow-hidden">
-            <div class="px-4 py-2.5 bg-tactical-bg/60 border-b border-tactical-border flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-tactical-muted">Рейтинг навантаження</span>
-              <span class="text-[11px] text-tactical-muted">Міс. / Всього</span>
+          <div class="card-flush">
+            <div class="card-header">
+              <span class="section-title">Рейтинг навантаження</span>
+              <span class="text-xs text-muted">Міс. / Всього</span>
             </div>
-            <div class="divide-y divide-tactical-border/60">
-              ${sorted.map(s => renderStatsSoldierRow(s, maxMonthCount, true)).join('')}
+            <div>
+              ${sorted.map(s => renderStatsRow(s, getSquadById(s.squadId), maxMonth, true)).join('')}
             </div>
           </div>
         `;
       }
 
       return `
-        ${renderMonthSwitcher()}
-
-        <!-- KPI Картки -->
-        <div class="grid grid-cols-3 gap-2.5">
-          <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3 text-center">
-            <div class="text-xl font-bold text-white">${totalDutiesMonth}</div>
-            <div class="text-[11px] text-tactical-muted leading-tight mt-0.5">Нарядів за місяць</div>
+        ${renderMonthBar(false)}
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-val">${totalMonth}</div>
+            <div class="kpi-label">Нарядів за міс.</div>
           </div>
-          <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3 text-center">
-            <div class="text-xl font-bold text-tactical-emerald">${avgPerSoldier}</div>
-            <div class="text-[11px] text-tactical-muted leading-tight mt-0.5">Середнє на бійця</div>
+          <div class="kpi-card">
+            <div class="kpi-val" style="color:#4ade80">${avg}</div>
+            <div class="kpi-label">Середнє на бійця</div>
           </div>
-          <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3 text-center">
-            <div class="text-xl font-bold text-white">${activeSoldiersCount}</div>
-            <div class="text-[11px] text-tactical-muted leading-tight mt-0.5">В строю</div>
+          <div class="kpi-card">
+            <div class="kpi-val">${activeCnt}</div>
+            <div class="kpi-label">В строю</div>
           </div>
         </div>
 
-        ${renderSquadPills(ui.statsSquadFilter, 'setStatsSquadFilter')}
+        ${renderSquadTabs(ui.statsSquadFilter, 'setStatsSquadFilter', false)}
 
-        <!-- Сортування -->
-        <div class="flex items-center justify-between gap-2">
-          <span class="text-xs text-tactical-muted font-medium">Сортування:</span>
-          <select onchange="setStatsSort(this.value)" class="bg-tactical-card border border-tactical-border rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-tactical-olive">
-            <option value="squad" ${ui.statsSort === 'squad' ? 'selected' : ''}>За відділенням</option>
+        <div class="row-between">
+          <span class="text-xs text-muted" style="font-weight:600">Сортування:</span>
+          <select class="select" style="width:auto;padding:8px 10px;font-size:12px" onchange="setStatsSort(this.value)">
+            <option value="squad" ${ui.statsSort === 'squad' ? 'selected' : ''}>За відділенням (КВ зверху)</option>
             <option value="month_asc" ${ui.statsSort === 'month_asc' ? 'selected' : ''}>Менше за місяць</option>
             <option value="month_desc" ${ui.statsSort === 'month_desc' ? 'selected' : ''}>Більше за місяць</option>
             <option value="total_desc" ${ui.statsSort === 'total_desc' ? 'selected' : ''}>Більше всього</option>
           </select>
         </div>
 
-        <!-- Список обліку -->
-        <div class="space-y-3">
-          ${listHtml}
-        </div>
+        <div class="stack">${listHtml}</div>
       `;
     }
 
-    function renderStatsSoldierRow(s, maxMonthCount, showSquad) {
-      const pct = Math.round((s.counts.monthCount / maxMonthCount) * 100);
+    function renderStatsRow(s, sq, maxMonth, showSquad) {
+      const pct = Math.round((s.stats.monthCount / maxMonth) * 100);
       const st = getStatusObj(s.status);
-      const squad = getSquadById(s.squadId);
       return `
-        <button onclick="openSoldierHistoryModal('${s.id}')" class="w-full text-left px-4 py-3 hover:bg-tactical-cardHover transition flex items-center justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-semibold text-white truncate">${escapeHtml(s.name)}</span>
-              ${s.status !== 'active' ? `<span class="text-[10px] px-1.5 py-0.5 rounded border font-semibold ${st.badge}">${st.label}</span>` : ''}
+        <button class="soldier-row ${s.isCommander ? 'is-kv' : ''}" onclick="openSoldierHistoryModal('${s.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left;">
+          <div class="soldier-info">
+            <div class="soldier-name-line">
+              <span class="soldier-name">${esc(s.name)}</span>
+              ${s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
+              ${s.status !== 'active' ? `<span class="badge ${st.cls}">${st.label}</span>` : ''}
             </div>
-            ${showSquad ? `<div class="text-[11px] text-tactical-muted mt-0.5">${escapeHtml(squad.name)}</div>` : ''}
-            <!-- Смужка навантаження -->
-            <div class="w-full h-1.5 bg-tactical-bg rounded-full overflow-hidden mt-2">
-              <div class="h-full bg-tactical-olive rounded-full transition-all" style="width: ${pct}%"></div>
+            <div class="soldier-meta">
+              ${showSquad ? `<span style="color:${sq.color};font-weight:600">${esc(getSquadShortLabel(sq))}</span><span>•</span>` : ''}
+              <span>Ост.: ${formatDateShort(s.stats.lastDate)}</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${pct}%; background:${sq.color}"></div>
             </div>
           </div>
-          <div class="shrink-0 flex items-center gap-3">
-            <div class="text-right">
-              <div class="text-base font-bold text-white leading-none">${s.counts.monthCount}</div>
-              <div class="text-[10px] text-tactical-muted mt-0.5">за міс.</div>
+          <div class="row-gap" style="flex-shrink:0">
+            <div style="text-align:right">
+              <div style="font-size:16px;font-weight:800;color:#fff;line-height:1">${s.stats.monthCount}</div>
+              <div class="text-xs text-muted">міс.</div>
             </div>
-            <div class="w-px h-7 bg-tactical-border"></div>
-            <div class="text-right min-w-[34px]">
-              <div class="text-sm font-semibold text-tactical-emerald leading-none">${s.counts.totalCount}</div>
-              <div class="text-[10px] text-tactical-muted mt-0.5">всього</div>
+            <div style="width:1px;height:26px;background:var(--border)"></div>
+            <div style="text-align:right;min-width:34px">
+              <div style="font-size:14px;font-weight:700;color:#4ade80;line-height:1">${s.stats.totalCount}</div>
+              <div class="text-xs text-muted">всього</div>
             </div>
           </div>
         </button>
@@ -950,139 +2005,539 @@
     function openSoldierHistoryModal(soldierId) {
       const s = getSoldierById(soldierId);
       if (!s) return;
-      const squad = getSquadById(s.squadId);
-      const counts = getSoldierCounts(s.id, ui.year, ui.month);
+      const sq = getSquadById(s.squadId);
+      const stats = getSoldierStats(s.id, ui.year, ui.month);
       const history = state.duties
         .filter(d => d.soldierId === s.id)
         .sort((a, b) => b.date.localeCompare(a.date));
 
       openModal(`
-        <div class="p-4 border-b border-tactical-border flex items-center justify-between shrink-0">
+        <div class="modal-header">
           <div>
-            <h3 class="text-base font-bold text-white">${escapeHtml(s.name)}</h3>
-            <p class="text-xs text-tactical-muted">${escapeHtml(squad.name)}${s.rank ? ' • ' + escapeHtml(s.rank) : ''}</p>
+            <div class="modal-title">${esc(s.name)} ${s.isCommander ? '★' : ''}</div>
+            <div class="text-xs text-muted">${esc(sq.name)}${s.rank ? ' • ' + esc(s.rank) : ''}</div>
           </div>
-          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
-        <div class="p-4 overflow-y-auto space-y-4">
-          <div class="grid grid-cols-2 gap-2.5">
-            <div class="p-3 rounded-xl bg-tactical-bg border border-tactical-border text-center">
-              <div class="text-lg font-bold text-white">${counts.monthCount}</div>
-              <div class="text-[11px] text-tactical-muted">${MONTHS_UK[ui.month]} ${ui.year}</div>
+        <div class="modal-body">
+          <div class="grid-2">
+            <div class="kpi-card">
+              <div class="kpi-val">${stats.monthCount}</div>
+              <div class="kpi-label">${MONTHS_UK[ui.month]} ${ui.year}</div>
             </div>
-            <div class="p-3 rounded-xl bg-tactical-bg border border-tactical-border text-center">
-              <div class="text-lg font-bold text-tactical-emerald">${counts.totalCount}</div>
-              <div class="text-[11px] text-tactical-muted">За весь час</div>
+            <div class="kpi-card">
+              <div class="kpi-val" style="color:#4ade80">${stats.totalCount}</div>
+              <div class="kpi-label">За весь час</div>
             </div>
           </div>
 
-          <div>
-            <h4 class="text-xs font-bold uppercase tracking-wider text-tactical-muted mb-2">Історія нарядів (${history.length})</h4>
-            ${history.length === 0
-              ? `<div class="text-sm text-tactical-muted text-center py-6">Історія нарядів порожня.</div>`
-              : `<div class="space-y-2">
-                  ${history.map(d => {
-                    const dt = getDutyTypeById(d.dutyTypeId);
-                    const col = getColorObj(dt.color);
-                    return `
-                      <div class="flex items-center justify-between p-2.5 rounded-xl bg-tactical-bg border border-tactical-border">
-                        <span class="text-xs font-medium text-white">${formatDateHuman(d.date)}</span>
-                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold border ${col.badge}">${escapeHtml(dt.name)}</span>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>`
-            }
-          </div>
+          <div class="field-label">Історія нарядів (${history.length}):</div>
+          ${history.length === 0
+            ? `<div class="empty-state">Записів про наряди ще немає.</div>`
+            : `<div class="stack">
+                ${history.map(d => {
+                  const dt = getDutyTypeById(d.dutyTypeId);
+                  return `
+                    <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">
+                      <span class="text-sm" style="font-weight:600;color:#fff">${formatDateHuman(d.date)}</span>
+                      <span class="badge" style="background:${sq.color}22;color:${sq.color};border-color:${sq.color}55">${esc(dt.name)}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>`
+          }
         </div>
       `);
     }
 
     // =========================================================================
-    // ВКЛАДКА 3: СКЛАД (PERSONNEL & SQUADS)
+    // РОЗДІЛ 2: ЗАДАЧІ (ЄДИНА ФОРМА ПОСТАНОВКИ + ФІЛЬТРАЦІЯ + ЗАУВАЖЕННЯ)
     // =========================================================================
-    function renderPersonnelTab() {
-      const squadsHtml = state.squads.length === 0
-        ? `<div class="bg-tactical-card border border-tactical-border rounded-2xl p-6 text-center text-sm text-tactical-muted">Додайте хоча б одне відділення.</div>`
-        : state.squads.map(sq => {
-            const members = state.soldiers.filter(s => s.squadId === sq.id);
+    function setTasksTargetFilter(val) {
+      ui.tasksTargetFilter = val;
+      render();
+    }
+
+    function setTasksStatusFilter(val) {
+      ui.tasksStatusFilter = val;
+      render();
+    }
+
+    function getFilteredTasks() {
+      return state.tasks.filter(t => {
+        // Фільтр за виконавцем (відділенням)
+        if (ui.tasksTargetFilter !== 'all') {
+          const matchesSquad = t.targetType === 'squad' && t.targetSquadId === ui.tasksTargetFilter;
+          const isGeneral = t.targetType === 'all_commanders' || t.targetType === 'all_platoon';
+          if (!matchesSquad && !isGeneral) return false;
+        }
+        // Фільтр за статусом
+        if (ui.tasksStatusFilter !== 'all' && t.status !== ui.tasksStatusFilter) return false;
+        return true;
+      });
+    }
+
+    function getTaskTargetDisplay(task) {
+      if (task.targetType === 'all_commanders') {
+        return { label: 'Усім командирам відділень', color: '#a855f7' };
+      }
+      if (task.targetType === 'all_platoon') {
+        return { label: 'Весь взвод', color: '#06b6d4' };
+      }
+      const sq = getSquadById(task.targetSquadId);
+      const kv = getSquadCommander(task.targetSquadId);
+      const label = `${getSquadCmdShort(sq)}${kv ? ' · ' + kv.name : ''}`;
+      return { label, color: sq.color };
+    }
+
+    function renderTasksTab() {
+      // Статистика задач (за поточним фільтром відділення)
+      const scopedTasks = state.tasks.filter(t => {
+        if (ui.tasksTargetFilter === 'all') return true;
+        return (t.targetType === 'squad' && t.targetSquadId === ui.tasksTargetFilter)
+          || t.targetType === 'all_commanders'
+          || t.targetType === 'all_platoon';
+      });
+      const cntReceived = scopedTasks.filter(t => t.status === 'received').length;
+      const cntDone = scopedTasks.filter(t => t.status === 'done').length;
+      const cntFailed = scopedTasks.filter(t => t.status === 'failed').length;
+
+      // Верхні вкладки по командирах відділень
+      const activeAllCount = state.tasks.filter(t => t.status !== 'done').length;
+      const targetPills = `
+        <div class="pills-row">
+          <button class="pill-btn ${ui.tasksTargetFilter === 'all' ? 'active' : ''}" style="--pill-color:#4ade80" onclick="setTasksTargetFilter('all')">
+            <span>Усі</span>
+            <span class="pill-count">${activeAllCount}</span>
+          </button>
+          ${state.squads.map(sq => {
+            const activeForSq = state.tasks.filter(t =>
+              t.status !== 'done' &&
+              ((t.targetType === 'squad' && t.targetSquadId === sq.id) || t.targetType === 'all_commanders' || t.targetType === 'all_platoon')
+            ).length;
             return `
-              <div class="bg-tactical-card border border-tactical-border rounded-2xl overflow-hidden">
-                <div class="px-4 py-3 bg-tactical-bg/60 border-b border-tactical-border flex items-center justify-between">
-                  <div>
-                    <h3 class="text-sm font-bold text-white">${escapeHtml(sq.name)}</h3>
-                    <p class="text-[11px] text-tactical-muted">Особового складу: ${members.length}</p>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <button onclick="openSquadModal('${sq.id}')" class="px-2.5 py-1.5 rounded-lg bg-tactical-card border border-tactical-border text-xs text-tactical-muted hover:text-white transition">Змінити</button>
-                    <button onclick="promptDeleteSquad('${sq.id}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400 hover:bg-red-500/20 transition">✕</button>
+              <button class="pill-btn ${ui.tasksTargetFilter === sq.id ? 'active' : ''}" style="--pill-color:${sq.color}" onclick="setTasksTargetFilter('${sq.id}')">
+                <span class="pill-dot" style="background:${sq.color}"></span>
+                <span>${esc(getSquadCmdShort(sq))}</span>
+                <span class="pill-count">${activeForSq}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      // Фільтр за статусом
+      const statusPills = `
+        <div class="pills-row">
+          <button class="pill-btn ${ui.tasksStatusFilter === 'all' ? 'active' : ''}" style="--pill-color:#e8eef5" onclick="setTasksStatusFilter('all')">Всі</button>
+          <button class="pill-btn ${ui.tasksStatusFilter === 'received' ? 'active' : ''}" style="--pill-color:#3b82f6" onclick="setTasksStatusFilter('received')">Отримав</button>
+          <button class="pill-btn ${ui.tasksStatusFilter === 'done' ? 'active' : ''}" style="--pill-color:#22c55e" onclick="setTasksStatusFilter('done')">Виконано</button>
+          <button class="pill-btn ${ui.tasksStatusFilter === 'failed' ? 'active' : ''}" style="--pill-color:#ef4444" onclick="setTasksStatusFilter('failed')">Не виконано</button>
+        </div>
+      `;
+
+      const filteredTasks = getFilteredTasks();
+
+      const tasksHtml = filteredTasks.length === 0
+        ? `<div class="card empty-state">Задач за обраними фільтрами немає. Натисніть «+ Нова задача», щоб поставити задачу.</div>`
+        : filteredTasks.map(t => {
+            const target = getTaskTargetDisplay(t);
+            const isNoteOpen = Boolean(ui.openNotes[t.id]);
+            const hasNote = Boolean(t.note && t.note.trim());
+
+            return `
+              <div class="task-card status-${t.status}" style="--sq-color:${target.color}">
+                <div class="task-top">
+                  <span class="badge" style="background:${target.color}22; color:${target.color}; border-color:${target.color}55; white-space:normal; line-height:1.25">
+                    ${esc(target.label)}
+                  </span>
+                  <div class="row-gap" style="flex-shrink:0">
+                    <button class="btn-icon" style="width:30px;height:30px" onclick="openTaskModal('${t.id}')" title="Редагувати">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="btn-icon danger" style="width:30px;height:30px" onclick="promptDeleteTask('${t.id}')" title="Видалити">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
                   </div>
                 </div>
-                <div class="divide-y divide-tactical-border/60">
-                  ${members.length === 0
-                    ? `<div class="p-4 text-xs text-tactical-muted text-center">У відділенні поки немає бійців</div>`
-                    : members.map(s => {
-                        const st = getStatusObj(s.status);
-                        return `
-                          <div class="px-4 py-3 flex items-center justify-between gap-2">
-                            <div class="min-w-0">
-                              <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-sm font-semibold text-white">${escapeHtml(s.name)}</span>
-                                <span class="text-[10px] px-1.5 py-0.5 rounded border font-semibold ${st.badge}">${st.label}</span>
-                              </div>
-                              ${s.rank ? `<div class="text-xs text-tactical-muted mt-0.5">${escapeHtml(s.rank)}</div>` : ''}
-                            </div>
-                            <div class="flex items-center gap-1.5 shrink-0">
-                              <button onclick="openSoldierModal('${s.id}')" class="p-2 rounded-lg bg-tactical-bg border border-tactical-border text-tactical-muted hover:text-white transition" title="Редагувати">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                              </button>
-                              <button onclick="promptDeleteSoldier('${s.id}')" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" title="Видалити">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                              </button>
-                            </div>
-                          </div>
-                        `;
-                      }).join('')
-                  }
+
+                <div class="task-text">${esc(t.text)}</div>
+
+                <div class="task-meta">
+                  <span>Поставив: <strong style="color:#fff">${esc(t.issuer || 'Не вказано')}</strong></span>
+                  ${t.deadline ? `<span>• Термін: <strong style="color:#fbbf24">${formatDeadline(t.deadline)}</strong></span>` : ''}
+                </div>
+
+                <!-- 3 кнопки статусу в один тап -->
+                <div class="task-status-grid">
+                  <button class="status-tap-btn ${t.status === 'received' ? 'active-received' : ''}" onclick="setTaskStatus('${t.id}', 'received')">Отримав задачу</button>
+                  <button class="status-tap-btn ${t.status === 'done' ? 'active-done' : ''}" onclick="setTaskStatus('${t.id}', 'done')">Виконано</button>
+                  <button class="status-tap-btn ${t.status === 'failed' ? 'active-failed' : ''}" onclick="setTaskStatus('${t.id}', 'failed')">Не виконано</button>
+                </div>
+
+                <!-- Розгортувана вкладка Зауваження -->
+                <div>
+                  <button class="note-toggle-btn ${hasNote ? 'has-note' : ''}" onclick="toggleTaskNote('${t.id}')">
+                    <span>${hasNote ? '● Зауваження (є запис)' : 'Зауваження / причина невиконання'}</span>
+                    <span>${isNoteOpen ? '▲' : '▼'}</span>
+                  </button>
+                  ${isNoteOpen ? `
+                    <div class="note-box" style="margin-top:6px">
+                      <textarea id="note-input-${t.id}" class="textarea" style="min-height:68px" placeholder="Вкажіть причину невиконання або коментар командира...">${esc(t.note || '')}</textarea>
+                      <div class="row-between">
+                        <span class="text-xs text-muted">${t.status === 'failed' ? 'Бажано вказати причину невиконання' : 'Коментар до задачі'}</span>
+                        <button class="btn btn-sm btn-primary" onclick="saveTaskNote('${t.id}')">Зберегти</button>
+                      </div>
+                    </div>
+                  ` : (hasNote ? `<div class="text-xs" style="margin-top:6px;padding:7px 10px;border-radius:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);color:#fde68a;white-space:pre-wrap">${esc(t.note)}</div>` : '')}
                 </div>
               </div>
             `;
           }).join('');
 
       return `
-        <div class="grid grid-cols-2 gap-2.5">
-          <button onclick="openSoldierModal()" class="py-3 px-3 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-xs font-bold flex items-center justify-center gap-1.5 transition">
-            <span>+ Додати бійця</span>
-          </button>
-          <button onclick="openSquadModal()" class="py-3 px-3 rounded-xl bg-tactical-card border border-tactical-border hover:bg-tactical-cardHover text-white text-xs font-bold flex items-center justify-center gap-1.5 transition">
-            <span>+ Нове відділення</span>
-          </button>
+        <div class="grid-2">
+          <button class="btn btn-primary" onclick="openTaskModal()">+ Нова задача</button>
+          <button class="btn btn-secondary" onclick="copyActiveTasks()">Копіювати задачі</button>
         </div>
 
-        <div class="space-y-3">
-          ${squadsHtml}
+        <!-- Міні-статистика задач -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-val" style="color:#60a5fa">${cntReceived}</div>
+            <div class="kpi-label">Отримано</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" style="color:#4ade80">${cntDone}</div>
+            <div class="kpi-label">Виконано</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" style="color:#f87171">${cntFailed}</div>
+            <div class="kpi-label">Не виконано</div>
+          </div>
+        </div>
+
+        ${targetPills}
+        ${statusPills}
+
+        <div class="stack">${tasksHtml}</div>
+      `;
+    }
+
+    function setTaskStatus(taskId, status) {
+      const t = state.tasks.find(x => x.id === taskId);
+      if (!t) return;
+      t.status = status;
+      if (status === 'failed') {
+        ui.openNotes[taskId] = true;
+      }
+      saveState();
+      render();
+      if (status === 'failed') {
+        setTimeout(() => document.getElementById(`note-input-${taskId}`)?.focus(), 60);
+      }
+    }
+
+    function toggleTaskNote(taskId) {
+      ui.openNotes[taskId] = !ui.openNotes[taskId];
+      render();
+    }
+
+    function saveTaskNote(taskId) {
+      const t = state.tasks.find(x => x.id === taskId);
+      const input = document.getElementById(`note-input-${taskId}`);
+      if (!t || !input) return;
+      t.note = input.value.trim();
+      ui.openNotes[taskId] = false;
+      saveState();
+      render();
+      showToast('Зауваження збережено');
+    }
+
+    function openTaskModal(taskId = null) {
+      const existing = taskId ? state.tasks.find(t => t.id === taskId) : null;
+      let currentTargetVal = 'all_commanders';
+      if (existing) {
+        currentTargetVal = existing.targetType === 'squad' ? `squad:${existing.targetSquadId}` : existing.targetType;
+      } else if (ui.tasksTargetFilter !== 'all') {
+        currentTargetVal = `squad:${ui.tasksTargetFilter}`;
+      } else if (state.squads.length > 0) {
+        currentTargetVal = `squad:${state.squads[0].id}`;
+      }
+
+      const targetOptions = [
+        ...state.squads.map(sq => {
+          const kv = getSquadCommander(sq.id);
+          const lbl = `Командиру ${sq.name}${kv ? ' · ' + kv.name : ' (КВ не призначено)'}`;
+          return `<option value="squad:${sq.id}" ${currentTargetVal === 'squad:' + sq.id ? 'selected' : ''}>${esc(lbl)}</option>`;
+        }),
+        `<option value="all_commanders" ${currentTargetVal === 'all_commanders' ? 'selected' : ''}>Усім командирам відділень</option>`,
+        `<option value="all_platoon" ${currentTargetVal === 'all_platoon' ? 'selected' : ''}>Весь взвод</option>`
+      ].join('');
+
+      openModal(`
+        <div class="modal-header">
+          <div class="modal-title">${existing ? 'Редагувати задачу' : 'Нова задача'}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <form class="modal-body" onsubmit="saveTask(event, '${taskId || ''}')">
+          <div class="field">
+            <label class="field-label" for="task-target">Кому (Виконавець)</label>
+            <select id="task-target" class="select">${targetOptions}</select>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="task-text">Суть задачі</label>
+            <textarea id="task-text" class="textarea" required placeholder="Опишіть задачу чітко та зрозуміло...">${esc(existing?.text || '')}</textarea>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="task-issuer">Хто поставив задачу</label>
+            <input id="task-issuer" class="input" type="text" required value="${esc(existing?.issuer || 'Ком. взводу')}" placeholder="Наприклад: Ком. взводу" />
+            <div class="chips-wrap" style="margin-top:4px">
+              ${ISSUER_PRESETS.map(p => `<button type="button" class="chip-btn" onclick="document.getElementById('task-issuer').value='${p}'">${p}</button>`).join('')}
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="task-deadline">Термін виконання (необов'язково)</label>
+            <input id="task-deadline" class="input" type="datetime-local" value="${esc(existing?.deadline || '')}" />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full">${existing ? 'Зберегти зміни' : 'Поставити задачу'}</button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('task-text')?.focus(), 60);
+    }
+
+    function saveTask(e, taskId) {
+      e.preventDefault();
+      const targetVal = document.getElementById('task-target').value;
+      const text = document.getElementById('task-text').value.trim();
+      const issuer = document.getElementById('task-issuer').value.trim();
+      const deadline = document.getElementById('task-deadline').value;
+      if (!text) return;
+
+      let targetType = targetVal;
+      let targetSquadId = null;
+      if (targetVal.startsWith('squad:')) {
+        targetType = 'squad';
+        targetSquadId = targetVal.slice(6);
+      }
+
+      if (taskId) {
+        const t = state.tasks.find(x => x.id === taskId);
+        if (t) {
+          t.targetType = targetType;
+          t.targetSquadId = targetSquadId;
+          t.text = text;
+          t.issuer = issuer;
+          t.deadline = deadline;
+        }
+      } else {
+        state.tasks.unshift({
+          id: genId('t'),
+          targetType,
+          targetSquadId,
+          text,
+          issuer,
+          deadline,
+          status: 'received',
+          note: '',
+          createdAt: toISODate(new Date())
+        });
+      }
+      state.isDemo = false;
+      saveState();
+      closeModal();
+      render();
+      showToast(taskId ? 'Задачу оновлено' : 'Задачу поставлено');
+    }
+
+    function promptDeleteTask(taskId) {
+      showConfirm(
+        'Видалити задачу?',
+        'Задача та зауваження до неї будуть видалені.',
+        'Видалити',
+        () => {
+          state.tasks = state.tasks.filter(t => t.id !== taskId);
+          saveState();
+          render();
+          showToast('Задачу видалено');
+        }
+      );
+    }
+
+    function copyActiveTasks() {
+      const list = getFilteredTasks().filter(t => ui.tasksStatusFilter === 'all' ? t.status !== 'done' : true);
+      if (!list.length) {
+        showToast('Немає активних задач для копіювання', 'error');
+        return;
+      }
+      const statusMap = { received: 'Отримав', done: 'Виконано', failed: 'Не виконано' };
+      const lines = [`Задачі взводу (${formatDateShort(toISODate(new Date()))}):`];
+      list.forEach((t, i) => {
+        const target = getTaskTargetDisplay(t);
+        lines.push(`${i + 1}. [${target.label}] ${t.text}`);
+        lines.push(`   Поставив: ${t.issuer} | Статус: ${statusMap[t.status]}${t.deadline ? ' | До: ' + formatDeadline(t.deadline) : ''}`);
+        if (t.note) lines.push(`   Зауваження: ${t.note}`);
+      });
+      copyToClipboard(lines.join('\n'), 'Активні задачі скопійовано');
+    }
+
+    // =========================================================================
+    // РОЗДІЛ 3: СКЛАД (ВІДДІЛЕННЯ, КВ ЗВЕРХУ, АВТО-ВЕЛИКА ЛІТЕРА, ПОШУК)
+    // =========================================================================
+    function setPersonnelSquadFilter(id) {
+      ui.personnelSquadFilter = id;
+      render();
+    }
+
+    function onPersonnelSearchInput(val) {
+      ui.personnelSearch = val;
+      renderPersonnelListOnly();
+    }
+
+    function clearPersonnelSearch() {
+      ui.personnelSearch = '';
+      render();
+    }
+
+    function renderPersonnelTab() {
+      return `
+        <div class="grid-2">
+          <button class="btn btn-primary" onclick="openSoldierModal()">+ Додати бійця</button>
+          <button class="btn btn-secondary" onclick="openSquadModal()">+ Відділення</button>
+        </div>
+
+        ${renderSquadTabs(ui.personnelSquadFilter, 'setPersonnelSquadFilter', true)}
+
+        <!-- Швидкий пошук за ПІБ -->
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="personnel-search-input" class="input" type="text" value="${esc(ui.personnelSearch)}" placeholder="Пошук бійця за ПІБ..." oninput="onPersonnelSearchInput(this.value)" />
+          ${ui.personnelSearch ? `<button class="search-clear" onclick="clearPersonnelSearch()" aria-label="Очистити">✕</button>` : ''}
+        </div>
+
+        <div id="personnel-list-container" class="stack">
+          ${buildPersonnelCardsHtml()}
         </div>
       `;
     }
 
+    function renderPersonnelListOnly() {
+      const container = document.getElementById('personnel-list-container');
+      if (container) container.innerHTML = buildPersonnelCardsHtml();
+    }
+
+    function buildPersonnelCardsHtml() {
+      if (state.squads.length === 0) {
+        return `<div class="card empty-state">Додайте хоча б одне відділення.</div>`;
+      }
+
+      const query = ui.personnelSearch.trim().toLowerCase();
+      const squadsToShow = ui.personnelSquadFilter === 'all'
+        ? state.squads
+        : state.squads.filter(sq => sq.id === ui.personnelSquadFilter);
+
+      let totalShown = 0;
+      const html = squadsToShow.map(sq => {
+        const allMembers = state.soldiers.filter(s => s.squadId === sq.id);
+        const filteredMembers = sortSquadMembers(
+          allMembers.filter(s => !query || s.name.toLowerCase().includes(query) || (s.rank && s.rank.toLowerCase().includes(query)))
+        );
+
+        if (query && filteredMembers.length === 0) return '';
+        totalShown += filteredMembers.length;
+
+        return `
+          <div class="card-flush">
+            <div class="card-header" style="border-left:4px solid ${sq.color}">
+              <div class="row-gap">
+                <span class="pill-dot" style="background:${sq.color}"></span>
+                <div>
+                  <div class="section-title">${esc(sq.name)}</div>
+                  <div class="text-xs text-muted">Особового складу: ${allMembers.length}</div>
+                </div>
+              </div>
+              <div class="row-gap">
+                <button class="btn btn-sm btn-secondary" onclick="openSquadModal('${sq.id}')">Змінити</button>
+                <button class="btn-icon danger" style="width:32px;height:32px" onclick="promptDeleteSquad('${sq.id}')" title="Видалити відділення">✕</button>
+              </div>
+            </div>
+            <div>
+              ${filteredMembers.length === 0
+                ? `<div class="empty-state" style="padding:18px">У відділенні поки немає бійців</div>`
+                : filteredMembers.map(s => {
+                    const st = getStatusObj(s.status);
+                    return `
+                      <div class="soldier-row ${s.isCommander ? 'is-kv' : ''}" style="--sq-color:${sq.color}">
+                        <div class="soldier-info">
+                          <div class="soldier-name-line">
+                            <span class="soldier-name">${esc(s.name)}</span>
+                            ${s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : ''}
+                            <span class="badge ${st.cls}">${st.label}</span>
+                          </div>
+                          ${s.rank ? `<div class="soldier-meta">${esc(s.rank)}</div>` : ''}
+                        </div>
+                        <div class="row-gap" style="flex-shrink:0">
+                          <button class="btn-icon" onclick="openSoldierModal('${s.id}')" title="Редагувати">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          </button>
+                          <button class="btn-icon danger" onclick="promptDeleteSoldier('${s.id}')" title="Видалити">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (query && totalShown === 0) {
+        return `<div class="card empty-state">За запитом «${esc(ui.personnelSearch)}» нікого не знайдено.</div>`;
+      }
+      return html;
+    }
+
+    // Модалка відділення (з вибором кольору)
+    let tempSquadColor = SQUAD_PALETTE[0];
+
     function openSquadModal(squadId = null) {
       const existing = squadId ? state.squads.find(s => s.id === squadId) : null;
+      tempSquadColor = existing?.color || SQUAD_PALETTE[state.squads.length % SQUAD_PALETTE.length];
+
       openModal(`
-        <div class="p-4 border-b border-tactical-border flex items-center justify-between">
-          <h3 class="text-base font-bold text-white">${existing ? 'Редагувати відділення' : 'Нове відділення'}</h3>
-          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        <div class="modal-header">
+          <div class="modal-title">${existing ? 'Редагувати відділення' : 'Нове відділення'}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
-        <form onsubmit="saveSquad(event, '${squadId || ''}')" class="p-4 space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1.5">Назва відділення</label>
-            <input id="squad-name-input" type="text" required value="${escapeHtml(existing?.name || '')}" placeholder="Наприклад: 4-те відділення" class="w-full px-3.5 py-3 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+        <form class="modal-body" onsubmit="saveSquad(event, '${squadId || ''}')">
+          <div class="field">
+            <label class="field-label" for="squad-name-input">Назва відділення</label>
+            <input id="squad-name-input" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Наприклад: 4-те відділення" />
           </div>
-          <button type="submit" class="w-full py-3 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-sm font-bold transition">
-            Зберегти
-          </button>
+          <div class="field">
+            <div class="field-label">Колір відділення</div>
+            <div class="color-palette" id="squad-color-palette">
+              ${SQUAD_PALETTE.map(c => `
+                <button type="button" class="color-swatch ${c === tempSquadColor ? 'selected' : ''}" style="background:${c}" onclick="pickSquadColor('${c}', this)" aria-label="Колір ${c}"></button>
+              `).join('')}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Зберегти</button>
         </form>
       `);
       setTimeout(() => document.getElementById('squad-name-input')?.focus(), 50);
+    }
+
+    function pickSquadColor(hex, btn) {
+      tempSquadColor = hex;
+      document.querySelectorAll('#squad-color-palette .color-swatch').forEach(el => el.classList.remove('selected'));
+      btn.classList.add('selected');
     }
 
     function saveSquad(e, squadId) {
@@ -1090,10 +2545,10 @@
       const name = document.getElementById('squad-name-input').value.trim();
       if (!name) return;
       if (squadId) {
-        const sq = state.squads.find(s => s.id === squadId);
-        if (sq) sq.name = name;
+        const sq = state.squads.find(x => x.id === squadId);
+        if (sq) { sq.name = name; sq.color = tempSquadColor; }
       } else {
-        state.squads.push({ id: generateId('sq'), name });
+        state.squads.push({ id: genId('sq'), name, color: tempSquadColor });
       }
       state.isDemo = false;
       saveState();
@@ -1104,20 +2559,23 @@
 
     function promptDeleteSquad(squadId) {
       const sq = getSquadById(squadId);
-      const count = state.soldiers.filter(s => s.squadId === squadId).length;
+      const cnt = state.soldiers.filter(s => s.squadId === squadId).length;
       showConfirm(
         `Видалити «${sq.name}»?`,
-        count > 0
-          ? `У цьому відділенні є ${count} бійців. Вони та їхні наряди також будуть видалені.`
+        cnt > 0
+          ? `У цьому відділенні є ${cnt} бійців. Вони та їхні наряди також будуть видалені.`
           : 'Відділення буде видалено зі списку.',
         'Видалити',
         () => {
-          const soldierIds = new Set(state.soldiers.filter(s => s.squadId === squadId).map(s => s.id));
+          const sIds = new Set(state.soldiers.filter(s => s.squadId === squadId).map(s => s.id));
           state.squads = state.squads.filter(s => s.id !== squadId);
           state.soldiers = state.soldiers.filter(s => s.squadId !== squadId);
-          state.duties = state.duties.filter(d => !soldierIds.has(d.soldierId));
+          state.duties = state.duties.filter(d => !sIds.has(d.soldierId));
+          state.tasks = state.tasks.filter(t => !(t.targetType === 'squad' && t.targetSquadId === squadId));
           if (ui.scheduleSquadFilter === squadId) ui.scheduleSquadFilter = 'all';
           if (ui.statsSquadFilter === squadId) ui.statsSquadFilter = 'all';
+          if (ui.personnelSquadFilter === squadId) ui.personnelSquadFilter = 'all';
+          if (ui.tasksTargetFilter === squadId) ui.tasksTargetFilter = 'all';
           saveState();
           render();
           showToast('Відділення видалено');
@@ -1125,53 +2583,74 @@
       );
     }
 
+    // Модалка бійця (з авто-великою літерою ПІБ та чекбоксом КВ)
     function openSoldierModal(soldierId = null) {
       if (state.squads.length === 0) {
-        showToast('Спочатку створіть хоча б одне відділення', 'error');
+        showToast('Спочатку створіть відділення', 'error');
         return;
       }
       const existing = soldierId ? state.soldiers.find(s => s.id === soldierId) : null;
+      const defaultSquad = existing?.squadId || (ui.personnelSquadFilter !== 'all' ? ui.personnelSquadFilter : state.squads[0].id);
+
       openModal(`
-        <div class="p-4 border-b border-tactical-border flex items-center justify-between">
-          <h3 class="text-base font-bold text-white">${existing ? 'Редагувати бійця' : 'Додати військовослужбовця'}</h3>
-          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        <div class="modal-header">
+          <div class="modal-title">${existing ? 'Редагувати бійця' : 'Додати військовослужбовця'}</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
-        <form onsubmit="saveSoldier(event, '${soldierId || ''}')" class="p-4 space-y-3.5 overflow-y-auto">
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1">ПІБ (Прізвище та ініціали)</label>
-            <input id="soldier-name" type="text" required value="${escapeHtml(existing?.name || '')}" placeholder="Наприклад: Коваленко І.В." class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+        <form class="modal-body" onsubmit="saveSoldier(event, '${soldierId || ''}')">
+          <div class="field">
+            <label class="field-label" for="s-name">ПІБ (автоматично з великої літери)</label>
+            <input id="s-name" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Наприклад: іваненко іван о." onblur="this.value = formatFullName(this.value)" />
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1">Звання / Посада (необов'язково)</label>
-            <input id="soldier-rank" type="text" value="${escapeHtml(existing?.rank || '')}" placeholder="Наприклад: солдат, стрілець" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+
+          <div class="field">
+            <label class="field-label" for="s-rank">Звання / Посада (необов'язково)</label>
+            <input id="s-rank" class="input" type="text" value="${esc(existing?.rank || '')}" placeholder="Наприклад: солдат, стрілець" />
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1">Відділення</label>
-            <select id="soldier-squad" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive">
-              ${state.squads.map(sq => `<option value="${sq.id}" ${existing?.squadId === sq.id ? 'selected' : ''}>${escapeHtml(sq.name)}</option>`).join('')}
+
+          <div class="field">
+            <label class="field-label" for="s-squad">Відділення</label>
+            <select id="s-squad" class="select">
+              ${state.squads.map(sq => `<option value="${sq.id}" ${defaultSquad === sq.id ? 'selected' : ''}>${esc(sq.name)}</option>`).join('')}
             </select>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1">Статус</label>
-            <select id="soldier-status" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive">
-              ${STATUS_OPTIONS.map(st => `<option value="${st.id}" ${(existing?.status || 'active') === st.id ? 'selected' : ''}>${st.label}</option>`).join('')}
+
+          <label class="checkbox-card" for="s-kv">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#fbbf24">★ Командир відділення</div>
+              <div class="text-xs text-muted">Відображається першим зверху та підтягується в задачах</div>
+            </div>
+            <input id="s-kv" type="checkbox" ${existing?.isCommander ? 'checked' : ''} />
+          </label>
+
+          <div class="field">
+            <label class="field-label" for="s-status">Статус</label>
+            <select id="s-status" class="select">
+              ${STATUS_LIST.map(st => `<option value="${st.id}" ${(existing?.status || 'active') === st.id ? 'selected' : ''}>${st.label}</option>`).join('')}
             </select>
           </div>
-          <button type="submit" class="w-full py-3 mt-2 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-sm font-bold transition">
-            Зберегти
-          </button>
+
+          <button type="submit" class="btn btn-primary btn-full">Зберегти</button>
         </form>
       `);
-      setTimeout(() => document.getElementById('soldier-name')?.focus(), 50);
+      setTimeout(() => document.getElementById('s-name')?.focus(), 50);
     }
 
     function saveSoldier(e, soldierId) {
       e.preventDefault();
-      const name = document.getElementById('soldier-name').value.trim();
-      const rank = document.getElementById('soldier-rank').value.trim();
-      const squadId = document.getElementById('soldier-squad').value;
-      const status = document.getElementById('soldier-status').value;
+      const name = formatFullName(document.getElementById('s-name').value);
+      const rank = document.getElementById('s-rank').value.trim();
+      const squadId = document.getElementById('s-squad').value;
+      const isCommander = document.getElementById('s-kv').checked;
+      const status = document.getElementById('s-status').value;
       if (!name) return;
+
+      // Якщо призначаємо нового КВ у цьому відділенні — знімаємо позначку з попереднього КВ цього відділення
+      if (isCommander) {
+        state.soldiers.forEach(s => {
+          if (s.squadId === squadId && s.id !== soldierId) s.isCommander = false;
+        });
+      }
 
       if (soldierId) {
         const s = state.soldiers.find(x => x.id === soldierId);
@@ -1179,16 +2658,17 @@
           s.name = name;
           s.rank = rank;
           s.squadId = squadId;
+          s.isCommander = isCommander;
           s.status = status;
         }
       } else {
-        state.soldiers.push({ id: generateId('s'), name, rank, squadId, status });
+        state.soldiers.push({ id: genId('s'), name, rank, squadId, isCommander, status });
       }
       state.isDemo = false;
       saveState();
       closeModal();
       render();
-      showToast(soldierId ? 'Дані оновлено' : 'Бійця додано');
+      showToast(soldierId ? 'Дані бійця оновлено' : 'Бійця додано');
     }
 
     function promptDeleteSoldier(soldierId) {
@@ -1209,86 +2689,98 @@
     }
 
     // =========================================================================
-    // ВКЛАДКА 4: НАЛАШТУВАННЯ (SETTINGS & LOCAL BACKUP)
+    // РОЗДІЛ 4: НАЛАШТУВАННЯ (ВИДИ НАРЯДІВ, КОЛЬОРИ, БЕКАП, CSV, СКИДАННЯ)
     // =========================================================================
     function renderSettingsTab() {
       return `
         <!-- Види нарядів -->
-        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-white">Види нарядів</h2>
-            <button onclick="openAddDutyTypeModal()" class="px-3 py-1.5 rounded-lg bg-tactical-olive hover:bg-tactical-oliveHover text-white text-xs font-bold transition">
-              + Додати
-            </button>
+        <div class="card stack">
+          <div class="row-between">
+            <span class="section-title">Види нарядів</span>
+            <button class="btn btn-sm btn-primary" onclick="openAddDutyTypeModal()">+ Додати</button>
           </div>
-          <div class="space-y-2">
-            ${state.dutyTypes.map(dt => {
-              const col = getColorObj(dt.color);
-              return `
-                <div class="flex items-center justify-between p-2.5 rounded-xl bg-tactical-bg border border-tactical-border">
-                  <div class="flex items-center gap-2.5">
-                    <span class="w-3 h-3 rounded-full ${col.dot}"></span>
-                    <span class="text-sm font-medium text-white">${escapeHtml(dt.name)}</span>
+          <div class="stack">
+            ${state.dutyTypes.map(dt => `
+              <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">
+                <span class="text-sm" style="font-weight:600;color:#fff">${esc(dt.name)}</span>
+                ${state.dutyTypes.length > 1
+                  ? `<button class="btn btn-sm btn-danger" onclick="deleteDutyType('${dt.id}')">Видалити</button>`
+                  : `<span class="text-xs text-muted">Останній</span>`
+                }
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Кольори відділень -->
+        <div class="card stack">
+          <span class="section-title">Кольори відділень</span>
+          ${state.squads.length === 0
+            ? `<div class="text-sm text-muted">Відділень ще немає.</div>`
+            : `<div class="stack">
+                ${state.squads.map(sq => `
+                  <div style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;flex-direction:column;gap:8px">
+                    <div class="row-gap">
+                      <span class="pill-dot" style="background:${sq.color}"></span>
+                      <span class="text-sm" style="font-weight:700;color:#fff">${esc(sq.name)}</span>
+                    </div>
+                    <div class="color-palette">
+                      ${SQUAD_PALETTE.map(c => `
+                        <button class="color-swatch ${sq.color === c ? 'selected' : ''}" style="background:${c};width:26px;height:26px" onclick="setSquadColorDirect('${sq.id}','${c}')" aria-label="Колір"></button>
+                      `).join('')}
+                    </div>
                   </div>
-                  ${state.dutyTypes.length > 1
-                    ? `<button onclick="deleteDutyType('${dt.id}')" class="px-2 py-1 rounded-lg text-xs text-red-400 hover:bg-red-500/15 transition">Видалити</button>`
-                    : `<span class="text-[11px] text-tactical-muted">Останній</span>`
-                  }
-                </div>
-              `;
-            }).join('')}
-          </div>
+                `).join('')}
+              </div>`
+          }
         </div>
 
-        <!-- Експорт та Резервне копіювання -->
-        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-4 space-y-3">
-          <h2 class="text-sm font-bold text-white">Локальний бекап та експорт</h2>
-          <p class="text-xs text-tactical-muted leading-relaxed">
-            Усі дані зберігаються виключно на вашому пристрої. Рекомендуємо періодично зберігати резервну копію.
+        <!-- Резервне копіювання та Експорт -->
+        <div class="card stack">
+          <span class="section-title">Резервне копіювання та експорт</span>
+          <p class="text-xs text-muted" style="line-height:1.5">
+            Усі дані зберігаються локально лише на вашому телефоні. Зберігайте JSON-бекап для переносу на інший пристрій.
           </p>
-          <div class="space-y-2.5 pt-1">
-            <button onclick="exportCSV()" class="w-full py-3 px-4 rounded-xl bg-tactical-olive/20 hover:bg-tactical-olive/30 border border-tactical-olive/50 text-emerald-300 text-sm font-semibold flex items-center justify-center gap-2 transition">
-              <span>Експорт обліку за ${MONTHS_UK[ui.month]} (CSV для Excel)</span>
-            </button>
-            <button onclick="exportJSON()" class="w-full py-3 px-4 rounded-xl bg-tactical-bg hover:bg-tactical-cardHover border border-tactical-border text-white text-sm font-semibold transition">
-              Експорт резервної копії (JSON)
-            </button>
-            <button onclick="document.getElementById('import-json-input').click()" class="w-full py-3 px-4 rounded-xl bg-tactical-bg hover:bg-tactical-cardHover border border-tactical-border text-white text-sm font-semibold transition">
-              Імпорт з файлу (JSON)
-            </button>
-          </div>
+          <button class="btn btn-primary btn-full" onclick="exportCSV()">
+            Експорт обліку за ${MONTHS_UK[ui.month]} (CSV для Excel)
+          </button>
+          <button class="btn btn-secondary btn-full" onclick="exportJSON()">
+            Експорт усіх даних (JSON-бекап)
+          </button>
+          <button class="btn btn-secondary btn-full" onclick="document.getElementById('import-json-input').click()">
+            Імпорт з файлу (JSON)
+          </button>
         </div>
 
-        <!-- Небезпечна зона -->
-        <div class="bg-tactical-card border border-red-500/30 rounded-2xl p-4 space-y-3">
-          <h2 class="text-sm font-bold text-red-400">Скидання даних</h2>
-          <button onclick="promptResetAll()" class="w-full py-3 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm font-bold transition">
-            Очистити всі дані
-          </button>
+        <!-- Скидання -->
+        <div class="card stack" style="border-color:rgba(239,68,68,0.35)">
+          <span class="section-title" style="color:#f87171">Очищення даних</span>
+          <button class="btn btn-danger btn-full" onclick="promptResetAll()">Очистити всі дані</button>
         </div>
       `;
     }
 
+    function setSquadColorDirect(squadId, color) {
+      const sq = state.squads.find(x => x.id === squadId);
+      if (!sq) return;
+      sq.color = color;
+      saveState();
+      render();
+      showToast('Колір відділення оновлено');
+    }
+
     function openAddDutyTypeModal() {
       openModal(`
-        <div class="p-4 border-b border-tactical-border flex items-center justify-between">
-          <h3 class="text-base font-bold text-white">Новий вид наряду</h3>
-          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        <div class="modal-header">
+          <div class="modal-title">Новий вид наряду</div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
-        <form onsubmit="saveDutyType(event)" class="p-4 space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1.5">Назва</label>
-            <input id="dt-name" type="text" required placeholder="Наприклад: Черговий по роті" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+        <form class="modal-body" onsubmit="saveDutyType(event)">
+          <div class="field">
+            <label class="field-label" for="dt-name">Назва виду наряду</label>
+            <input id="dt-name" class="input" type="text" required placeholder="Наприклад: Черговий по КПП" />
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-tactical-muted mb-1.5">Колір мітки</label>
-            <select id="dt-color" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive">
-              ${DUTY_COLORS.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
-            </select>
-          </div>
-          <button type="submit" class="w-full py-3 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-sm font-bold transition">
-            Додати
-          </button>
+          <button type="submit" class="btn btn-primary btn-full">Додати</button>
         </form>
       `);
       setTimeout(() => document.getElementById('dt-name')?.focus(), 50);
@@ -1297,25 +2789,24 @@
     function saveDutyType(e) {
       e.preventDefault();
       const name = document.getElementById('dt-name').value.trim();
-      const color = document.getElementById('dt-color').value;
       if (!name) return;
-      state.dutyTypes.push({ id: generateId('dt'), name, color });
+      state.dutyTypes.push({ id: genId('dt'), name });
       saveState();
       closeModal();
       render();
       showToast('Вид наряду додано');
     }
 
-    function deleteDutyType(dtId) {
+    function deleteDutyType(id) {
       if (state.dutyTypes.length <= 1) return;
-      state.dutyTypes = state.dutyTypes.filter(dt => dt.id !== dtId);
+      state.dutyTypes = state.dutyTypes.filter(d => d.id !== id);
       saveState();
       render();
       showToast('Вид наряду видалено');
     }
 
-    function downloadFile(content, filename, mimeType) {
-      const blob = new Blob([content], { type: mimeType });
+    function downloadFile(content, filename, mime) {
+      const blob = new Blob([content], { type: mime });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -1327,9 +2818,9 @@
     }
 
     function exportJSON() {
-      const dateStr = formatDateISO(new Date());
-      downloadFile(JSON.stringify(state, null, 2), `oblik_naryadiv_backup_${dateStr}.json`, 'application/json');
-      showToast('Резервну копію збережено');
+      const d = toISODate(new Date());
+      downloadFile(JSON.stringify(state, null, 2), `pomichnyk_vzvodu_backup_${d}.json`, 'application/json');
+      showToast('Резервну копію JSON збережено');
     }
 
     function handleImportJSON(event) {
@@ -1340,18 +2831,21 @@
         try {
           const parsed = JSON.parse(e.target.result);
           if (!Array.isArray(parsed.squads) || !Array.isArray(parsed.soldiers) || !Array.isArray(parsed.duties)) {
-            throw new Error('Невірний формат файлу');
+            throw new Error('bad format');
           }
           state = {
             isDemo: false,
             squads: parsed.squads,
             soldiers: parsed.soldiers,
-            dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length ? parsed.dutyTypes : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
-            duties: parsed.duties
+            dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
+              ? parsed.dutyTypes
+              : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+            duties: parsed.duties,
+            tasks: Array.isArray(parsed.tasks) ? parsed.tasks : []
           };
           saveState();
           render();
-          showToast('Дані успішно відновлено');
+          showToast('Дані успішно імпортовано');
         } catch (err) {
           showToast('Помилка: некоректний JSON-файл', 'error');
         } finally {
@@ -1362,31 +2856,38 @@
     }
 
     function exportCSV() {
-      const year = ui.year;
-      const month = ui.month;
-      const header = ['Відділення', 'ПІБ', 'Звання/Посада', 'Статус', `За ${MONTHS_UK[month]} ${year}`, 'Всього за весь час'];
+      const y = ui.year;
+      const m = ui.month;
+      const header = ['Відділення', 'ПІБ', 'Посада/Звання', 'КВ', 'Статус', `За ${MONTHS_UK[m]} ${y}`, 'Всього', 'Останній наряд'];
       const rows = [header];
 
       for (const sq of state.squads) {
-        const members = state.soldiers.filter(s => s.squadId === sq.id);
+        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
         for (const s of members) {
-          const counts = getSoldierCounts(s.id, year, month);
-          const st = getStatusObj(s.status);
-          rows.push([sq.name, s.name, s.rank || '', st.label, counts.monthCount, counts.totalCount]);
+          const st = getSoldierStats(s.id, y, m);
+          const statusLabel = getStatusObj(s.status).label;
+          rows.push([
+            sq.name,
+            s.name,
+            s.rank || '',
+            s.isCommander ? 'Так' : '',
+            statusLabel,
+            st.monthCount,
+            st.totalCount,
+            formatDateShort(st.lastDate)
+          ]);
         }
       }
 
-      const csvBody = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
-      // UTF-8 BOM для коректного відкриття кирилиці в Excel
-      const bom = '\uFEFF';
-      downloadFile(bom + csvBody, `oblik_${year}_${String(month + 1).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8;');
-      showToast('CSV-файл сформовано');
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+      downloadFile('\uFEFF' + csv, `oblik_naryadiv_${y}_${String(m + 1).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8;');
+      showToast('CSV-таблицю збережено');
     }
 
     function promptResetAll() {
       showConfirm(
         'Очистити всі дані?',
-        'Усі відділення, бійці та історія нарядів будуть безповоротно видалені з цього пристрою.',
+        'Усі відділення, особовий склад, наряди та задачі будуть безповоротно видалені з цього пристрою.',
         'Очистити все',
         () => {
           state = {
@@ -1394,7 +2895,8 @@
             squads: [],
             soldiers: [],
             dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
-            duties: []
+            duties: [],
+            tasks: []
           };
           saveState();
           render();
@@ -1408,30 +2910,29 @@
     // =========================================================================
     function render() {
       // Демо-банер
-      const demoBanner = document.getElementById('demo-banner');
-      if (state.isDemo) {
-        demoBanner.classList.remove('hidden');
-      } else {
-        demoBanner.classList.add('hidden');
-      }
+      document.getElementById('demo-banner').classList.toggle('hidden', !state.isDemo);
 
       // Активна кнопка нижньої навігації
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('text-tactical-emerald');
-        btn.classList.add('text-tactical-muted');
-      });
-      const activeBtn = document.getElementById(`nav-${ui.activeTab}`);
-      if (activeBtn) {
-        activeBtn.classList.remove('text-tactical-muted');
-        activeBtn.classList.add('text-tactical-emerald');
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-${ui.activeTab}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      // Лічильник активних задач на іконці навігації
+      const activeTasksCnt = state.tasks.filter(t => t.status !== 'done').length;
+      const badge = document.getElementById('nav-tasks-badge');
+      if (activeTasksCnt > 0) {
+        badge.textContent = activeTasksCnt > 99 ? '99+' : activeTasksCnt;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
       }
 
       // Контент вкладки
       const main = document.getElementById('main-content');
-      if (ui.activeTab === 'schedule') {
-        main.innerHTML = renderScheduleTab();
-      } else if (ui.activeTab === 'stats') {
-        main.innerHTML = renderStatsTab();
+      if (ui.activeTab === 'duties') {
+        main.innerHTML = renderDutiesTab();
+      } else if (ui.activeTab === 'tasks') {
+        main.innerHTML = renderTasksTab();
       } else if (ui.activeTab === 'personnel') {
         main.innerHTML = renderPersonnelTab();
       } else if (ui.activeTab === 'settings') {
@@ -1439,7 +2940,7 @@
       }
     }
 
-    // Ініціалізація при завантаженні
+    // Запуск застосунку
     loadState();
     render();
   </script>
