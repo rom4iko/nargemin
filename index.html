@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.16-dark-task-title</title>
+  <title>Помічник взводу v3.17-yibashka</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -895,6 +895,57 @@
     }
 
 
+    /* =========================================================================
+       РОЗДІЛ «ЇБАШКА» — ОБЛІК НЕОРДИНАРНИХ РОБІТ ПО ВІДДІЛЕННЯХ (v3.17)
+       ========================================================================= */
+    .yib-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--amber);
+      border-radius: var(--radius);
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .yib-person-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #bae6fd;
+    }
+    [data-theme="light"] .yib-person-chip {
+      color: #0369a1;
+      background: rgba(2, 132, 199, 0.12);
+    }
+    .yib-stat-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .yib-stat-row:last-child { border-bottom: none; }
+    .yib-work-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -1081,7 +1132,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.16-dark-task-title';
+    var APP_VERSION = 'v3.17-yibashka';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -1286,6 +1337,7 @@
         personnel: [],
         duties: {},
         tasks: [],
+        yibashka: [],
         rozkhid: {},
         scheduledAbsences: [],
         pins: Object.assign({}, DEFAULT_PINS),
@@ -1338,6 +1390,9 @@
       var rawTasks = Array.isArray(raw.tasks) ? raw.tasks
         : (raw.tasks && typeof raw.tasks === 'object' ? Object.values(raw.tasks).filter(Boolean) : []);
 
+      var rawYib = Array.isArray(raw.yibashka) ? raw.yibashka
+        : (raw.yibashka && typeof raw.yibashka === 'object' ? Object.values(raw.yibashka).filter(Boolean) : []);
+
       var rawSched = Array.isArray(raw.scheduledAbsences) ? raw.scheduledAbsences
         : (raw.scheduledAbsences && typeof raw.scheduledAbsences === 'object' ? Object.values(raw.scheduledAbsences).filter(Boolean) : []);
 
@@ -1365,6 +1420,7 @@
         personnel: rawPersonnel,
         duties: normalizedDuties,
         tasks: rawTasks,
+        yibashka: rawYib,
         rozkhid: raw.rozkhid && typeof raw.rozkhid === 'object' && !Array.isArray(raw.rozkhid) ? raw.rozkhid : {},
         scheduledAbsences: rawSched,
         pins: Object.assign({}, DEFAULT_PINS, raw.pins && typeof raw.pins === 'object' ? raw.pins : {}),
@@ -1437,6 +1493,25 @@
         };
       });
 
+      // Нормалізація записів розділу «Їбашка»
+      s.yibashka = s.yibashka.filter(function(w) {
+        return w && String(w.workName || w.title || '').trim().length > 0;
+      }).map(function(w) {
+        var sqId = mapLegacySquadId(w.squadId || 'sq1');
+        var ids = Array.isArray(w.soldierIds) ? w.soldierIds.map(String).filter(Boolean)
+          : (w.soldierIds && typeof w.soldierIds === 'object' ? Object.values(w.soldierIds).map(String).filter(Boolean) : []);
+        return {
+          id: String(w.id || genId('yib')),
+          squadId: sqId,
+          date: String(w.date || todayISO()),
+          workName: String(w.workName || w.title || '').trim(),
+          soldierIds: ids,
+          note: String(w.note || ''),
+          createdBy: String(w.createdBy || ''),
+          createdAt: String(w.createdAt || fmtTimeNow())
+        };
+      });
+
       // Нормалізація запланованих відсутностей (підтримка startDate/endDate/category)
       s.scheduledAbsences = s.scheduledAbsences.filter(function(sa) {
         return sa && sa.soldierId && (sa.fromDate || sa.startDate);
@@ -1503,6 +1578,12 @@
       tasksFilterStatus: 'all',
       tasksExpanded: {},
       tasksExpandedRemarks: {},
+      yibSubtab: 'journal',
+      yibSquadFilter: 'all',
+      yibStatSquadFilter: 'all',
+      yibStatMonth: '',
+      yibModalSoldierIds: [],
+      yibModalSearch: '',
       personnelSearch: '',
       personnelSquadFilter: 'all',
       expandedSoldiers: {},
@@ -3032,6 +3113,412 @@
     }
 
     // =========================================================================
+    // 9.5. ВКЛАДКА «ЇБАШКА» — ПІДКАБІНЕТИ КВ ДЛЯ НЕОРДИНАРНИХ РОБІТ ТА ОБЛІК
+    // =========================================================================
+    function getEditableYibSquadIds() {
+      if (currentRole === 'admin' || currentRole === 'kg') {
+        return getOrderedSquads().map(function(sq) { return sq.id; });
+      }
+      var mySq = getMySquadId();
+      return mySq ? [mySq] : [];
+    }
+
+    function canManageYibRecord(rec) {
+      if (!rec) return false;
+      if (currentRole === 'admin' || currentRole === 'kg') return true;
+      var mySq = getMySquadId();
+      return Boolean(mySq && rec.squadId === mySq);
+    }
+
+    function renderYibashkaTab() {
+      var mySq = getMySquadId();
+      var canSeeAllSquads = currentRole === 'admin' || currentRole === 'kg';
+      var editableSquads = getEditableYibSquadIds();
+
+      // Для КВ автоматично фіксуємо його відділення (підкабінет КВ), для Адміна/КГ — перемикач усіх відділень
+      var activeSquadFilter = canSeeAllSquads ? (ui.yibSquadFilter || 'all') : (mySq || 'sq1');
+
+      var subTabs =
+        '<div class="seg-control">' +
+          '<button type="button" class="seg-btn ' + (ui.yibSubtab === 'journal' ? 'active' : '') + '" onclick="ui.yibSubtab=\'journal\';render()">' + ico('edit', 14) + ' Журнал робіт</button>' +
+          '<button type="button" class="seg-btn ' + (ui.yibSubtab === 'stats' ? 'active' : '') + '" onclick="ui.yibSubtab=\'stats\';render()">' + ico('chart', 14) + ' Облік по людях</button>' +
+        '</div>';
+
+      // Перемикач підкабінетів відділень (для Адміна/КГ — усі кабінети КВ, для КВ — плашка його кабінету)
+      var cabinetHeader = '';
+      if (canSeeAllSquads) {
+        var sqPills = '<button type="button" class="pill ' + (activeSquadFilter === 'all' ? 'active' : '') + '" onclick="ui.yibSquadFilter=\'all\';render()">Усі відділення</button>' +
+          getOrderedSquads().map(function(sq) {
+            return '<button type="button" class="pill ' + (activeSquadFilter === sq.id ? 'active' : '') + '" onclick="ui.yibSquadFilter=\'' + sq.id + '\';render()">' +
+              '<span class="dot" style="background:' + esc(sq.color) + '"></span>' + esc(sq.name) + '</button>';
+          }).join('');
+        cabinetHeader = '<div class="pills-scroll">' + sqPills + '</div>';
+      } else {
+        var sqObj = getSquadById(mySq);
+        cabinetHeader = '<div class="info-banner">Підкабінет: <b>' + esc(sqObj ? sqObj.name : 'Ваше відділення') + '</b> — тут ви фіксуєте, хто та на яку роботу визначений.</div>';
+      }
+
+      if (ui.yibSubtab === 'stats') {
+        return subTabs + cabinetHeader + renderYibashkaStats(activeSquadFilter);
+      }
+
+      // Кнопка додавання запису на роботу
+      var addBtn = editableSquads.length
+        ? '<button type="button" class="btn btn-primary btn-full" onclick="openYibModal(null)">+ Призначити людей на роботу</button>'
+        : '';
+
+      var filteredRecords = state.yibashka
+        .filter(function(rec) {
+          if (activeSquadFilter !== 'all' && rec.squadId !== activeSquadFilter) return false;
+          return true;
+        })
+        .sort(function(a, b) {
+          if (a.date !== b.date) return b.date.localeCompare(a.date);
+          return String(b.id).localeCompare(String(a.id));
+        });
+
+      var copyBtn = filteredRecords.length
+        ? '<button type="button" class="btn btn-sm btn-info btn-full" onclick="copyYibashkaReport()">' + ico('copy', 14) + ' Скопіювати список робіт</button>'
+        : '';
+
+      var cardsHtml = filteredRecords.length ? filteredRecords.map(function(rec) {
+        var sq = getSquadById(rec.squadId);
+        var soldiers = (rec.soldierIds || []).map(getSoldierById).filter(Boolean);
+        var canEdit = canManageYibRecord(rec);
+
+        var peopleChips = soldiers.length
+          ? soldiers.map(function(s) {
+              return '<span class="yib-person-chip">' + esc(s.name) + '</span>';
+            }).join('')
+          : '<span class="text-xs text-muted">Людей не вказано</span>';
+
+        return '<div class="yib-card" style="border-left-color:' + esc(sq ? sq.color : 'var(--amber)') + '">' +
+          '<div class="row-between wrap">' +
+            '<div class="row wrap" style="gap:6px">' +
+              '<span class="badge badge-warn">' + fmtUA(rec.date) + '</span>' +
+              '<span class="badge badge-info">' + esc(sq ? sq.name : rec.squadId) + '</span>' +
+              '<span class="badge badge-ok">' + soldiers.length + ' ос.</span>' +
+            '</div>' +
+            (canEdit ? (
+              '<div class="row" style="gap:5px">' +
+                '<button type="button" class="btn-icon btn-icon-sm" onclick="openYibModal(\'' + rec.id + '\')" title="Редагувати">' + ico('edit', 13) + '</button>' +
+                '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteYibRecord(\'' + rec.id + '\')" title="Видалити">✕</button>' +
+              '</div>'
+            ) : '') +
+          '</div>' +
+          '<div class="fw-800" style="font-size:15px">' + esc(rec.workName) + '</div>' +
+          '<div class="row wrap" style="gap:5px">' + peopleChips + '</div>' +
+          (rec.note ? '<div class="text-xs text-muted">Примітка: ' + esc(rec.note) + '</div>' : '') +
+          '<div class="row-between text-xs text-muted">' +
+            '<span>' + (rec.createdBy ? ('Вніс: ' + esc(rec.createdBy)) : '') + '</span>' +
+            '<span>' + esc(rec.createdAt) + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('') : '<div class="card empty-state">Записів робіт у цьому кабінеті ще немає. Натисніть «+ Призначити людей на роботу».</div>';
+
+      return subTabs + cabinetHeader + addBtn + copyBtn + cardsHtml;
+    }
+
+    function renderYibashkaStats(activeSquadFilter) {
+      // Фільтр по місяцю (опціонально)
+      var monthFilter = ui.yibStatMonth || '';
+      var monthBar =
+        '<div class="card row-between">' +
+          '<div class="text-xs fw-bold text-muted">Період обліку:</div>' +
+          '<div class="row" style="gap:6px">' +
+            '<button type="button" class="btn btn-xs ' + (!monthFilter ? 'btn-primary' : 'btn-secondary') + '" onclick="ui.yibStatMonth=\'\';render()">За весь час</button>' +
+            '<button type="button" class="btn btn-xs ' + (monthFilter === todayISO().slice(0, 7) ? 'btn-primary' : 'btn-secondary') + '" onclick="ui.yibStatMonth=todayISO().slice(0,7);render()">Поточний місяць</button>' +
+          '</div>' +
+        '</div>';
+
+      // Збираємо статистику по кожному бійцю: скільки всього виходів і на які саме роботи
+      var countMap = {};
+      var worksBySoldier = {};
+      var workTypesSummary = {};
+
+      state.yibashka.forEach(function(rec) {
+        if (monthFilter && String(rec.date || '').indexOf(monthFilter) !== 0) return;
+        if (activeSquadFilter !== 'all' && rec.squadId !== activeSquadFilter) return;
+
+        var wName = String(rec.workName || 'Робота').trim();
+        workTypesSummary[wName] = (workTypesSummary[wName] || 0) + (rec.soldierIds ? rec.soldierIds.length : 0);
+
+        (rec.soldierIds || []).forEach(function(sid) {
+          countMap[sid] = (countMap[sid] || 0) + 1;
+          if (!worksBySoldier[sid]) worksBySoldier[sid] = {};
+          worksBySoldier[sid][wName] = (worksBySoldier[sid][wName] || 0) + 1;
+        });
+      });
+
+      var copyStatBtn = '<button type="button" class="btn btn-sm btn-info btn-full" onclick="copyYibashkaStats()">' + ico('copy', 14) + ' Скопіювати облік «Їбашки»</button>';
+
+      if (!state.personnel.length) {
+        return monthBar + '<div class="card empty-state">Особовий склад ще порожній. Додайте бійців у розділі «Склад».</div>';
+      }
+
+      var squadsToShow = getOrderedSquads().filter(function(sq) {
+        return activeSquadFilter === 'all' || sq.id === activeSquadFilter;
+      });
+
+      var groupsHtml = squadsToShow.map(function(sq) {
+        var list = getSoldiersBySquad(sq.id).slice().sort(function(a, b) {
+          var ca = countMap[a.id] || 0;
+          var cb = countMap[b.id] || 0;
+          if (cb !== ca) return cb - ca;
+          return a.name.localeCompare(b.name, 'uk');
+        });
+        if (!list.length) return '';
+
+        var rows = list.map(function(s) {
+          var totalRuns = countMap[s.id] || 0;
+          var wMap = worksBySoldier[s.id] || {};
+          var wKeys = Object.keys(wMap);
+          var tagsHtml = wKeys.length
+            ? '<div class="row wrap" style="gap:4px">' + wKeys.map(function(wk) {
+                return '<span class="yib-work-tag">' + esc(wk) + ' ×' + wMap[wk] + '</span>';
+              }).join('') + '</div>'
+            : '<div class="text-xs text-muted">Ще не залучався</div>';
+
+          return '<div class="yib-stat-row">' +
+            '<div class="row-between">' +
+              '<div class="min0 row" style="gap:6px">' +
+                getCommanderBadgeHtml(s, sq) +
+                '<span class="fw-bold text-sm">' + esc(s.name) + '</span>' +
+              '</div>' +
+              '<span class="badge ' + (totalRuns > 0 ? 'badge-warn' : 'badge-ok') + '">Всього: ' + totalRuns + '</span>' +
+            '</div>' +
+            tagsHtml +
+          '</div>';
+        }).join('');
+
+        return '<div class="card-flush">' +
+          '<div class="acc-header" style="cursor:default">' +
+            '<div class="row"><span class="dot" style="background:' + esc(sq.color) + '"></span><span class="fw-800">' + esc(sq.name) + '</span></div>' +
+            '<span class="text-xs text-muted">' + list.length + ' ос.</span>' +
+          '</div>' +
+          '<div class="acc-body">' + rows + '</div>' +
+        '</div>';
+      }).join('');
+
+      return monthBar + copyStatBtn + groupsHtml;
+    }
+
+    function openYibModal(existingId) {
+      var editableSquads = getEditableYibSquadIds();
+      if (!editableSquads.length) return;
+      var rec = existingId ? state.yibashka.find(function(x) { return x.id === existingId; }) : null;
+      if (rec && !canManageYibRecord(rec)) return;
+
+      var defaultSq = rec ? rec.squadId
+        : (ui.yibSquadFilter && ui.yibSquadFilter !== 'all' && editableSquads.indexOf(ui.yibSquadFilter) !== -1
+          ? ui.yibSquadFilter
+          : editableSquads[0]);
+
+      ui.yibModalSoldierIds = rec ? (rec.soldierIds || []).slice() : [];
+      ui.yibModalSearch = '';
+      renderYibModal(existingId || '', defaultSq, rec ? rec.date : todayISO(), rec ? rec.workName : '', rec ? rec.note : '');
+    }
+
+    function renderYibModal(existingId, squadId, dateVal, workNameVal, noteVal) {
+      var editableSquads = getEditableYibSquadIds();
+      var sqSelectHtml = '';
+      if (editableSquads.length > 1) {
+        var opts = editableSquads.map(function(sid) {
+          var sq = getSquadById(sid);
+          return '<option value="' + sid + '" ' + (sid === squadId ? 'selected' : '') + '>' + esc(sq ? sq.name : sid) + '</option>';
+        }).join('');
+        sqSelectHtml = '<div class="field"><label class="field-label">Відділення (підкабінет)</label>' +
+          '<select id="yib-sq" class="select" onchange="onYibModalSquadChange(\'' + existingId + '\')">' + opts + '</select></div>';
+      } else {
+        var singleSq = getSquadById(squadId);
+        sqSelectHtml = '<input id="yib-sq" type="hidden" value="' + esc(squadId) + '" />' +
+          '<div class="text-xs text-muted">Підкабінет: <b style="color:var(--text)">' + esc(singleSq ? singleSq.name : squadId) + '</b></div>';
+      }
+
+      // Підказки з раніше введених назв робіт для швидкого вибору
+      var pastWorksSet = {};
+      state.yibashka.forEach(function(item) {
+        if (item.workName) pastWorksSet[item.workName] = true;
+      });
+      var pastWorks = Object.keys(pastWorksSet).slice(0, 8);
+      var quickTagsHtml = pastWorks.length
+        ? '<div class="pills-scroll">' + pastWorks.map(function(pw) {
+            return '<button type="button" class="pill" onclick="document.getElementById(\'yib-work\').value=' + JSON.stringify(pw) + '">' + esc(pw) + '</button>';
+          }).join('') + '</div>'
+        : '';
+
+      var soldiers = getSoldiersBySquad(squadId, ui.yibModalSearch);
+      var prevBody = document.querySelector('#modal-box .modal-body');
+      var prevScroll = prevBody ? prevBody.scrollTop : 0;
+
+      var soldiersHtml = soldiers.length ? soldiers.map(function(s) {
+        var checked = ui.yibModalSoldierIds.indexOf(s.id) !== -1;
+        return '<label class="checkbox-row">' +
+          '<div class="min0">' +
+            '<div class="row" style="gap:6px">' + getCommanderBadgeHtml(s, getSquadById(squadId)) + '<span class="fw-bold text-sm">' + esc(s.rank) + ' ' + esc(s.name) + '</span></div>' +
+          '</div>' +
+          '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="toggleYibModalSoldier(\'' + existingId + '\',\'' + s.id + '\')" />' +
+        '</label>';
+      }).join('') : '<div class="empty-state" style="padding:12px">У цьому відділенні немає бійців</div>';
+
+      openModal(
+        '<div class="modal-header">' +
+          '<div><div class="modal-title">' + (existingId ? 'Редагувати роботу' : 'Призначити на роботу') + '</div>' +
+          '<div class="text-xs text-muted">Визначено людей: ' + ui.yibModalSoldierIds.length + '</div></div>' +
+          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          sqSelectHtml +
+          '<div class="grid-2">' +
+            '<div class="field"><label class="field-label">Дата</label><input id="yib-date" class="input" type="date" value="' + esc(dateVal || todayISO()) + '" /></div>' +
+            '<div class="field"><label class="field-label">Назва / тип роботи</label><input id="yib-work" class="input" type="text" value="' + esc(workNameVal || '') + '" placeholder="Напр. Розвантаження, прибирання..." /></div>' +
+          '</div>' +
+          quickTagsHtml +
+          '<div class="field"><label class="field-label">Примітка (необов\'язково)</label><input id="yib-note" class="input" type="text" value="' + esc(noteVal || '') + '" placeholder="Час, місце, старший..." /></div>' +
+          '<div class="field"><label class="field-label">Хто визначений (' + ui.yibModalSoldierIds.length + ' ос.)</label>' +
+            '<input class="input" type="search" placeholder="Пошук бійця..." value="' + esc(ui.yibModalSearch) + '" oninput="onYibModalSearchInput(\'' + existingId + '\',this.value)" />' +
+          '</div>' +
+          '<div class="card-flush">' + soldiersHtml + '</div>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="saveYibModal(\'' + existingId + '\')">Зберегти (' + ui.yibModalSoldierIds.length + ' ос.)</button>' +
+        '</div>'
+      );
+
+      var newBody = document.querySelector('#modal-box .modal-body');
+      if (newBody && prevScroll > 0) newBody.scrollTop = prevScroll;
+    }
+
+    function onYibModalSquadChange(existingId) {
+      var sq = document.getElementById('yib-sq').value;
+      var d = document.getElementById('yib-date').value;
+      var w = document.getElementById('yib-work').value;
+      var n = document.getElementById('yib-note').value;
+      ui.yibModalSoldierIds = [];
+      renderYibModal(existingId, sq, d, w, n);
+    }
+
+    function onYibModalSearchInput(existingId, val) {
+      ui.yibModalSearch = val;
+      var sq = document.getElementById('yib-sq').value;
+      var d = document.getElementById('yib-date').value;
+      var w = document.getElementById('yib-work').value;
+      var n = document.getElementById('yib-note').value;
+      renderYibModal(existingId, sq, d, w, n);
+    }
+
+    function toggleYibModalSoldier(existingId, sid) {
+      var idx = ui.yibModalSoldierIds.indexOf(sid);
+      if (idx !== -1) ui.yibModalSoldierIds.splice(idx, 1);
+      else ui.yibModalSoldierIds.push(sid);
+      var sq = document.getElementById('yib-sq').value;
+      var d = document.getElementById('yib-date').value;
+      var w = document.getElementById('yib-work').value;
+      var n = document.getElementById('yib-note').value;
+      renderYibModal(existingId, sq, d, w, n);
+    }
+
+    function saveYibModal(existingId) {
+      var squadId = document.getElementById('yib-sq').value;
+      var dateVal = document.getElementById('yib-date').value || todayISO();
+      var workName = (document.getElementById('yib-work').value || '').trim();
+      var noteVal = (document.getElementById('yib-note').value || '').trim();
+
+      if (!workName) { showToast('Вкажіть назву роботи', true); return; }
+      if (!ui.yibModalSoldierIds.length) { showToast('Оберіть хоча б одного військовослужбовця', true); return; }
+
+      var actor = (ROLES_META[currentRole] && ROLES_META[currentRole].short) || currentRole || '';
+
+      if (existingId) {
+        var rec = state.yibashka.find(function(x) { return x.id === existingId; });
+        if (rec && canManageYibRecord(rec)) {
+          rec.squadId = squadId;
+          rec.date = dateVal;
+          rec.workName = workName;
+          rec.soldierIds = ui.yibModalSoldierIds.slice();
+          rec.note = noteVal;
+        }
+      } else {
+        state.yibashka.unshift({
+          id: genId('yib'),
+          squadId: squadId,
+          date: dateVal,
+          workName: workName,
+          soldierIds: ui.yibModalSoldierIds.slice(),
+          note: noteVal,
+          createdBy: actor,
+          createdAt: fmtTimeNow()
+        });
+      }
+
+      saveState(true);
+      closeModal();
+      showToast(existingId ? 'Запис оновлено' : 'Людей призначено на роботу');
+      render();
+    }
+
+    function deleteYibRecord(recId) {
+      var rec = state.yibashka.find(function(x) { return x.id === recId; });
+      if (!rec || !canManageYibRecord(rec)) return;
+      state.yibashka = state.yibashka.filter(function(x) { return x.id !== recId; });
+      saveState(true);
+      showToast('Запис видалено');
+      render();
+    }
+
+    function copyYibashkaReport() {
+      var canSeeAll = currentRole === 'admin' || currentRole === 'kg';
+      var activeSq = canSeeAll ? (ui.yibSquadFilter || 'all') : (getMySquadId() || 'sq1');
+      var list = state.yibashka.filter(function(r) { return activeSq === 'all' || r.squadId === activeSq; });
+      if (!list.length) { showToast('Записів немає'); return; }
+
+      var lines = ['Їбашка — призначення на роботи (' + state.groupNumber + '):'];
+      list.slice(0, 25).forEach(function(r) {
+        var sq = getSquadById(r.squadId);
+        var names = (r.soldierIds || []).map(function(id) {
+          var s = getSoldierById(id);
+          return s ? s.name : '';
+        }).filter(Boolean).join(', ');
+        lines.push('• ' + fmtUA(r.date) + ' [' + (sq ? sq.name : r.squadId) + '] — ' + r.workName + ': ' + (names || '-'));
+      });
+      copyText(lines.join('\n'), 'Список робіт скопійовано');
+    }
+
+    function copyYibashkaStats() {
+      var canSeeAll = currentRole === 'admin' || currentRole === 'kg';
+      var activeSq = canSeeAll ? (ui.yibSquadFilter || 'all') : (getMySquadId() || 'sq1');
+      var monthFilter = ui.yibStatMonth || '';
+
+      var countMap = {};
+      var worksBySoldier = {};
+      state.yibashka.forEach(function(rec) {
+        if (monthFilter && String(rec.date || '').indexOf(monthFilter) !== 0) return;
+        if (activeSq !== 'all' && rec.squadId !== activeSq) return;
+        (rec.soldierIds || []).forEach(function(sid) {
+          countMap[sid] = (countMap[sid] || 0) + 1;
+          if (!worksBySoldier[sid]) worksBySoldier[sid] = {};
+          worksBySoldier[sid][rec.workName] = (worksBySoldier[sid][rec.workName] || 0) + 1;
+        });
+      });
+
+      var lines = ['Облік робіт «Їбашка»' + (monthFilter ? (' (' + monthFilter + ')') : '') + ':'];
+      getOrderedSquads().forEach(function(sq) {
+        if (activeSq !== 'all' && sq.id !== activeSq) return;
+        var list = getSoldiersBySquad(sq.id);
+        if (!list.length) return;
+        lines.push('\n' + sq.name + ':');
+        list.forEach(function(s) {
+          var cnt = countMap[s.id] || 0;
+          var wMap = worksBySoldier[s.id] || {};
+          var details = Object.keys(wMap).map(function(k) { return k + ' ×' + wMap[k]; }).join(', ');
+          lines.push('- ' + s.name + ': ' + cnt + (details ? (' (' + details + ')') : ''));
+        });
+      });
+      copyText(lines.join('\n'), 'Облік «Їбашки» скопійовано');
+    }
+
+
+    // =========================================================================
     // 10. ВКЛАДКА 3: РОЗХІД (11 КАТЕГОРІЙ + ПЛАНУВАННЯ + УНІКАЛЬНІСТЬ)
     // =========================================================================
     function renderRozkhidTab() {
@@ -4037,6 +4524,14 @@
             '<span class="hub-tile-sub">' + total + ' осіб у взводі</span>' +
           '</button>' +
         '</div>' +
+        '<button type="button" class="hub-row-card" onclick="openSection(\'yibashka\')">' +
+          '<span class="hub-tile-ico" style="margin-bottom:0;background:var(--amber);color:#161C18">' + ico('bolt', 19) + '</span>' +
+          '<span class="min0">' +
+            '<div class="fw-800 text-sm">Їбашка</div>' +
+            '<div class="text-xs text-muted">Підкабінети КВ: неординарні роботи та облік (' + state.yibashka.length + ')</div>' +
+          '</span>' +
+          '<span class="text-muted" style="font-size:18px">›</span>' +
+        '</button>' +
         '<button type="button" class="hub-row-card" onclick="openSection(\'settings\')">' +
           '<span class="hub-tile-ico" style="margin-bottom:0">' + ico('sliders', 19) + '</span>' +
           '<span class="min0">' +
@@ -4054,6 +4549,7 @@
         { k: 'rozkhid', label: 'Розхід' },
         { k: 'duties', label: 'Наряди' },
         { k: 'tasks', label: 'Задачі', badge: activeTasks },
+        { k: 'yibashka', label: 'Їбашка' },
         { k: 'personnel', label: 'Склад' },
         { k: 'settings', label: 'Налашт.' }
       ];
@@ -4088,6 +4584,7 @@
       var bodyHtml = '';
       if (ui.tab === 'duties') bodyHtml = renderDutiesTab();
       else if (ui.tab === 'tasks') bodyHtml = renderTasksTab();
+      else if (ui.tab === 'yibashka') bodyHtml = renderYibashkaTab();
       else if (ui.tab === 'rozkhid') bodyHtml = renderRozkhidTab();
       else if (ui.tab === 'personnel') bodyHtml = renderPersonnelTab();
       else bodyHtml = renderSettingsTab();
