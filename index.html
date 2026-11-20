@@ -1,1150 +1,4 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0d1217" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Помічник взводу</title>
-  <style>
-    /* =====================================================================
-       БАЗОВІ ЗМІННІ ТА СКИДАННЯ (100% АВТОНОМНИЙ CSS, ZERO DEPENDENCIES)
-       ===================================================================== */
-    :root {
-      --bg: #0d1217;
-      --card: #151c24;
-      --card-2: #1c2530;
-      --border: #273240;
-      --text: #e8eef5;
-      --muted: #8b99a8;
-      --accent: #4d7c3f;
-      --accent-bright: #5e964d;
-      --accent-soft: rgba(94, 150, 77, 0.16);
-      --green: #10b981;
-      --blue: #3b82f6;
-      --amber: #f59e0b;
-      --red: #ef4444;
-      --purple: #a855f7;
-      --cyan: #06b6d4;
-      --gold: #eab308;
-      --radius: 14px;
-      --radius-sm: 10px;
-      --nav-h: 64px;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html, body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
-      font-size: 15px;
-      line-height: 1.4;
-      -webkit-font-smoothing: antialiased;
-      -webkit-tap-highlight-color: transparent;
-      overscroll-behavior-y: none;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
-
-    button, input, select, textarea {
-      font: inherit;
-      color: inherit;
-      background: none;
-      border: none;
-      outline: none;
-    }
-
-    /* >= 16px на полях вводу, щоб Safari на iPhone не збільшував масштаб при фокусі */
-    input, select, textarea {
-      font-size: 16px;
-    }
-
-    button {
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    /* Головний контейнер (mobile-first) */
-    .app-shell {
-      max-width: 600px;
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 24px);
-    }
-
-    /* Верхня шапка */
-    .app-header {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      background: rgba(13, 18, 23, 0.94);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(94, 150, 77, 0.45);
-      color: #84cc16;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.01em;
-    }
-
-    .brand-sub {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .header-ver-badge {
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(94, 150, 77, 0.45);
-      color: #86efac;
-      font-size: 11px;
-      font-weight: 800;
-      flex-shrink: 0;
-    }
-
-    /* Основний контент */
-    .main-content {
-      flex: 1;
-      padding: 12px 12px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* Нижня фіксована навігація (5 вкладок) */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 40;
-      background: rgba(21, 28, 36, 0.97);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid var(--border);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    .bottom-nav-inner {
-      max-width: 600px;
-      margin: 0 auto;
-      height: var(--nav-h);
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-    }
-
-    .nav-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 600;
-      position: relative;
-      min-height: 44px;
-      padding: 4px 2px;
-      transition: color 0.15s;
-    }
-
-    .nav-btn span.nav-lbl {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
-
-    .nav-btn.active {
-      color: #4ade80;
-    }
-
-    .nav-btn.active::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 18%;
-      right: 18%;
-      height: 3px;
-      border-radius: 0 0 4px 4px;
-      background: #4ade80;
-    }
-
-    .nav-badge {
-      position: absolute;
-      top: 6px;
-      right: calc(50% - 19px);
-      min-width: 16px;
-      height: 16px;
-      padding: 0 4px;
-      border-radius: 999px;
-      background: var(--amber);
-      color: #111;
-      font-size: 10px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Картки та секції */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 13px;
-    }
-
-    .card-flush {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    .card-header {
-      padding: 11px 13px;
-      background: rgba(13, 18, 23, 0.6);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .section-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    /* Акордеон-вкладки */
-    .accordion-header {
-      width: 100%;
-      padding: 12px 13px;
-      background: rgba(13, 18, 23, 0.65);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      text-align: left;
-      min-height: 54px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .accordion-header:hover {
-      background: rgba(28, 37, 48, 0.75);
-    }
-
-    .accordion-header.open {
-      border-bottom: 1px solid var(--border);
-    }
-
-    .chevron {
-      width: 18px;
-      height: 18px;
-      color: var(--muted);
-      flex-shrink: 0;
-      transition: transform 0.2s ease;
-    }
-
-    .accordion-header.open .chevron {
-      transform: rotate(90deg);
-      color: #fff;
-    }
-
-    /* Підвкладки */
-    .subtabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 4px;
-    }
-
-    .subtab-btn {
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      min-height: 44px;
-      transition: all 0.15s;
-    }
-
-    .subtab-btn.active {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    }
-
-    /* Горизонтальні фільтр-пілюлі */
-    .pills-row {
-      display: flex;
-      gap: 7px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-    .pills-row::-webkit-scrollbar { display: none; }
-
-    .pill-btn {
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
-      transition: all 0.15s;
-      min-height: 38px;
-    }
-
-    .pill-btn.active {
-      background: var(--card-2);
-      color: #fff;
-      border-color: var(--pill-color, #4ade80);
-      box-shadow: inset 0 0 0 1px var(--pill-color, #4ade80);
-    }
-
-    .pill-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .pill-count {
-      font-size: 11px;
-      padding: 1px 6px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-    }
-
-    /* Кнопки (мінімальна висота 44px для зручного тапу) */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 700;
-      transition: background 0.15s, border-color 0.15s;
-      min-height: 44px;
-    }
-
-    .btn-sm {
-      padding: 7px 11px;
-      font-size: 12px;
-      min-height: 36px;
-      border-radius: 8px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .btn-primary:hover { background: var(--accent-bright); }
-
-    .btn-secondary {
-      background: var(--card-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { background: #24303e; }
-
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.14);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.35);
-    }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.22); }
-
-    .btn-danger-solid {
-      background: #dc2626;
-      color: #fff;
-    }
-
-    .btn-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 9px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-    .btn-icon:hover { color: #fff; background: var(--card-2); }
-    .btn-icon.danger {
-      color: #f87171;
-      background: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.25);
-    }
-
-    .btn-full { width: 100%; }
-
-    /* Поля вводу */
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .field-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .input, .select, .textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      font-size: 16px;
-      color: #fff;
-      min-height: 44px;
-      transition: border-color 0.15s;
-    }
-
-    .input:focus, .select:focus, .textarea:focus {
-      border-color: var(--accent-bright);
-    }
-
-    .textarea {
-      resize: vertical;
-      min-height: 84px;
-    }
-
-    .search-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      flex: 1;
-    }
-
-    .search-wrap svg {
-      position: absolute;
-      left: 12px;
-      color: var(--muted);
-      pointer-events: none;
-    }
-
-    .search-wrap .input {
-      padding-left: 38px;
-      padding-right: 36px;
-    }
-
-    .search-clear {
-      position: absolute;
-      right: 8px;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Чекбокси та перемикачі */
-    .checkbox-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 11px 12px;
-      border-radius: var(--radius-sm);
-      background: var(--bg);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      min-height: 44px;
-    }
-
-    .checkbox-card input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: #4ade80;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .toggle-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-      cursor: pointer;
-      min-height: 40px;
-    }
-
-    .toggle-pill input[type="checkbox"] {
-      width: 17px;
-      height: 17px;
-      accent-color: #4ade80;
-      flex-shrink: 0;
-    }
-
-    /* Бейджі */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      border: 1px solid transparent;
-      white-space: nowrap;
-    }
-
-    .badge-kv {
-      background: rgba(245, 158, 11, 0.18);
-      color: #fbbf24;
-      border-color: rgba(245, 158, 11, 0.45);
-    }
-
-    .badge-kg {
-      background: rgba(234, 179, 8, 0.22);
-      color: #fde047;
-      border-color: rgba(234, 179, 8, 0.55);
-    }
-
-    .badge-status-active { background: rgba(16, 185, 129, 0.14); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
-    .badge-status-absent { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.35); }
-    .badge-status-med { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
-    .badge-status-leave { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.35); }
-    .badge-status-other { background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.35); }
-
-    .badge-warn {
-      background: rgba(239, 68, 68, 0.16);
-      color: #fca5a5;
-      border-color: rgba(239, 68, 68, 0.4);
-    }
-
-    .badge-rec {
-      background: rgba(34, 197, 94, 0.16);
-      color: #86efac;
-      border-color: rgba(34, 197, 94, 0.35);
-    }
-
-    /* Перемикач місяця / дати */
-    .date-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 6px;
-    }
-
-    .date-bar-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-      text-align: center;
-      flex: 1;
-      line-height: 1.2;
-    }
-
-    /* Календар */
-    .cal-weekdays, .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-
-    .cal-weekdays {
-      margin-bottom: 6px;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .cal-weekdays .wknd { color: rgba(251, 191, 36, 0.85); }
-
-    .cal-cell {
-      min-height: 48px;
-      border-radius: 9px;
-      background: rgba(13, 18, 23, 0.65);
-      border: 1px solid transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 5px 2px;
-      transition: background 0.12s, border-color 0.12s;
-    }
-
-    .cal-cell:hover { background: var(--card-2); }
-
-    .cal-cell.today {
-      border-color: rgba(74, 222, 128, 0.55);
-      background: rgba(34, 197, 94, 0.08);
-    }
-
-    .cal-cell.selected {
-      background: rgba(94, 150, 77, 0.25);
-      border-color: #4ade80;
-      box-shadow: inset 0 0 0 1px #4ade80;
-    }
-
-    .cal-day-num {
-      font-size: 12px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .cal-cell.today .cal-day-num { color: #4ade80; }
-
-    .cal-dots {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 3px;
-      min-height: 8px;
-      max-width: 100%;
-    }
-
-    .cal-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-
-    /* Рядок бійця */
-    .soldier-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 11px 13px;
-      border-left: 4px solid var(--sq-color, #4ade80);
-      border-bottom: 1px solid rgba(39, 50, 64, 0.65);
-      background: var(--card);
-    }
-    .soldier-row:last-child { border-bottom: none; }
-    .soldier-row.is-kv {
-      background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, rgba(21, 28, 36, 1) 72%);
-    }
-
-    .soldier-info { min-width: 0; flex: 1; }
-
-    .soldier-name-line {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .soldier-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .soldier-meta {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 3px;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    /* Швидкі кнопки статусів у розгорнутій картці бійця */
-    .status-chips-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
-    }
-
-    .status-chip-btn {
-      padding: 7px 4px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      text-align: center;
-      min-height: 36px;
-    }
-
-    .status-chip-btn.active {
-      background: rgba(94, 150, 77, 0.22);
-      border-color: #4ade80;
-      color: #fff;
-    }
-
-    .status-chip-btn.active-absent {
-      background: rgba(245, 158, 11, 0.22);
-      border-color: #f59e0b;
-      color: #fde68a;
-    }
-
-    /* Розхід: рядки категорій з лічильниками - / + та кнопкою ПІБ */
-    .rozkhid-cat-row {
-      padding: 10px 11px;
-      border-radius: 11px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .rozkhid-cat-row.has-val {
-      border-color: rgba(245, 158, 11, 0.45);
-      background: rgba(245, 158, 11, 0.05);
-    }
-
-    .stepper {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .step-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: var(--card-2);
-      border: 1px solid var(--border);
-      color: #fff;
-      font-size: 17px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .step-btn:hover { background: #263342; }
-
-    .step-val {
-      min-width: 24px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .rozkhid-preview {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.55;
-      color: #d7e2ec;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    /* KPI сітка */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .kpi-grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    .kpi-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 11px 8px;
-      text-align: center;
-    }
-
-    .kpi-val {
-      font-size: 20px;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.1;
-    }
-
-    .kpi-label {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    /* Смужка навантаження */
-    .bar-track {
-      height: 5px;
-      background: var(--bg);
-      border-radius: 99px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 0.25s;
-    }
-
-    /* Картка задачі */
-    .task-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--sq-color, #8b99a8);
-      border-radius: var(--radius);
-      padding: 13px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .task-card.status-done { opacity: 0.85; }
-
-    .task-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .task-text {
-      font-size: 14px;
-      color: #fff;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.45;
-    }
-
-    .task-card.status-done .task-text {
-      text-decoration: line-through;
-      color: var(--muted);
-    }
-
-    .task-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .task-status-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-
-    .status-tap-btn {
-      padding: 8px 6px;
-      border-radius: 9px;
-      font-size: 11px;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      text-align: center;
-      transition: all 0.15s;
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .status-tap-btn.active-received {
-      background: rgba(59, 130, 246, 0.2);
-      border-color: #3b82f6;
-      color: #93c5fd;
-    }
-
-    .status-tap-btn.active-done {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: #10b981;
-      color: #6ee7b7;
-    }
-
-    .status-tap-btn.active-failed {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: #ef4444;
-      color: #fca5a5;
-    }
-
-    /* Зауваження під задачею */
-    .note-toggle-btn {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 9px 11px;
-      border-radius: 9px;
-      background: rgba(13, 18, 23, 0.65);
-      border: 1px solid var(--border);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      min-height: 40px;
-    }
-
-    .note-toggle-btn.has-note {
-      border-color: rgba(245, 158, 11, 0.45);
-      color: #fde68a;
-    }
-
-    .note-box {
-      background: rgba(13, 18, 23, 0.85);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    /* Палітра кольорів */
-    .color-palette {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .color-swatch {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      transition: transform 0.12s;
-    }
-
-    .color-swatch.selected {
-      border-color: #fff;
-      transform: scale(1.12);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
-    }
-
-    .chips-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    /* Модальні вікна */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 60;
-      background: rgba(0, 0, 0, 0.78);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    @media (min-width: 560px) {
-      .modal-backdrop { align-items: center; padding: 16px; }
-    }
-
-    .modal-backdrop.open { display: flex; }
-
-    .modal-panel {
-      width: 100%;
-      max-width: 560px;
-      max-height: 90vh;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px 20px 0 0;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: slideUp 0.18s ease-out;
-    }
-
-    @media (min-width: 560px) {
-      .modal-panel { border-radius: 18px; }
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .modal-header {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .modal-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .modal-body {
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    /* Сповіщення (Toast) */
-    .toast-wrap {
-      position: fixed;
-      top: calc(64px + env(safe-area-inset-top, 0px));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 80;
-      width: 90%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-    }
-
-    .toast {
-      padding: 11px 14px;
-      border-radius: 12px;
-      background: #1d2834;
-      border: 1px solid rgba(74, 222, 128, 0.55);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-      animation: slideUp 0.18s ease-out;
-    }
-
-    .toast.error {
-      background: #331619;
-      border-color: rgba(239, 68, 68, 0.6);
-      color: #fecaca;
-    }
-
-    /* Рядок версії сайту */
-    .version-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 12px 14px;
-      border-radius: var(--radius);
-      background: var(--card);
-      border: 1px solid rgba(94, 150, 77, 0.45);
-      font-size: 13px;
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    .version-pill {
-      padding: 3px 10px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(94, 150, 77, 0.45);
-      color: #86efac;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    /* Допоміжні утиліти */
-    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .row-gap { display: flex; align-items: center; gap: 8px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .stack { display: flex; flex-direction: column; gap: 10px; }
-    .empty-state { text-align: center; padding: 24px 14px; color: var(--muted); font-size: 13px; }
-    .text-xs { font-size: 11px; }
-    .text-sm { font-size: 13px; }
-    .text-muted { color: var(--muted); }
-    .hidden { display: none !important; }
-  </style>
-</head>
-<body>
-  <div class="app-shell">
-    <!-- Верхня шапка з бейджем версії -->
-    <header class="app-header">
+<!-- ... existing code ... -->
       <div class="brand">
         <div class="brand-icon" aria-hidden="true">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1157,152 +11,30 @@
           <div class="brand-sub">Наряди • Задачі • Розхід • Склад</div>
         </div>
       </div>
-      <span class="header-ver-badge">v2.5</span>
+      <span class="header-ver-badge">v2.6</span>
     </header>
-
-    <!-- Основний контент активної вкладки -->
-    <main id="main-content" class="main-content"></main>
-
-    <!-- Нижня фіксована навігація (5 вкладок: Наряди, Задачі, Розхід, Склад, Налаштування) -->
-    <nav class="bottom-nav" aria-label="Головна навігація">
-      <div class="bottom-nav-inner">
-        <button class="nav-btn" id="nav-duties" onclick="switchTab('duties')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-          <span class="nav-lbl">Наряди</span>
-        </button>
-
-        <button class="nav-btn" id="nav-tasks" onclick="switchTab('tasks')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-          <span class="nav-lbl">Задачі</span>
-          <span id="nav-tasks-badge" class="nav-badge hidden">0</span>
-        </button>
-
-        <button class="nav-btn" id="nav-rozkhid" onclick="switchTab('rozkhid')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-            <rect x="8" y="2" width="8" height="4" rx="1"/>
-            <line x1="8" y1="11" x2="16" y2="11"/>
-            <line x1="8" y1="15" x2="14" y2="15"/>
-          </svg>
-          <span class="nav-lbl">Розхід</span>
-        </button>
-
-        <button class="nav-btn" id="nav-personnel" onclick="switchTab('personnel')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-          <span class="nav-lbl">Склад</span>
-        </button>
-
-        <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-          <span class="nav-lbl">Налашт.</span>
-        </button>
-      </div>
-    </nav>
-  </div>
-
-  <!-- Модальне вікно -->
-  <div id="modal-root" class="modal-backdrop">
-    <div id="modal-panel" class="modal-panel"></div>
-  </div>
-
-  <!-- Контейнер сповіщень -->
-  <div id="toast-root" class="toast-wrap"></div>
-
-  <!-- Прихований інпут для імпорту JSON -->
-  <input type="file" id="import-json-input" accept=".json,application/json" class="hidden" onchange="handleImportJSONFile(event)" />
-
+<!-- ... existing code ... -->
   <script>
     // =========================================================================
     // КОНСТАНТИ, ВЕРСІЯ ТА ДОВІДНИКИ
     // =========================================================================
-    const APP_VERSION = 'v2.5';
+    const APP_VERSION = 'v2.6';
     const APP_UPDATED_DATE = '20.11.2026';
-    const STORAGE_KEY = 'pomichnyk_vzvodu_v3';
-
-    const MONTHS_UK = [
-      'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
-      'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
-    ];
-
-    const MONTHS_GEN_UK = [
-      'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
-      'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'
-    ];
-
-    const WEEKDAYS_UK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
-
-    const GROUP_CMD_SQUAD_ID = 'group_cmd';
-
-    const SQUAD_PALETTE = [
-      '#eab308', // Золотий (Командир групи)
-      '#10b981', // Смарагдовий (1-ше відділення)
-      '#3b82f6', // Синій (2-ге відділення)
-      '#f59e0b', // Бурштиновий (3-тє відділення)
-      '#a855f7', // Фіолетовий
-      '#06b6d4', // Бірюзовий
-      '#f43f5e', // Малиновий
-      '#84cc16', // Лаймовий
-      '#ec4899'  // Рожевий
-    ];
-
-    // Постійні статуси військовослужбовця у «Складі» (автоматично підтягуються в «Розхід»)
-    const SOLDIER_STATUSES = [
-      { id: 'active', short: 'В строю', label: 'В строю', cls: 'badge-status-active' },
-      { id: 'Ш',      short: 'Ш',       label: 'Ш (Шпиталь)', cls: 'badge-status-med' },
-      { id: 'Л',      short: 'Л',       label: 'Л (Лазарет)', cls: 'badge-status-med' },
-      { id: 'Вд',     short: 'Вд',      label: 'Вд (Відрядження)', cls: 'badge-status-absent' },
-      { id: 'Вп',     short: 'Вп',      label: 'Вп (Відпустка)', cls: 'badge-status-leave' },
-      { id: 'Г',      short: 'Г',       label: 'Г (Гуртожиток)', cls: 'badge-status-other' },
-      { id: 'Пк',     short: 'Пк',      label: 'Пк (Поза казармою)', cls: 'badge-status-other' },
-      { id: 'Хв',     short: 'Хв',      label: 'Хв (Хворий)', cls: 'badge-status-med' }
-    ];
-
-    const PERMANENT_ABSENT_CODES = new Set(['Ш', 'Л', 'Вд', 'Вп', 'Г', 'Пк', 'Хв']);
-
-    // Точний порядок категорій відсутності в «Розході» (БЕЗ розшифрувань у рапорті)
-    const ROZKHID_ABSENT_CATEGORIES = [
-      { code: 'Прийом шпиталь', hint: 'Прийом шпиталь' },
-      { code: 'Прийом лазарет', hint: 'Прийом лазарет' },
-      { code: 'Ш',              hint: 'Шпиталь' },
-      { code: 'Л',              hint: 'Лазарет' },
-      { code: 'Вд',             hint: 'Відрядження' },
-      { code: 'Вп',             hint: 'Відпустка' },
-      { code: 'Н',              hint: 'Наряд (авто з графіка)' },
-      { code: 'Г',              hint: 'Гуртожиток' },
-      { code: 'Пк',             hint: 'Поза казармою' },
-      { code: 'Хв',             hint: 'Хворий' },
-      { code: 'Стародобовий',   hint: 'Вчорашній наряд (авто)' }
-    ];
-
+    const STORAGE_KEY = 'pomichnyk_vzvodu_data';
+// ... existing code ... -->
     const DEFAULT_SQUADS = [
       { id: GROUP_CMD_SQUAD_ID, name: 'Командир групи', color: '#eab308', isGroupCmd: true },
-      { id: 'sq_1', name: '1-ше відділення', color: '#10b981' },
-      { id: 'sq_2', name: '2-ге відділення', color: '#3b82f6' },
-      { id: 'sq_3', name: '3-тє відділення', color: '#f59e0b' }
+      { id: 'sq_1', name: '1-ше відділення', color: '#3b82f6' },
+      { id: 'sq_2', name: '2-ге відділення', color: '#10b981' },
+      { id: 'sq_3', name: '3-тє відділення', color: '#a855f7' }
     ];
 
     const DEFAULT_DUTY_TYPES = [
-      { id: 'dt_1', name: 'Черговий' },
-      { id: 'dt_2', name: 'Днювальний' },
-      { id: 'dt_3', name: 'КПП' },
-      { id: 'dt_4', name: 'Патруль' }
+      { id: 'dt_ck', name: 'ЧК', desc: 'Черговий курсу', maxPeople: 1, color: '#f59e0b' },
+      { id: 'dt_dn', name: 'Дн', desc: 'Днювальні курсу', maxPeople: 3, color: '#3b82f6' }
     ];
+
+    const QUICK_RANKS = ['солдат', 'ст. солдат', 'мол. сержант', 'сержант'];
 
     // =========================================================================
     // СТАН ДАНИХ ТА UI (БЕЗ ДЕМО-ЗАПИСІВ)
@@ -1311,10 +43,10 @@
       groupNumber: '223',
       squads: [],       // [{ id, name, color, isGroupCmd? }]
       soldiers: [],     // [{ id, name, rank, squadId, isCommander, status }]
-      dutyTypes: [],    // [{ id, name }]
+      dutyTypes: [],    // [{ id, name, desc, maxPeople, color }]
       duties: [],       // [{ id, date: 'YYYY-MM-DD', soldierId, dutyTypeId }]
       tasks: [],        // [{ id, targetType: 'squad'|'all_commanders', targetSquadId, text, issuer, deadline, status, note, createdAt }]
-      rozkhid: {},      // { 'YYYY-MM-DD': { overrides: { [soldierId]: code|'Вн' }, extra: { [catCode]: number } } }
+      rozkhid: {},      // { 'YYYY-MM-DD': { cleared?: boolean, overrides: { [soldierId]: code|'Вн' }, extra: { [catCode]: number } } }
       lastBackupAt: null
     };
 
@@ -1329,8 +61,11 @@
       statsSquadFilter: 'all',
       statsSort: 'month_desc',    // 'month_desc' | 'month_asc' | 'total_desc' | 'alpha'
       rozkhidDate: toISODate(nowDate),
-      rozkhidIncludeNames: true,  // УВІМКНЕНО за замовчуванням у v2.5
+      rozkhidIncludeNames: true,  // Увімкнено за замовчуванням
       rozkhidHideZeros: false,
+      rozkhidModalCat: '',
+      rozkhidModalSearch: '',
+      rozkhidModalOpenSquads: {},
       personnelSquadFilter: 'all',
       expandedPersonnelSquads: {},
       expandedSoldiers: {},
@@ -1340,273 +75,35 @@
       openNotes: {}
     };
 
-    let assignModal = { date: '', dutyTypeId: '' };
+    let assignModal = { date: '', dutyTypeId: '', selectedIds: [] };
     let tempSquadColor = SQUAD_PALETTE[0];
-
-    // =========================================================================
-    // УТИЛІТИ
-    // =========================================================================
-    function genId(prefix = 'id') {
-      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
-    }
-
-    function toISODate(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
-
-    function toDateTimeHuman(d) {
-      const dd = String(d.getDate()).padStart(2, '0');
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const yyyy = d.getFullYear();
-      const hh = String(d.getHours()).padStart(2, '0');
-      const min = String(d.getMinutes()).padStart(2, '0');
-      return `${dd}.${mm}.${yyyy} о ${hh}:${min}`;
-    }
-
-    function addDaysISO(iso, delta) {
-      const [y, m, d] = iso.split('-').map(Number);
-      return toISODate(new Date(y, m - 1, d + delta));
-    }
-
-    function diffDaysISO(isoA, isoB) {
-      const [ya, ma, da] = isoA.split('-').map(Number);
-      const [yb, mb, db] = isoB.split('-').map(Number);
-      return Math.round((Date.UTC(ya, ma - 1, da) - Date.UTC(yb, mb - 1, db)) / 86400000);
-    }
-
-    function formatDateHuman(iso) {
-      if (!iso) return '—';
-      const [y, m, d] = iso.split('-').map(Number);
-      return `${d} ${MONTHS_GEN_UK[m - 1]} ${y}`;
-    }
-
-    function formatDateShort(iso) {
-      if (!iso) return 'Не було';
-      const [y, m, d] = iso.split('-').map(Number);
-      return `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`;
-    }
-
-    function formatDeadline(val) {
-      if (!val) return '';
-      const [datePart, timePart] = val.split('T');
-      const [y, m, d] = datePart.split('-').map(Number);
-      const base = `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`;
-      return timePart ? `${base} о ${timePart.slice(0, 5)}` : base;
-    }
-
-    function getMonthPrefix(year, month) {
-      return `${year}-${String(month + 1).padStart(2, '0')}`;
-    }
-
-    function esc(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    // Автоматична велика літера для кожного слова та ініціалів у ПІБ
-    function formatFullName(raw) {
-      if (!raw) return '';
-      return raw
-        .trim()
-        .replace(/\s+/g, ' ')
-        .split(' ')
-        .map(word =>
-          word
-            .split('-')
-            .map(part =>
-              part
-                .split('.')
-                .map(seg => seg ? seg.charAt(0).toUpperCase() + seg.slice(1) : '')
-                .join('.')
-            )
-            .join('-')
-        )
-        .join(' ');
-    }
-
-    function capitalizeLive(inputEl) {
-      const pos = inputEl.selectionStart;
-      const val = inputEl.value;
-      const formatted = val.replace(/(^|[\s\-\.])([a-zа-яіїєґ])/g, (m, sep, ch) => sep + ch.toUpperCase());
-      if (formatted !== val) {
-        inputEl.value = formatted;
-        try { inputEl.setSelectionRange(pos, pos); } catch (e) {}
-      }
-    }
-
-    // Надійне копіювання в буфер обміну (працює на iOS Safari, Android Chrome та в iFrame)
-    function copyToClipboard(text, successMsg = 'Скопійовано у буфер обміну') {
-      try {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.top = '-9999px';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-        ta.setSelectionRange(0, text.length);
-        const ok = document.execCommand('copy');
-        document.body.removeChild(ta);
-        if (ok) {
-          showToast(successMsg);
-          return true;
-        }
-      } catch (e) {}
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text)
-          .then(() => showToast(successMsg))
-          .catch(() => showToast('Не вдалося скопіювати текст', 'error'));
-        return true;
-      }
-
-      showToast('Не вдалося скопіювати текст', 'error');
-      return false;
-    }
-
-    // Отримання прізвища для рапорту (якщо є однофамільці у взводі — додає ініціал імені)
-    function getSurnameCountsMap() {
-      const counts = {};
-      for (const s of state.soldiers) {
-        const parts = (s.name || '').trim().split(/\s+/);
-        const key = (parts[0] || '').toLowerCase();
-        if (key) counts[key] = (counts[key] || 0) + 1;
-      }
-      return counts;
-    }
-
-    function formatReportSurname(soldier, surnameCounts) {
-      const parts = (soldier.name || '').trim().split(/\s+/).filter(Boolean);
-      if (parts.length === 0) return '';
-      const surname = parts[0];
-      const key = surname.toLowerCase();
-      if ((surnameCounts[key] || 0) > 1 && parts[1]) {
-        const initial = parts[1].replace(/\./g, '').charAt(0).toUpperCase();
-        return initial ? `${surname} ${initial}.` : surname;
-      }
-      return surname;
-    }
-
-    function normalizeSoldierStatus(st) {
-      if (!st || st === 'active') return 'active';
-      if (st === 'leave') return 'Вп';
-      if (st === 'medical') return 'Ш';
-      if (st === 'trip') return 'Вд';
-      if (PERMANENT_ABSENT_CODES.has(st)) return st;
-      return 'active';
-    }
-
-    function getStatusObj(statusId) {
-      const norm = normalizeSoldierStatus(statusId);
-      return SOLDIER_STATUSES.find(s => s.id === norm) || SOLDIER_STATUSES[0];
-    }
-
-    function isGroupCmdSquad(sq) {
-      return Boolean(sq && (sq.id === GROUP_CMD_SQUAD_ID || sq.isGroupCmd));
-    }
-
-    function getOrderedSquads() {
-      const cmd = [];
-      const rest = [];
-      for (const sq of state.squads) {
-        if (isGroupCmdSquad(sq)) cmd.push(sq);
-        else rest.push(sq);
-      }
-      return [...cmd, ...rest];
-    }
-
-    function getSquadById(id) {
-      return state.squads.find(s => s.id === id) || { id, name: 'Без відділення', color: '#64748b' };
-    }
-
-    function getSquadTabLabel(sq) {
-      if (!sq) return 'Відд.';
-      if (isGroupCmdSquad(sq)) return 'Ком. групи';
-      const m = sq.name.match(/^(\d+)/);
-      if (m) return `${m[1]} відд.`;
-      return sq.name.length > 11 ? sq.name.slice(0, 10) + '…' : sq.name;
-    }
-
-    function formatCommanderTargetLabel(sq) {
-      if (!sq) return 'Командиру відділення';
-      if (isGroupCmdSquad(sq)) return 'Командиру групи';
-      const m = sq.name.match(/^(\d+)/);
-      if (m) return `Командиру ${m[1]}-го відділення`;
-      return `Командиру (${sq.name})`;
-    }
-
+    let tempDutyTypeColor = '#3b82f6';
+// ... existing code ... -->
     function getSoldierById(id) {
       return state.soldiers.find(s => s.id === id);
     }
 
     function getDutyTypeById(id) {
-      return state.dutyTypes.find(d => d.id === id) || { id, name: 'Наряд' };
+      return state.dutyTypes.find(d => d.id === id) || { id, name: 'Наряд', desc: '', maxPeople: 1, color: '#64748b' };
     }
 
-    function getSquadCommander(squadId) {
-      return state.soldiers.find(s => s.squadId === squadId && s.isCommander) || null;
-    }
-
-    function getGroupCommanderSoldier() {
-      return state.soldiers.find(s => s.squadId === GROUP_CMD_SQUAD_ID) || null;
-    }
-
-    // Командир відділення завжди зверху, решта — за алфавітом
-    function sortSquadMembers(list) {
-      return [...list].sort((a, b) => {
-        if (a.isCommander && !b.isCommander) return -1;
-        if (!a.isCommander && b.isCommander) return 1;
-        return a.name.localeCompare(b.name, 'uk');
+    function normalizeDutyTypes(list) {
+      if (!Array.isArray(list) || list.length === 0) {
+        return JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES));
+      }
+      return list.map((dt, idx) => {
+        const lower = String(dt.name || '').toLowerCase();
+        const isDn = lower === 'дн' || lower.includes('днювальн');
+        const isCk = lower === 'чк' || lower.includes('чергов');
+        const defaultMax = isDn ? 3 : 1;
+        const maxPeople = Math.min(10, Math.max(1, Number(dt.maxPeople) || defaultMax));
+        const color = dt.color || (isCk ? '#f59e0b' : isDn ? '#3b82f6' : SQUAD_PALETTE[(idx + 1) % SQUAD_PALETTE.length]);
+        const desc = dt.desc !== undefined ? dt.desc : (isCk ? 'Черговий курсу' : isDn ? 'Днювальні курсу' : '');
+        return { id: dt.id || genId('dt'), name: dt.name || 'Наряд', desc, maxPeople, color };
       });
     }
-
-    function getSoldierStats(soldierId, year, month, beforeOrOnDate = null) {
-      const prefix = getMonthPrefix(year, month);
-      let monthCount = 0;
-      let totalCount = 0;
-      let lastDate = null;
-
-      for (const d of state.duties) {
-        if (d.soldierId !== soldierId) continue;
-        totalCount++;
-        if (d.date.startsWith(prefix)) monthCount++;
-        if (!beforeOrOnDate || d.date <= beforeOrOnDate) {
-          if (!lastDate || d.date > lastDate) lastDate = d.date;
-        }
-      }
-      return { monthCount, totalCount, lastDate };
-    }
-
-    // =========================================================================
-    // ІНІЦІАЛІЗАЦІЯ, МІГРАЦІЯ ТА ЗБЕРЕЖЕННЯ (БЕЗ ДЕМО-ЗАПИСІВ)
-    // =========================================================================
-    function ensureGroupCmdSquad(squadsList) {
-      const list = Array.isArray(squadsList) ? [...squadsList] : [];
-      const existingIdx = list.findIndex(sq =>
-        sq && (sq.id === GROUP_CMD_SQUAD_ID || sq.isGroupCmd || (sq.name && sq.name.trim().toLowerCase() === 'командир групи'))
-      );
-      if (existingIdx === -1) {
-        list.unshift({ id: GROUP_CMD_SQUAD_ID, name: 'Командир групи', color: '#eab308', isGroupCmd: true });
-      } else {
-        const [item] = list.splice(existingIdx, 1);
-        item.isGroupCmd = true;
-        if (!item.color) item.color = '#eab308';
-        list.unshift(item);
-      }
-      return list;
-    }
-
-    // Міграція формату rozkhid з попередніх версій ({ [date]: { [soldierId]: code } } -> { [date]: { overrides: {}, extra: {} } })
+// ... existing code ... -->
+    // Міграція формату rozkhid з попередніх версій
     function migrateRozkhidMap(rawRozkhid) {
       const res = {};
       if (!rawRozkhid || typeof rawRozkhid !== 'object') return res;
@@ -1614,12 +111,13 @@
         if (!val || typeof val !== 'object') continue;
         if (val.overrides && typeof val.overrides === 'object') {
           res[dateKey] = {
+            cleared: Boolean(val.cleared),
             overrides: { ...val.overrides },
             extra: val.extra && typeof val.extra === 'object' ? { ...val.extra } : {}
           };
         } else {
-          // Старий плаский формат: { [soldierId]: statusCode }
           res[dateKey] = {
+            cleared: false,
             overrides: { ...val },
             extra: {}
           };
@@ -1645,7 +143,7 @@
       try {
         let raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
-          for (const legacyKey of ['pomichnyk_vzvodu_v2', 'pomichnyk_vzvodu_v1', 'platoon_duty_tracker_v1']) {
+          for (const legacyKey of ['pomichnyk_vzvodu_v3', 'pomichnyk_vzvodu_v2', 'pomichnyk_vzvodu_v1', 'platoon_duty_tracker_v1']) {
             const legacyRaw = localStorage.getItem(legacyKey);
             if (legacyRaw) {
               raw = legacyRaw;
@@ -1672,9 +170,7 @@
           groupNumber: typeof parsed.groupNumber === 'string' && parsed.groupNumber.trim() ? parsed.groupNumber : '223',
           squads: migratedSquads,
           soldiers: migratedSoldiers,
-          dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
-            ? parsed.dutyTypes
-            : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+          dutyTypes: normalizeDutyTypes(parsed.dutyTypes),
           duties: Array.isArray(parsed.duties) ? parsed.duties : [],
           tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
           rozkhid: migrateRozkhidMap(parsed.rozkhid),
@@ -1686,198 +182,7 @@
         state = createEmptyInitialState();
       }
     }
-
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {
-        console.error('Помилка збереження:', e);
-        showToast('Помилка збереження в пам\'ять пристрою', 'error');
-      }
-    }
-
-    // =========================================================================
-    // СПОВІЩЕННЯ ТА МОДАЛЬНІ ВІКНА (БЕЗ alert() / confirm())
-    // =========================================================================
-    function showToast(msg, type = 'success') {
-      const root = document.getElementById('toast-root');
-      const el = document.createElement('div');
-      el.className = `toast ${type === 'error' ? 'error' : ''}`;
-      el.textContent = msg;
-      root.appendChild(el);
-      setTimeout(() => {
-        el.style.opacity = '0';
-        el.style.transition = 'opacity 0.2s';
-        setTimeout(() => el.remove(), 220);
-      }, 2400);
-    }
-
-    function openModal(html) {
-      const root = document.getElementById('modal-root');
-      const panel = document.getElementById('modal-panel');
-      panel.innerHTML = html;
-      root.classList.add('open');
-    }
-
-    function closeModal() {
-      document.getElementById('modal-root').classList.remove('open');
-    }
-
-    document.getElementById('modal-root').addEventListener('click', (e) => {
-      if (e.target.id === 'modal-root') closeModal();
-    });
-
-    function showConfirm(title, message, confirmLabel, onConfirm, danger = true) {
-      openModal(`
-        <div class="modal-header">
-          <div class="modal-title">${esc(title)}</div>
-          <button class="btn-icon" onclick="closeModal()">✕</button>
-        </div>
-        <div class="modal-body">
-          <p class="text-sm text-muted" style="line-height:1.5">${esc(message)}</p>
-          <div class="grid-2" style="margin-top:4px">
-            <button class="btn btn-secondary" onclick="closeModal()">Скасувати</button>
-            <button id="confirm-ok-btn" class="btn ${danger ? 'btn-danger-solid' : 'btn-primary'}">${esc(confirmLabel)}</button>
-          </div>
-        </div>
-      `);
-      document.getElementById('confirm-ok-btn').onclick = () => {
-        closeModal();
-        onConfirm();
-      };
-    }
-
-    // =========================================================================
-    // НАВІГАЦІЯ ТА ЗАГАЛЬНІ КОМПОНЕНТИ
-    // =========================================================================
-    function switchTab(tab) {
-      ui.activeTab = tab;
-      render();
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-
-    function switchDutiesSubTab(sub) {
-      ui.dutiesSubTab = sub;
-      render();
-    }
-
-    function changeMonth(delta) {
-      ui.month += delta;
-      if (ui.month < 0) { ui.month = 11; ui.year--; }
-      else if (ui.month > 11) { ui.month = 0; ui.year++; }
-
-      if (ui.year === nowDate.getFullYear() && ui.month === nowDate.getMonth()) {
-        ui.selectedDate = toISODate(nowDate);
-      } else {
-        ui.selectedDate = `${ui.year}-${String(ui.month + 1).padStart(2, '0')}-01`;
-      }
-      render();
-    }
-
-    function goToToday() {
-      const t = new Date();
-      ui.year = t.getFullYear();
-      ui.month = t.getMonth();
-      ui.selectedDate = toISODate(t);
-      render();
-    }
-
-    function renderMonthBar(showTodayBtn = true) {
-      return `
-        <div class="date-bar">
-          <button class="btn-icon" onclick="changeMonth(-1)" aria-label="Попередній місяць">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <div class="date-bar-title" style="text-transform:uppercase">${MONTHS_UK[ui.month]} ${ui.year}</div>
-          ${showTodayBtn ? `<button class="btn btn-sm btn-secondary" onclick="goToToday()">Сьогодні</button>` : ''}
-          <button class="btn-icon" onclick="changeMonth(1)" aria-label="Наступний місяць">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-      `;
-    }
-
-    function renderSquadPills(activeId, handlerName, excludeGroupCmd = false) {
-      const allBtn = `
-        <button class="pill-btn ${activeId === 'all' ? 'active' : ''}" style="--pill-color:#4ade80" onclick="${handlerName}('all')">
-          <span>Всі</span>
-        </button>
-      `;
-      const ordered = getOrderedSquads().filter(sq => !(excludeGroupCmd && isGroupCmdSquad(sq)));
-      const squadBtns = ordered.map(sq => `
-        <button class="pill-btn ${activeId === sq.id ? 'active' : ''}" style="--pill-color:${sq.color}" onclick="${handlerName}('${sq.id}')">
-          <span class="pill-dot" style="background:${sq.color}"></span>
-          <span>${esc(getSquadTabLabel(sq))}</span>
-        </button>
-      `).join('');
-      return `<div class="pills-row">${allBtn}${squadBtns}</div>`;
-    }
-
-    // =========================================================================
-    // ВКЛАДКА 1: НАРЯДИ (ГРАФІК + ОБЛІК)
-    // =========================================================================
-    function renderDutiesTab() {
-      const subTabsHtml = `
-        <div class="subtabs">
-          <button class="subtab-btn ${ui.dutiesSubTab === 'schedule' ? 'active' : ''}" onclick="switchDutiesSubTab('schedule')">Графік</button>
-          <button class="subtab-btn ${ui.dutiesSubTab === 'stats' ? 'active' : ''}" onclick="switchDutiesSubTab('stats')">Облік</button>
-        </div>
-      `;
-      return subTabsHtml + (ui.dutiesSubTab === 'schedule' ? renderScheduleView() : renderStatsView());
-    }
-
-    function setScheduleSquadFilter(id) {
-      ui.scheduleSquadFilter = id;
-      render();
-    }
-
-    function selectCalendarDate(iso) {
-      ui.selectedDate = iso;
-      render();
-    }
-
-    function renderScheduleView() {
-      const y = ui.year;
-      const m = ui.month;
-      const firstDay = new Date(y, m, 1);
-      const daysInMonth = new Date(y, m + 1, 0).getDate();
-      let offset = firstDay.getDay() - 1;
-      if (offset < 0) offset = 6;
-
-      const todayISO = toISODate(nowDate);
-      const monthPrefix = getMonthPrefix(y, m);
-
-      const byDate = {};
-      for (const d of state.duties) {
-        if (!d.date.startsWith(monthPrefix)) continue;
-        const soldier = getSoldierById(d.soldierId);
-        if (!soldier) continue;
-        if (ui.scheduleSquadFilter !== 'all' && soldier.squadId !== ui.scheduleSquadFilter) continue;
-        if (!byDate[d.date]) byDate[d.date] = [];
-        byDate[d.date].push({ duty: d, soldier });
-      }
-
-      let cells = '';
-      for (let i = 0; i < offset; i++) cells += `<div></div>`;
-      for (let day = 1; day <= daysInMonth; day++) {
-        const iso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
-        const items = byDate[iso] || [];
-        const isToday = iso === todayISO;
-        const isSelected = iso === ui.selectedDate;
-
-        const dots = items.slice(0, 5).map(item => {
-          const sq = getSquadById(item.soldier.squadId);
-          return `<span class="cal-dot" style="background:${sq.color}"></span>`;
-        }).join('');
-
-        cells += `
-          <button class="cal-cell ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="selectCalendarDate('${iso}')">
-            <span class="cal-day-num">${day}</span>
-            <div class="cal-dots">${dots}${items.length > 5 ? '<span style="font-size:9px;color:#8b99a8;line-height:6px">+</span>' : ''}</div>
-          </button>
-        `;
-      }
-
+// ... existing code ... -->
       const dayDuties = state.duties.filter(d => {
         if (d.date !== ui.selectedDate) return false;
         const s = getSoldierById(d.soldierId);
@@ -1886,33 +191,60 @@
         return true;
       });
 
-      const dayListHtml = dayDuties.length === 0
+      // Групуємо наряди дня за видами нарядів (ЧК -> Дн -> інші)
+      const groupedDayDuties = [];
+      const seenTypeIds = new Set();
+      for (const dt of state.dutyTypes) {
+        const list = dayDuties.filter(d => d.dutyTypeId === dt.id);
+        if (list.length > 0) {
+          groupedDayDuties.push({ dt, list });
+          seenTypeIds.add(dt.id);
+        }
+      }
+      for (const d of dayDuties) {
+        if (!seenTypeIds.has(d.dutyTypeId)) {
+          const dt = getDutyTypeById(d.dutyTypeId);
+          groupedDayDuties.push({ dt, list: dayDuties.filter(x => x.dutyTypeId === d.dutyTypeId) });
+          seenTypeIds.add(d.dutyTypeId);
+        }
+      }
+
+      const dayListHtml = groupedDayDuties.length === 0
         ? `<div class="empty-state">На ${formatDateHuman(ui.selectedDate)} нарядів не призначено.</div>`
-        : `<div class="stack">
-            ${dayDuties.map(d => {
-              const s = getSoldierById(d.soldierId);
-              const sq = getSquadById(s.squadId);
-              const dt = getDutyTypeById(d.dutyTypeId);
-              const isKG = isGroupCmdSquad(sq);
-              return `
-                <div class="soldier-row" style="--sq-color:${sq.color}; border-radius:10px; border:1px solid var(--border); border-left:4px solid ${sq.color};">
-                  <div class="soldier-info">
-                    <div class="soldier-name-line">
-                      <span class="badge" style="background:${sq.color}22; color:${sq.color}; border-color:${sq.color}55">${esc(dt.name)}</span>
-                      <span class="soldier-name">${esc(s.name)}</span>
-                      ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
-                    </div>
-                    <div class="soldier-meta">
-                      <span>${esc(sq.name)}</span>
-                      ${s.rank ? `<span>• ${esc(s.rank)}</span>` : ''}
-                    </div>
+        : `<div class="stack" style="gap:12px">
+            ${groupedDayDuties.map(({ dt, list }) => `
+              <div class="stack" style="gap:6px">
+                <div class="row-between" style="padding:0 2px">
+                  <div class="row-gap">
+                    <span class="pill-dot" style="background:${dt.color || '#4ade80'}"></span>
+                    <span class="section-title" style="color:${dt.color || '#fff'}">${esc(dt.name)}${dt.desc ? ' — ' + esc(dt.desc) : ''}</span>
                   </div>
-                  <button class="btn-icon danger" onclick="removeDuty('${d.id}')" title="Видалити наряд">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
+                  <span class="text-xs text-muted">${list.length}${dt.maxPeople > 1 ? ' / ' + dt.maxPeople : ''} ос.</span>
                 </div>
-              `;
-            }).join('')}
+                ${list.map(d => {
+                  const s = getSoldierById(d.soldierId);
+                  const sq = getSquadById(s.squadId);
+                  const isKG = isGroupCmdSquad(sq);
+                  return `
+                    <div class="soldier-row" style="--sq-color:${sq.color}; border-radius:10px; border:1px solid var(--border); border-left:4px solid ${sq.color};">
+                      <div class="soldier-info">
+                        <div class="soldier-name-line">
+                          <span class="soldier-name">${esc(s.name)}</span>
+                          ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
+                        </div>
+                        <div class="soldier-meta">
+                          <span>${esc(sq.name)}</span>
+                          ${s.rank ? `<span>• ${esc(s.rank)}</span>` : ''}
+                        </div>
+                      </div>
+                      <button class="btn-icon danger" onclick="removeDuty('${d.id}')" title="Видалити наряд">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `).join('')}
           </div>`;
 
       return `
@@ -1936,16 +268,20 @@
           </div>
           ${dayListHtml}
           ${dayDuties.length > 0 ? `
-            <button class="btn btn-secondary btn-full" onclick="copyDayDuties('${ui.selectedDate}')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span>Скопіювати наряд на день</span>
-            </button>
+            <div class="grid-2">
+              <button class="btn btn-secondary" onclick="openDayDutiesPreviewModal('${ui.selectedDate}')">Перегляд тексту</button>
+              <button class="btn btn-primary" onclick="copyDayDuties('${ui.selectedDate}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Скопіювати наряд</span>
+              </button>
+            </div>
           ` : ''}
         </div>
       `;
     }
 
-    function copyDayDuties(isoDate) {
+    // Генерація тексту наряду на день за строгим шаблоном v2.6
+    function generateDayDutiesText(isoDate) {
       const dayDuties = state.duties.filter(d => {
         if (d.date !== isoDate) return false;
         const s = getSoldierById(d.soldierId);
@@ -1953,16 +289,63 @@
         if (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter) return false;
         return true;
       });
-      if (!dayDuties.length) return;
+      if (!dayDuties.length) return '';
 
-      const lines = [`Наряд на ${formatDateHuman(isoDate)}:`];
-      dayDuties.forEach((d, idx) => {
-        const s = getSoldierById(d.soldierId);
-        const sq = getSquadById(s.squadId);
-        const dt = getDutyTypeById(d.dutyTypeId);
-        lines.push(`${idx + 1}. ${dt.name} — ${s.name}${s.rank ? ' (' + s.rank + ')' : ''} [${getSquadTabLabel(sq)}]`);
+      const groupNum = (state.groupNumber || '223').trim() || '223';
+      const header = `${groupNum}, ${formatDateShort(isoDate)}`;
+
+      // Впорядковуємо види нарядів: спочатку ЧК, потім Дн, далі решта
+      const typeOrder = [...state.dutyTypes];
+      const knownIds = new Set(typeOrder.map(dt => dt.id));
+      dayDuties.forEach(d => {
+        if (!knownIds.has(d.dutyTypeId)) {
+          typeOrder.push(getDutyTypeById(d.dutyTypeId));
+          knownIds.add(d.dutyTypeId);
+        }
       });
-      copyToClipboard(lines.join('\n'), 'Наряд на день скопійовано');
+
+      const blocks = [];
+      for (const dt of typeOrder) {
+        const items = dayDuties.filter(d => d.dutyTypeId === dt.id);
+        if (!items.length) continue;
+        const lines = [`${dt.name}:`];
+        items.forEach(d => {
+          const s = getSoldierById(d.soldierId);
+          if (!s) return;
+          const rankPrefix = s.rank && s.rank.trim() ? `${s.rank.trim()} ` : '';
+          lines.push(`-${rankPrefix}${s.name}`);
+        });
+        blocks.push(lines.join('\n'));
+      }
+
+      return `${header}\n${blocks.join('\n\n')}`;
+    }
+
+    function openDayDutiesPreviewModal(isoDate) {
+      const text = generateDayDutiesText(isoDate);
+      if (!text) return;
+      openModal(`
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Наряд на ${formatDateShort(isoDate)}</div>
+            <div class="text-xs text-muted">Попередній перегляд перед копіюванням</div>
+          </div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <pre class="rozkhid-preview">${esc(text)}</pre>
+          <button class="btn btn-primary btn-full" onclick="copyDayDuties('${isoDate}'); closeModal();">Скопіювати наряд</button>
+        </div>
+      `);
+    }
+
+    function copyDayDuties(isoDate) {
+      const text = generateDayDutiesText(isoDate);
+      if (!text) {
+        showToast('На цей день нарядів не призначено', 'error');
+        return;
+      }
+      copyToClipboard(text, 'Наряд на день скопійовано');
     }
 
     function removeDuty(id, reopenSoldierId = null) {
@@ -1980,12 +363,64 @@
       }
       assignModal.date = isoDate;
       assignModal.dutyTypeId = state.dutyTypes[0]?.id || '';
+      assignModal.selectedIds = [];
       renderAssignDutyModal();
     }
 
     function setAssignDutyType(id) {
       assignModal.dutyTypeId = id;
+      assignModal.selectedIds = [];
       renderAssignDutyModal();
+    }
+
+    function toggleAssignSoldier(soldierId) {
+      const dt = getDutyTypeById(assignModal.dutyTypeId);
+      const maxPeople = Math.max(1, Number(dt.maxPeople) || 1);
+
+      if (maxPeople === 1) {
+        // Для наряду на 1 людину (наприклад ЧК) — миттєве призначення
+        confirmAssignDutyList([soldierId]);
+        return;
+      }
+
+      const idx = assignModal.selectedIds.indexOf(soldierId);
+      if (idx >= 0) {
+        assignModal.selectedIds.splice(idx, 1);
+      } else {
+        if (assignModal.selectedIds.length >= maxPeople) {
+          showToast(`Для «${dt.name}» можна обрати максимум ${maxPeople} ос.`, 'error');
+          return;
+        }
+        assignModal.selectedIds.push(soldierId);
+      }
+      renderAssignDutyModal();
+    }
+
+    function confirmAssignSelectedDuties() {
+      if (assignModal.selectedIds.length === 0) {
+        showToast('Оберіть хоча б одного військовослужбовця', 'error');
+        return;
+      }
+      confirmAssignDutyList(assignModal.selectedIds);
+    }
+
+    function confirmAssignDutyList(soldierIds) {
+      if (!assignModal.dutyTypeId) {
+        showToast('Оберіть вид наряду', 'error');
+        return;
+      }
+      soldierIds.forEach(soldierId => {
+        state.duties.push({
+          id: genId('d'),
+          date: assignModal.date,
+          soldierId,
+          dutyTypeId: assignModal.dutyTypeId
+        });
+      });
+      saveState();
+      closeModal();
+      render();
+      showToast(soldierIds.length > 1 ? `Призначено бійців: ${soldierIds.length}` : 'Наряд призначено');
     }
 
     function renderAssignDutyModal() {
@@ -1993,6 +428,11 @@
       const targetYear = y;
       const targetMonth = m - 1;
       const yesterdayISO = addDaysISO(assignModal.date, -1);
+
+      const activeDt = getDutyTypeById(assignModal.dutyTypeId);
+      const maxPeople = Math.max(1, Number(activeDt.maxPeople) || 1);
+      const isMulti = maxPeople > 1;
+      const selectedSet = new Set(assignModal.selectedIds);
 
       const busyTodaySet = new Set(state.duties.filter(d => d.date === assignModal.date).map(d => d.soldierId));
       const busyYestSet = new Set(state.duties.filter(d => d.date === yesterdayISO).map(d => d.soldierId));
@@ -2035,9 +475,15 @@
           const stObj = getStatusObj(c.status);
           const isActive = stObj.id === 'active';
           const isRec = isActive && !c.isToday && !c.isYesterday && c.stats.monthCount === bestMonthCount;
+          const isPicked = selectedSet.has(c.id);
 
           return `
-            <button class="soldier-row ${c.isCommander || isKG ? 'is-kv' : ''}" onclick="confirmAssignDuty('${c.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left; border-radius:10px; border:1px solid ${isRec ? 'rgba(16,185,129,0.45)' : 'var(--border)'}; border-left:4px solid ${sq.color}; opacity:${!isActive ? '0.6' : '1'}">
+            <button type="button" class="soldier-row ${c.isCommander || isKG ? 'is-kv' : ''}" onclick="toggleAssignSoldier('${c.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left; border-radius:10px; border:1px solid ${isPicked ? '#4ade80' : (isRec ? 'rgba(16,185,129,0.45)' : 'var(--border)')}; border-left:4px solid ${sq.color}; background:${isPicked ? 'rgba(74,222,128,0.12)' : ''}; opacity:${!isActive ? '0.6' : '1'}">
+              ${isMulti ? `
+                <div style="width:22px;height:22px;border-radius:6px;border:2px solid ${isPicked ? '#4ade80' : 'var(--border)'};background:${isPicked ? '#4ade80' : 'var(--bg)'};color:#0d1217;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  ${isPicked ? '✓' : ''}
+                </div>
+              ` : ''}
               <div class="soldier-info">
                 <div class="soldier-name-line">
                   <span class="soldier-name">${esc(c.name)}</span>
@@ -2084,386 +530,33 @@
             <div class="field-label">1. Оберіть вид наряду:</div>
             <div class="chips-wrap">
               ${state.dutyTypes.map(dt => `
-                <button class="btn btn-sm ${assignModal.dutyTypeId === dt.id ? 'btn-primary' : 'btn-secondary'}" onclick="setAssignDutyType('${dt.id}')">
-                  ${esc(dt.name)}
+                <button type="button" class="btn btn-sm ${assignModal.dutyTypeId === dt.id ? 'btn-primary' : 'btn-secondary'}" onclick="setAssignDutyType('${dt.id}')">
+                  <span class="pill-dot" style="background:${dt.color || '#4ade80'}"></span>
+                  <span>${esc(dt.name)}</span>
+                  ${dt.maxPeople > 1 ? `<span class="text-xs" style="opacity:0.85">(до ${dt.maxPeople})</span>` : ''}
                 </button>
               `).join('')}
             </div>
           </div>
 
-          <div class="field-label">2. Оберіть військовослужбовця (по відділеннях):</div>
+          <div class="row-between">
+            <div class="field-label">2. Оберіть особовий склад:</div>
+            ${isMulti ? `<span class="badge badge-rec">Обрано: ${assignModal.selectedIds.length} / ${maxPeople}</span>` : `<span class="text-xs text-muted">1 людина (тап — призначити)</span>`}
+          </div>
+
           <div class="stack" style="gap:12px">${groupsHtml}</div>
+
+          ${isMulti ? `
+            <div style="position:sticky;bottom:0;background:var(--card);padding-top:10px;border-top:1px solid var(--border)">
+              <button type="button" class="btn btn-primary btn-full" onclick="confirmAssignSelectedDuties()">
+                Призначити обраних (${assignModal.selectedIds.length} / ${maxPeople})
+              </button>
+            </div>
+          ` : ''}
         </div>
       `);
     }
-
-    function confirmAssignDuty(soldierId) {
-      if (!assignModal.dutyTypeId) {
-        showToast('Оберіть вид наряду', 'error');
-        return;
-      }
-      state.duties.push({
-        id: genId('d'),
-        date: assignModal.date,
-        soldierId,
-        dutyTypeId: assignModal.dutyTypeId
-      });
-      saveState();
-      closeModal();
-      render();
-      showToast('Наряд призначено');
-    }
-
-    // Підвкладка «ОБЛІК»
-    function setStatsSquadFilter(id) {
-      ui.statsSquadFilter = id;
-      render();
-    }
-
-    function setStatsSort(val) {
-      ui.statsSort = val;
-      render();
-    }
-
-    function renderStatsView() {
-      const y = ui.year;
-      const m = ui.month;
-
-      const filtered = state.soldiers
-        .filter(s => ui.statsSquadFilter === 'all' || s.squadId === ui.statsSquadFilter)
-        .map(s => ({ ...s, stats: getSoldierStats(s.id, y, m) }));
-
-      const totalMonth = filtered.reduce((sum, s) => sum + s.stats.monthCount, 0);
-      const totalAllTime = filtered.reduce((sum, s) => sum + s.stats.totalCount, 0);
-      const avgPerSoldier = filtered.length > 0 ? (totalMonth / filtered.length).toFixed(1) : '0.0';
-      const maxMonth = Math.max(1, ...filtered.map(s => s.stats.monthCount));
-
-      const sortMembers = (arr, isKG) => [...arr].sort((a, b) => {
-        if (!isKG) {
-          if (a.isCommander && !b.isCommander) return -1;
-          if (!a.isCommander && b.isCommander) return 1;
-        }
-        if (ui.statsSort === 'month_desc') return b.stats.monthCount - a.stats.monthCount || b.stats.totalCount - a.stats.totalCount || a.name.localeCompare(b.name, 'uk');
-        if (ui.statsSort === 'month_asc') return a.stats.monthCount - b.stats.monthCount || a.stats.totalCount - b.stats.totalCount || a.name.localeCompare(b.name, 'uk');
-        if (ui.statsSort === 'total_desc') return b.stats.totalCount - a.stats.totalCount || b.stats.monthCount - a.stats.monthCount || a.name.localeCompare(b.name, 'uk');
-        return a.name.localeCompare(b.name, 'uk');
-      });
-
-      const orderedSquads = getOrderedSquads().filter(sq => ui.statsSquadFilter === 'all' || sq.id === ui.statsSquadFilter);
-
-      let listHtml = '';
-      if (filtered.length === 0) {
-        listHtml = `<div class="card empty-state">Особового складу ще немає. Додайте бійців у вкладці «Склад».</div>`;
-      } else {
-        listHtml = orderedSquads.map(sq => {
-          const isKG = isGroupCmdSquad(sq);
-          const members = sortMembers(filtered.filter(s => s.squadId === sq.id), isKG);
-          if (members.length === 0) return '';
-          return `
-            <div class="card-flush">
-              <div class="card-header" style="border-left:4px solid ${sq.color}">
-                <div class="row-gap">
-                  <span class="pill-dot" style="background:${sq.color}"></span>
-                  <span class="section-title">${esc(sq.name)} (${members.length})</span>
-                </div>
-                <span class="text-xs text-muted">Міс. / Всього</span>
-              </div>
-              <div>
-                ${members.map(s => renderStatsRow(s, sq, maxMonth)).join('')}
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      return `
-        ${renderMonthBar(false)}
-
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-val">${totalMonth}</div>
-            <div class="kpi-label">За місяць</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-val" style="color:#60a5fa">${avgPerSoldier}</div>
-            <div class="kpi-label">Середнє / боєць</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-val" style="color:#4ade80">${totalAllTime}</div>
-            <div class="kpi-label">За весь час</div>
-          </div>
-        </div>
-
-        ${renderSquadPills(ui.statsSquadFilter, 'setStatsSquadFilter')}
-
-        <div class="row-between">
-          <span class="text-xs text-muted" style="font-weight:600">Всередині відділення:</span>
-          <select class="select" style="width:auto;min-height:38px;padding:6px 10px;font-size:13px" onchange="setStatsSort(this.value)">
-            <option value="month_desc" ${ui.statsSort === 'month_desc' ? 'selected' : ''}>За місяць (більше → менше)</option>
-            <option value="month_asc" ${ui.statsSort === 'month_asc' ? 'selected' : ''}>За місяць (менше → більше)</option>
-            <option value="total_desc" ${ui.statsSort === 'total_desc' ? 'selected' : ''}>За весь час</option>
-            <option value="alpha" ${ui.statsSort === 'alpha' ? 'selected' : ''}>За алфавітом</option>
-          </select>
-        </div>
-
-        <div class="stack">${listHtml}</div>
-      `;
-    }
-
-    function renderStatsRow(s, sq, maxMonth) {
-      const pct = Math.round((s.stats.monthCount / maxMonth) * 100);
-      const st = getStatusObj(s.status);
-      const isKG = isGroupCmdSquad(sq);
-      return `
-        <button class="soldier-row ${s.isCommander || isKG ? 'is-kv' : ''}" onclick="openSoldierHistoryModal('${s.id}')" style="--sq-color:${sq.color}; width:100%; text-align:left;">
-          <div class="soldier-info">
-            <div class="soldier-name-line">
-              <span class="pill-dot" style="background:${sq.color}"></span>
-              <span class="soldier-name">${esc(s.name)}</span>
-              ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
-              ${st.id !== 'active' ? `<span class="badge ${st.cls}">${st.short}</span>` : ''}
-            </div>
-            <div class="soldier-meta">
-              <span>Останній: ${formatDateShort(s.stats.lastDate)}</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill" style="width:${pct}%; background:${sq.color}"></div>
-            </div>
-          </div>
-          <div class="row-gap" style="flex-shrink:0">
-            <div style="text-align:right">
-              <div style="font-size:16px;font-weight:800;color:#fff;line-height:1">${s.stats.monthCount}</div>
-              <div class="text-xs text-muted">міс.</div>
-            </div>
-            <div style="width:1px;height:26px;background:var(--border)"></div>
-            <div style="text-align:right;min-width:34px">
-              <div style="font-size:14px;font-weight:700;color:#4ade80;line-height:1">${s.stats.totalCount}</div>
-              <div class="text-xs text-muted">всього</div>
-            </div>
-          </div>
-        </button>
-      `;
-    }
-
-    function openSoldierHistoryModal(soldierId) {
-      const s = getSoldierById(soldierId);
-      if (!s) return;
-      const sq = getSquadById(s.squadId);
-      const stats = getSoldierStats(s.id, ui.year, ui.month);
-      const history = state.duties
-        .filter(d => d.soldierId === s.id)
-        .sort((a, b) => b.date.localeCompare(a.date));
-
-      openModal(`
-        <div class="modal-header">
-          <div>
-            <div class="modal-title">${esc(s.name)} ${s.isCommander ? '★' : ''}</div>
-            <div class="text-xs text-muted">${esc(sq.name)}${s.rank ? ' • ' + esc(s.rank) : ''}</div>
-          </div>
-          <button class="btn-icon" onclick="closeModal()">✕</button>
-        </div>
-        <div class="modal-body">
-          <div class="grid-2">
-            <div class="kpi-card">
-              <div class="kpi-val">${stats.monthCount}</div>
-              <div class="kpi-label">${MONTHS_UK[ui.month]} ${ui.year}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-val" style="color:#4ade80">${stats.totalCount}</div>
-              <div class="kpi-label">За весь час</div>
-            </div>
-          </div>
-
-          <div class="field-label">Історія нарядів (${history.length}):</div>
-          ${history.length === 0
-            ? `<div class="empty-state">Записів про наряди ще немає.</div>`
-            : `<div class="stack">
-                ${history.map(d => {
-                  const dt = getDutyTypeById(d.dutyTypeId);
-                  return `
-                    <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">
-                      <div>
-                        <div class="text-sm" style="font-weight:600;color:#fff">${formatDateHuman(d.date)}</div>
-                        <span class="badge" style="margin-top:4px;background:${sq.color}22;color:${sq.color};border-color:${sq.color}55">${esc(dt.name)}</span>
-                      </div>
-                      <button class="btn-icon danger" onclick="removeDuty('${d.id}', '${s.id}')" title="Видалити запис">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                      </button>
-                    </div>
-                  `;
-                }).join('')}
-              </div>`
-          }
-        </div>
-      `);
-    }
-
-    // =========================================================================
-    // ВКЛАДКА 2: ЗАДАЧІ
-    // =========================================================================
-    function setTasksTargetFilter(val) {
-      ui.tasksTargetFilter = val;
-      render();
-    }
-
-    function setTasksStatusFilter(val) {
-      ui.tasksStatusFilter = val;
-      render();
-    }
-
-    function getFilteredTasks() {
-      return state.tasks.filter(t => {
-        if (ui.tasksTargetFilter !== 'all') {
-          const matchesSquad = t.targetType === 'squad' && t.targetSquadId === ui.tasksTargetFilter;
-          const isAllCmd = t.targetType === 'all_commanders';
-          if (!matchesSquad && !isAllCmd) return false;
-        }
-        if (ui.tasksStatusFilter === 'active' && t.status !== 'received') return false;
-        if (ui.tasksStatusFilter === 'done' && t.status !== 'done') return false;
-        if (ui.tasksStatusFilter === 'failed' && t.status !== 'failed') return false;
-        return true;
-      });
-    }
-
-    function getTaskTargetDisplay(task) {
-      if (task.targetType === 'all_commanders') {
-        return { label: 'Усім командирам відділень', color: '#a855f7', kvName: '' };
-      }
-      const sq = getSquadById(task.targetSquadId);
-      const kv = getSquadCommander(task.targetSquadId);
-      return {
-        label: formatCommanderTargetLabel(sq),
-        color: sq.color,
-        kvName: kv ? kv.name : ''
-      };
-    }
-
-    function renderTasksTab() {
-      const targetPills = renderSquadPills(ui.tasksTargetFilter, 'setTasksTargetFilter', true);
-
-      const statusPills = `
-        <div class="pills-row">
-          <button class="pill-btn ${ui.tasksStatusFilter === 'all' ? 'active' : ''}" style="--pill-color:#e8eef5" onclick="setTasksStatusFilter('all')">Усі</button>
-          <button class="pill-btn ${ui.tasksStatusFilter === 'active' ? 'active' : ''}" style="--pill-color:#3b82f6" onclick="setTasksStatusFilter('active')">Активні</button>
-          <button class="pill-btn ${ui.tasksStatusFilter === 'done' ? 'active' : ''}" style="--pill-color:#10b981" onclick="setTasksStatusFilter('done')">Виконані</button>
-          <button class="pill-btn ${ui.tasksStatusFilter === 'failed' ? 'active' : ''}" style="--pill-color:#ef4444" onclick="setTasksStatusFilter('failed')">Не виконано</button>
-        </div>
-      `;
-
-      const filteredTasks = getFilteredTasks();
-
-      const tasksHtml = filteredTasks.length === 0
-        ? `<div class="card empty-state">Задач немає. Натисніть «+ Нова задача», щоб додати задачу.</div>`
-        : filteredTasks.map(t => {
-            const target = getTaskTargetDisplay(t);
-            const isNoteOpen = Boolean(ui.openNotes[t.id]);
-            const hasNote = Boolean(t.note && t.note.trim());
-
-            return `
-              <div class="task-card status-${t.status}" style="--sq-color:${target.color}">
-                <div class="task-top">
-                  <div>
-                    <span class="badge" style="background:${target.color}22; color:${target.color}; border-color:${target.color}55; white-space:normal; line-height:1.25">
-                      ${esc(target.label)}
-                    </span>
-                    ${target.kvName ? `<div class="text-xs text-muted" style="margin-top:3px">КВ: ${esc(target.kvName)}</div>` : ''}
-                  </div>
-                  <div class="row-gap" style="flex-shrink:0">
-                    <button class="btn-icon" style="width:34px;height:34px" onclick="openTaskModal('${t.id}')" title="Редагувати">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button class="btn-icon danger" style="width:34px;height:34px" onclick="promptDeleteTask('${t.id}')" title="Видалити">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="task-text">${esc(t.text)}</div>
-
-                <div class="task-meta">
-                  <span>Поставив: <strong style="color:#fff">${esc(t.issuer || 'Не вказано')}</strong></span>
-                  <span>• ${esc(t.createdAt || '')}</span>
-                  ${t.deadline ? `<span>• Термін: <strong style="color:#fbbf24">${formatDeadline(t.deadline)}</strong></span>` : ''}
-                </div>
-
-                <div class="task-status-grid">
-                  <button class="status-tap-btn ${t.status === 'received' ? 'active-received' : ''}" onclick="setTaskStatus('${t.id}', 'received')">Отримав задачу</button>
-                  <button class="status-tap-btn ${t.status === 'done' ? 'active-done' : ''}" onclick="setTaskStatus('${t.id}', 'done')">Виконано</button>
-                  <button class="status-tap-btn ${t.status === 'failed' ? 'active-failed' : ''}" onclick="setTaskStatus('${t.id}', 'failed')">Не виконано</button>
-                </div>
-
-                <div>
-                  <button class="note-toggle-btn ${hasNote ? 'has-note' : ''}" onclick="toggleTaskNote('${t.id}')">
-                    <span>${hasNote ? '● Зауваження (є запис)' : 'Зауваження'}</span>
-                    <span>${isNoteOpen ? '▲' : '▼'}</span>
-                  </button>
-                  ${isNoteOpen ? `
-                    <div class="note-box" style="margin-top:6px">
-                      <textarea id="note-input-${t.id}" class="textarea" style="min-height:68px" placeholder="Вкажіть причину невиконання або коментар...">${esc(t.note || '')}</textarea>
-                      <div class="row-between">
-                        <span class="text-xs text-muted">${t.status === 'failed' ? 'Вкажіть причину невиконання' : 'Коментар до задачі'}</span>
-                        <button class="btn btn-sm btn-primary" onclick="saveTaskNote('${t.id}')">Зберегти</button>
-                      </div>
-                    </div>
-                  ` : (hasNote ? `<div class="text-xs" style="margin-top:6px;padding:7px 10px;border-radius:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);color:#fde68a;white-space:pre-wrap">${esc(t.note)}</div>` : '')}
-                </div>
-              </div>
-            `;
-          }).join('');
-
-      return `
-        <div class="grid-2">
-          <button class="btn btn-primary" onclick="openTaskModal()">+ Нова задача</button>
-          <button class="btn btn-secondary" onclick="copyActiveTasks()">Скопіювати активні</button>
-        </div>
-
-        ${targetPills}
-        ${statusPills}
-
-        <div class="stack">${tasksHtml}</div>
-      `;
-    }
-
-    function setTaskStatus(taskId, status) {
-      const t = state.tasks.find(x => x.id === taskId);
-      if (!t) return;
-      t.status = status;
-      if (status === 'failed') ui.openNotes[taskId] = true;
-      saveState();
-      render();
-      if (status === 'failed') {
-        setTimeout(() => document.getElementById(`note-input-${taskId}`)?.focus(), 60);
-      }
-    }
-
-    function toggleTaskNote(taskId) {
-      ui.openNotes[taskId] = !ui.openNotes[taskId];
-      render();
-    }
-
-    function saveTaskNote(taskId) {
-      const t = state.tasks.find(x => x.id === taskId);
-      const input = document.getElementById(`note-input-${taskId}`);
-      if (!t || !input) return;
-      t.note = input.value.trim();
-      ui.openNotes[taskId] = false;
-      saveState();
-      render();
-      showToast('Зауваження збережено');
-    }
-
-    function openTaskModal(taskId = null) {
-      const existing = taskId ? state.tasks.find(t => t.id === taskId) : null;
-      const squadTargets = getOrderedSquads().filter(sq => !isGroupCmdSquad(sq));
-      let currentTargetVal = 'all_commanders';
-      if (existing) {
-        currentTargetVal = existing.targetType === 'squad' ? `squad:${existing.targetSquadId}` : 'all_commanders';
-      } else if (ui.tasksTargetFilter !== 'all' && ui.tasksTargetFilter !== GROUP_CMD_SQUAD_ID) {
-        currentTargetVal = `squad:${ui.tasksTargetFilter}`;
-      } else if (squadTargets.length > 0) {
-        currentTargetVal = `squad:${squadTargets[0].id}`;
-      }
-
+// ... existing code ... -->
       const targetOptions = [
         ...squadTargets.map(sq => {
           const kv = getSquadCommander(sq.id);
@@ -2473,8 +566,6 @@
         }),
         `<option value="all_commanders" ${currentTargetVal === 'all_commanders' ? 'selected' : ''}>Усім командирам відділень</option>`
       ].join('');
-
-      const groupCmdSoldier = getGroupCommanderSoldier();
 
       openModal(`
         <div class="modal-header">
@@ -2490,119 +581,19 @@
           <div class="field">
             <label class="field-label" for="task-issuer">Хто поставив</label>
             <input id="task-issuer" class="input" type="text" required value="${esc(existing?.issuer || '')}" placeholder="Введіть вручну..." />
-            ${groupCmdSoldier ? `
-              <div class="chips-wrap" style="margin-top:2px">
-                <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('task-issuer').value = '${esc(groupCmdSoldier.name)}'">
-                  ★ КГ: ${esc(groupCmdSoldier.name)}
-                </button>
-              </div>
-            ` : ''}
           </div>
 
           <div class="field">
             <label class="field-label" for="task-text">Суть задачі</label>
             <textarea id="task-text" class="textarea" required placeholder="Опишіть задачу...">${esc(existing?.text || '')}</textarea>
           </div>
-
-          <div class="field">
-            <label class="field-label" for="task-deadline">Термін виконання (необов'язково)</label>
-            <input id="task-deadline" class="input" type="datetime-local" value="${esc(existing?.deadline || '')}" />
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-full">${existing ? 'Зберегти зміни' : 'Поставити задачу'}</button>
-        </form>
-      `);
-      setTimeout(() => document.getElementById('task-issuer')?.focus(), 60);
-    }
-
-    function saveTask(e, taskId) {
-      e.preventDefault();
-      const targetVal = document.getElementById('task-target').value;
-      const issuer = document.getElementById('task-issuer').value.trim();
-      const text = document.getElementById('task-text').value.trim();
-      const deadline = document.getElementById('task-deadline').value;
-      if (!text || !issuer) return;
-
-      let targetType = 'all_commanders';
-      let targetSquadId = null;
-      if (targetVal.startsWith('squad:')) {
-        targetType = 'squad';
-        targetSquadId = targetVal.slice(6);
-      }
-
-      if (taskId) {
-        const t = state.tasks.find(x => x.id === taskId);
-        if (t) {
-          t.targetType = targetType;
-          t.targetSquadId = targetSquadId;
-          t.text = text;
-          t.issuer = issuer;
-          t.deadline = deadline;
-        }
-      } else {
-        state.tasks.unshift({
-          id: genId('t'),
-          targetType,
-          targetSquadId,
-          text,
-          issuer,
-          deadline,
-          status: 'received',
-          note: '',
-          createdAt: toDateTimeHuman(new Date())
-        });
-      }
-      saveState();
-      closeModal();
-      render();
-      showToast(taskId ? 'Задачу оновлено' : 'Задачу поставлено');
-    }
-
-    function promptDeleteTask(taskId) {
-      showConfirm(
-        'Видалити задачу?',
-        'Задача та зауваження до неї будуть видалені.',
-        'Видалити',
-        () => {
-          state.tasks = state.tasks.filter(t => t.id !== taskId);
-          saveState();
-          render();
-          showToast('Задачу видалено');
-        }
-      );
-    }
-
-    function copyActiveTasks() {
-      const list = state.tasks.filter(t => {
-        if (t.status === 'done') return false;
-        if (ui.tasksTargetFilter !== 'all') {
-          const matchesSquad = t.targetType === 'squad' && t.targetSquadId === ui.tasksTargetFilter;
-          const isAllCmd = t.targetType === 'all_commanders';
-          if (!matchesSquad && !isAllCmd) return false;
-        }
-        return true;
-      });
-      if (!list.length) {
-        showToast('Немає активних задач для копіювання', 'error');
-        return;
-      }
-      const statusMap = { received: 'Отримав задачу', done: 'Виконано', failed: 'Не виконано' };
-      const lines = [`Активні задачі (${formatDateShort(toISODate(new Date()))}):`];
-      list.forEach((t, i) => {
-        const target = getTaskTargetDisplay(t);
-        lines.push(`${i + 1}. [${target.label}${target.kvName ? ' — ' + target.kvName : ''}] ${t.text}`);
-        lines.push(`   Поставив: ${t.issuer} | Статус: ${statusMap[t.status]}${t.deadline ? ' | Термін: ' + formatDeadline(t.deadline) : ''}`);
-        if (t.note) lines.push(`   Зауваження: ${t.note}`);
-      });
-      copyToClipboard(lines.join('\n'), 'Активні задачі скопійовано');
-    }
-
+<!-- ... existing code ... -->
     // =========================================================================
-    // ВКЛАДКА 3: РОЗХІД (КЛЮЧОВЕ ОНОВЛЕННЯ v2.5 — АВТОПІДТЯГУВАННЯ + ПРІЗВИЩА В ДУЖКАХ)
+    // ВКЛАДКА 3: РОЗХІД (v2.6 — ОЧИСТИТИ РОЗХІД, УНІКАЛЬНІСТЬ ПРІЗВИЩ, АКОРДЕОН)
     // =========================================================================
     function ensureRozkhidDay(dateISO) {
       if (!state.rozkhid[dateISO] || typeof state.rozkhid[dateISO] !== 'object') {
-        state.rozkhid[dateISO] = { overrides: {}, extra: {} };
+        state.rozkhid[dateISO] = { cleared: false, overrides: {}, extra: {} };
       }
       if (!state.rozkhid[dateISO].overrides) state.rozkhid[dateISO].overrides = {};
       if (!state.rozkhid[dateISO].extra) state.rozkhid[dateISO].extra = {};
@@ -2633,156 +624,110 @@
       if (previewEl) previewEl.textContent = generateRozkhidText();
     }
 
-    // Ефективний статус бійця на конкретну дату:
-    // 1) Ручна правка за день (overrides)
-    // 2) Авто: наряд на цю дату -> 'Н'
-    // 3) Авто: постійний статус у «Складі» (Ш, Л, Вд, Вп, Г, Пк, Хв)
-    // 4) Авто: наряд попередньої доби -> 'Стародобовий'
-    // 5) Інакше -> 'Вн'
+    // Ефективний статус бійця на конкретну дату (суворо ОДИН статус — жодних пересічень):
+    // 1) Ручна відмітка на цей день (overrides)
+    // 2) Якщо дата очищена кнопкою «Очистити розхід» -> 'Вн'
+    // 3) Авто: сьогоднішній наряд -> 'Н'
+    // 4) Авто: вчорашній наряд -> 'Стародобовий'
+    // 5) Авто: постійний статус зі «Складу» (Ш, Л, Вд, Вп, Г, Пк, Хв)
+    // 6) Інакше -> 'Вн'
     function getEffectiveRozkhidStatus(dateISO, soldier, todayDutySet, yestDutySet) {
       const dayData = state.rozkhid[dateISO];
       if (dayData && dayData.overrides && dayData.overrides[soldier.id]) {
         return dayData.overrides[soldier.id];
       }
+      if (dayData && dayData.cleared) {
+        return 'Вн';
+      }
       if (todayDutySet.has(soldier.id)) return 'Н';
+      if (yestDutySet.has(soldier.id)) return 'Стародобовий';
       const perm = normalizeSoldierStatus(soldier.status);
       if (PERMANENT_ABSENT_CODES.has(perm)) return perm;
-      if (yestDutySet.has(soldier.id)) return 'Стародобовий';
       return 'Вн';
     }
-
-    // Повний розрахунок розходу за вибрану дату (зі збереженням порядку відділень)
-    function computeRozkhidData(dateISO) {
-      const yestISO = addDaysISO(dateISO, -1);
-      const todayDutySet = new Set(state.duties.filter(d => d.date === dateISO).map(d => d.soldierId));
-      const yestDutySet = new Set(state.duties.filter(d => d.date === yestISO).map(d => d.soldierId));
-      const dayData = state.rozkhid[dateISO] || { overrides: {}, extra: {} };
-      const surnameCounts = getSurnameCountsMap();
-
-      const buckets = {};
-      ROZKHID_ABSENT_CATEGORIES.forEach(cat => {
-        buckets[cat.code] = { soldiers: [], extra: Number(dayData.extra?.[cat.code] || 0) };
-      });
-
-      const orderedSoldiers = [];
-      for (const sq of getOrderedSquads()) {
-        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
-        orderedSoldiers.push(...members);
-      }
-
-      const statusBySoldier = {};
-      for (const s of orderedSoldiers) {
-        const code = getEffectiveRozkhidStatus(dateISO, s, todayDutySet, yestDutySet);
-        statusBySoldier[s.id] = code;
-        if (buckets[code]) {
-          buckets[code].soldiers.push({
-            id: s.id,
-            fullName: s.name,
-            reportName: formatReportSurname(s, surnameCounts)
-          });
-        }
-      }
-
-      const totalList = state.soldiers.length;
-      let totalAbsent = 0;
-      const categories = ROZKHID_ABSENT_CATEGORIES.map(cat => {
-        const b = buckets[cat.code];
-        const count = Math.max(0, b.soldiers.length + b.extra);
-        totalAbsent += count;
-        return {
-          code: cat.code,
-          hint: cat.hint,
-          soldiers: b.soldiers,
-          extra: b.extra,
-          count
-        };
-      });
-
-      const presentCount = Math.max(0, totalList - totalAbsent);
-      return { totalList, presentCount, totalAbsent, categories, statusBySoldier };
-    }
-
-    // Генерація готового тексту рапорту за точним шаблоном v2.5 (з прізвищами в дужках)
-    function generateRozkhidText() {
-      const data = computeRozkhidData(ui.rozkhidDate);
-      const groupNum = (state.groupNumber || '223').trim() || '223';
-      const lines = [
-        groupNum,
-        `З/с - ${data.totalList}`,
-        `Вн - ${data.presentCount}`
-      ];
-
-      for (const cat of data.categories) {
-        if (ui.rozkhidHideZeros && cat.count === 0) continue;
-        let line = `${cat.code} - ${cat.count}`;
-        if (ui.rozkhidIncludeNames && cat.count > 0 && cat.soldiers.length > 0) {
-          const namesStr = cat.soldiers.map(x => x.reportName).join(', ');
-          line += ` (${namesStr})`;
-        }
-        lines.push(line);
-      }
-
-      return lines.join('\n');
-    }
-
-    function copyRozkhid() {
-      copyToClipboard(generateRozkhidText(), 'Розхід скопійовано у буфер обміну');
-    }
-
-    // Коригування кількості кнопками «-» та «+»
-    function adjustRozkhidCount(catCode, delta) {
-      const dayData = ensureRozkhidDay(ui.rozkhidDate);
-      const data = computeRozkhidData(ui.rozkhidDate);
-      const cat = data.categories.find(c => c.code === catCode);
-      if (!cat) return;
-
-      if (delta > 0) {
-        dayData.extra[catCode] = (Number(dayData.extra[catCode] || 0)) + 1;
-      } else if (delta < 0) {
-        const curExtra = Number(dayData.extra[catCode] || 0);
-        if (curExtra > 0) {
-          dayData.extra[catCode] = curExtra - 1;
-        } else if (cat.soldiers.length > 0) {
-          // Знімаємо останнього бійця з цієї категорії на сьогодні
-          const lastSoldier = cat.soldiers[cat.soldiers.length - 1];
-          dayData.overrides[lastSoldier.id] = 'Вн';
-        }
-      }
-      saveState();
-      render();
+// ... existing code ... -->
+    function promptClearRozkhidDay() {
+      showConfirm(
+        'Очистити розхід?',
+        `Усі пункти відсутності та прив'язані прізвища на ${formatDateHuman(ui.rozkhidDate)} будуть обнулені (Вн = З/с). Ви зможете повернути автопідтягування кнопкою «Автопідтягнути».`,
+        'Очистити розхід',
+        () => {
+          state.rozkhid[ui.rozkhidDate] = { cleared: true, overrides: {}, extra: {} };
+          saveState();
+          render();
+          showToast('Розхід на обрану дату очищено');
+        },
+        true
+      );
     }
 
     function resetRozkhidDayOverrides() {
       delete state.rozkhid[ui.rozkhidDate];
       saveState();
       render();
-      showToast('Відновлено автоматичний розрахунок з нарядів та складу');
+      showToast('Автопідтягнуто з графіка нарядів та складу');
     }
 
-    // Модальне вікно «ПІБ» для поіменного вибору бійців (згруповано по відділеннях)
+    // Модальне вікно «ПІБ» для поіменного вибору бійців — АКОРДЕОН по відділеннях + пошук
     function openRozkhidCategoryModal(catCode) {
-      const catMeta = ROZKHID_ABSENT_CATEGORIES.find(x => x.code === catCode) || { code: catCode, hint: '' };
+      ui.rozkhidModalCat = catCode;
+      ui.rozkhidModalSearch = '';
+      ui.rozkhidModalOpenSquads = {}; // За замовчуванням усі відділення згорнуті
+      renderRozkhidCategoryModal();
+    }
+
+    function toggleRozkhidModalSquad(squadId) {
+      ui.rozkhidModalOpenSquads[squadId] = !ui.rozkhidModalOpenSquads[squadId];
+      renderRozkhidCategoryModal();
+    }
+
+    function onRozkhidModalSearch(val) {
+      ui.rozkhidModalSearch = val;
+      const box = document.getElementById('rozkhid-modal-groups');
+      if (box) box.innerHTML = buildRozkhidModalGroupsHtml();
+    }
+
+    function buildRozkhidModalGroupsHtml() {
+      const catCode = ui.rozkhidModalCat;
       const dateISO = ui.rozkhidDate;
       const data = computeRozkhidData(dateISO);
       const orderedSquads = getOrderedSquads();
+      const query = ui.rozkhidModalSearch.trim().toLowerCase();
 
-      const groupsHtml = orderedSquads.map(sq => {
+      if (state.soldiers.length === 0) {
+        return `<div class="empty-state">Немає особового складу. Додайте бійців у розділі «Склад».</div>`;
+      }
+
+      let foundAny = false;
+      const html = orderedSquads.map(sq => {
         const isKG = isGroupCmdSquad(sq);
-        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
-        if (members.length === 0) return '';
+        const allMembers = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
+        if (allMembers.length === 0) return '';
 
-        const rows = members.map(s => {
+        const filteredMembers = query
+          ? allMembers.filter(s => s.name.toLowerCase().includes(query) || (s.rank && s.rank.toLowerCase().includes(query)))
+          : allMembers;
+
+        if (query && filteredMembers.length === 0) return '';
+        foundAny = true;
+
+        const selectedInCatCount = allMembers.filter(s => (data.statusBySoldier[s.id] || 'Вн') === catCode).length;
+        const isOpen = query ? true : Boolean(ui.rozkhidModalOpenSquads[sq.id]);
+
+        const rows = filteredMembers.map(s => {
           const curStatus = data.statusBySoldier[s.id] || 'Вн';
           const isChecked = curStatus === catCode;
+          const isInOtherCat = curStatus !== 'Вн' && curStatus !== catCode;
           return `
-            <label class="checkbox-card" style="border-left:4px solid ${sq.color}; padding:9px 11px;">
+            <label class="checkbox-card" style="border-left:4px solid ${sq.color}; padding:9px 11px; border-radius:0; border-top:none; border-right:none;">
               <div class="soldier-info">
                 <div class="soldier-name-line">
                   <span class="soldier-name">${esc(s.name)}</span>
                   ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
+                  ${isInOtherCat ? `<span class="badge badge-warn">Вже у: ${esc(curStatus)}</span>` : ''}
                 </div>
                 <div class="soldier-meta">
-                  <span>Статус: <strong style="color:${curStatus === 'Вн' ? '#34d399' : '#fbbf24'}">${esc(curStatus)}</strong></span>
+                  ${isChecked ? `<span style="color:#4ade80;font-weight:700">Обрано у «${esc(catCode)}»</span>` : (isInOtherCat ? `<span>При виборі переміститься сюди</span>` : `<span>В наявності (Вн)</span>`)}
                 </div>
               </div>
               <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSoldierInRozkhidCategory('${s.id}', '${esc(catCode)}', this.checked)" />
@@ -2791,54 +736,77 @@
         }).join('');
 
         return `
-          <div class="stack" style="gap:6px">
-            <div class="row-gap" style="padding:4px 2px 0">
-              <span class="pill-dot" style="background:${sq.color}"></span>
-              <span class="section-title" style="color:${sq.color}">${esc(sq.name)}</span>
+          <div class="card-flush">
+            <div class="accordion-header ${isOpen ? 'open' : ''}" style="border-left:4px solid ${sq.color}; min-height:48px; padding:10px 12px;" onclick="toggleRozkhidModalSquad('${sq.id}')">
+              <div class="row-gap" style="min-width:0">
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="pill-dot" style="background:${sq.color}"></span>
+                <span class="section-title" style="color:${sq.color}">${esc(sq.name)}</span>
+              </div>
+              <span class="pill-count" style="${selectedInCatCount > 0 ? 'background:rgba(74,222,128,0.2);color:#86efac;font-weight:700' : ''}">${selectedInCatCount} / ${allMembers.length}</span>
             </div>
-            ${rows}
+            ${isOpen ? `<div>${rows}</div>` : ''}
           </div>
         `;
       }).join('');
+
+      if (query && !foundAny) {
+        return `<div class="empty-state">За запитом «${esc(ui.rozkhidModalSearch)}» нікого не знайдено.</div>`;
+      }
+      return html;
+    }
+
+    function renderRozkhidCategoryModal() {
+      const catCode = ui.rozkhidModalCat;
+      const catMeta = ROZKHID_ABSENT_CATEGORIES.find(x => x.code === catCode) || { code: catCode, hint: '' };
 
       openModal(`
         <div class="modal-header">
           <div>
             <div class="modal-title">${esc(catMeta.code)}</div>
-            <div class="text-xs text-muted">${formatDateHuman(dateISO)} • Поіменний вибір по відділеннях</div>
+            <div class="text-xs text-muted">${formatDateHuman(ui.rozkhidDate)} • Відділення відкриваються кліком</div>
           </div>
           <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
         <div class="modal-body">
-          ${state.soldiers.length === 0
-            ? `<div class="empty-state">Немає особового складу. Додайте бійців у розділі «Склад».</div>`
-            : `<div class="stack" style="gap:12px">${groupsHtml}</div>`
-          }
+          <div class="search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="input" type="text" value="${esc(ui.rozkhidModalSearch)}" placeholder="Швидкий пошук по ПІБ..." oninput="onRozkhidModalSearch(this.value)" />
+          </div>
+          <div id="rozkhid-modal-groups" class="stack" style="gap:8px">
+            ${buildRozkhidModalGroupsHtml()}
+          </div>
           <button class="btn btn-primary btn-full" onclick="closeModal()">Готово</button>
         </div>
       `);
     }
 
     function toggleSoldierInRozkhidCategory(soldierId, catCode, checked) {
-      const dayData = ensureRozkhidDay(ui.rozkhidDate);
+      const dateISO = ui.rozkhidDate;
+      const beforeData = computeRozkhidData(dateISO);
+      const prevStatus = beforeData.statusBySoldier[soldierId] || 'Вн';
+      const dayData = ensureRozkhidDay(dateISO);
+
       if (checked) {
         dayData.overrides[soldierId] = catCode;
+        if (prevStatus !== 'Вн' && prevStatus !== catCode) {
+          const s = getSoldierById(soldierId);
+          const shortName = s ? formatReportSurname(s, getSurnameCountsMap()) : 'Бійця';
+          showToast(`${shortName} переміщено з «${prevStatus}» у «${catCode}»`);
+        }
       } else {
         dayData.overrides[soldierId] = 'Вн';
       }
+
       saveState();
       render();
-      openRozkhidCategoryModal(catCode);
+      const box = document.getElementById('rozkhid-modal-groups');
+      if (box) box.innerHTML = buildRozkhidModalGroupsHtml();
     }
 
     function renderRozkhidTab() {
       const data = computeRozkhidData(ui.rozkhidDate);
       const previewText = generateRozkhidText();
-      const hasManualEdits = Boolean(
-        state.rozkhid[ui.rozkhidDate] &&
-        (Object.keys(state.rozkhid[ui.rozkhidDate].overrides || {}).length > 0 ||
-         Object.values(state.rozkhid[ui.rozkhidDate].extra || {}).some(v => v > 0))
-      );
 
       const categoriesHtml = data.categories.map(cat => {
         const namesPreview = cat.soldiers.map(x => x.reportName).join(', ');
@@ -2854,7 +822,9 @@
               <button class="step-btn" onclick="adjustRozkhidCount('${esc(cat.code)}', -1)" aria-label="Зменшити">−</button>
               <span class="step-val" style="color:${cat.count > 0 ? '#fbbf24' : 'var(--muted)'}">${cat.count}</span>
               <button class="step-btn" onclick="adjustRozkhidCount('${esc(cat.code)}', 1)" aria-label="Збільшити">+</button>
-              <button class="btn btn-sm btn-secondary" style="margin-left:4px;min-height:34px;padding:4px 9px" onclick="openRozkhidCategoryModal('${esc(cat.code)}')">ПІБ</button>
+              <button class="btn btn-sm btn-secondary" style="margin-left:4px;min-height:34px;padding:4px 9px" onclick="openRozkhidCategoryModal('${esc(cat.code)}')">
+                ПІБ${cat.soldiers.length > 0 ? ' (' + cat.soldiers.length + ')' : ''}
+              </button>
             </div>
           </div>
         `;
@@ -2873,7 +843,7 @@
           </button>
         </div>
 
-        <!-- Номер групи та зведення З/с і Вн -->
+        <!-- Номер групи, кнопки дій та зведення З/с і Вн -->
         <div class="card stack">
           <div class="row-between">
             <label for="rozkhid-group-input" class="field-label" style="white-space:nowrap">Номер групи:</label>
@@ -2889,13 +859,17 @@
               <div class="kpi-label">Вн (Відсутні: ${data.totalAbsent})</div>
             </div>
           </div>
+          <div class="grid-2">
+            <button class="btn btn-danger" onclick="promptClearRozkhidDay()">Очистити розхід</button>
+            <button class="btn btn-secondary" onclick="resetRozkhidDayOverrides()">Автопідтягнути</button>
+          </div>
         </div>
 
         <!-- Позиції відсутності (автопідтягування + ручні лічильники + вибір ПІБ) -->
         <div class="card stack">
           <div class="row-between">
             <span class="section-title" style="color:var(--muted)">Розподіл відсутніх</span>
-            ${hasManualEdits ? `<button class="btn btn-sm btn-secondary" onclick="resetRozkhidDayOverrides()">Авто-синхр.</button>` : `<span class="text-xs text-muted">Авто з нарядів і складу</span>`}
+            <span class="text-xs text-muted">1 боєць = 1 пункт</span>
           </div>
           <div class="stack" style="gap:6px">${categoriesHtml}</div>
         </div>
@@ -2921,332 +895,21 @@
         </div>
       `;
     }
-
-    // =========================================================================
-    // ВКЛАДКА 4: СКЛАД (КОМАНДИР ГРУПИ ПЕРШИЙ + ВІДДІЛЕННЯ + АКОРДЕОН ПРІЗВИЩ)
-    // =========================================================================
-    function setPersonnelSquadFilter(id) {
-      ui.personnelSquadFilter = id;
-      if (id !== 'all') ui.expandedPersonnelSquads[id] = true;
-      render();
-    }
-
-    function togglePersonnelSquad(squadId) {
-      ui.expandedPersonnelSquads[squadId] = !ui.expandedPersonnelSquads[squadId];
-      render();
-    }
-
-    function toggleSoldierCard(soldierId) {
-      ui.expandedSoldiers[soldierId] = !ui.expandedSoldiers[soldierId];
-      render();
-    }
-
-    function quickSetSoldierStatus(soldierId, newStatus) {
-      const s = getSoldierById(soldierId);
-      if (!s) return;
-      s.status = newStatus;
-      saveState();
-      render();
-      const st = getStatusObj(newStatus);
-      showToast(`${s.name}: ${st.label}`);
-    }
-
-    function toggleAllPersonnelSquads() {
-      const ordered = getOrderedSquads();
-      const allOpen = ordered.length > 0 && ordered.every(sq => ui.expandedPersonnelSquads[sq.id]);
-      ordered.forEach(sq => { ui.expandedPersonnelSquads[sq.id] = !allOpen; });
-      render();
-    }
-
-    function onPersonnelSearchInput(val) {
-      ui.personnelSearch = val;
-      const container = document.getElementById('personnel-list-container');
-      if (container) container.innerHTML = buildPersonnelAccordionHtml();
-      const clearBtn = document.getElementById('personnel-search-clear');
-      if (clearBtn) clearBtn.classList.toggle('hidden', !val);
-    }
-
-    function clearPersonnelSearch() {
-      ui.personnelSearch = '';
-      render();
-    }
-
-    function renderPersonnelTab() {
-      const ordered = getOrderedSquads();
-      const allOpen = ordered.length > 0 && ordered.every(sq => ui.expandedPersonnelSquads[sq.id]);
-
-      const filterPills = `
-        <div class="pills-row">
-          <button class="pill-btn ${ui.personnelSquadFilter === 'all' ? 'active' : ''}" style="--pill-color:#4ade80" onclick="setPersonnelSquadFilter('all')">
-            <span>Всі</span>
-            <span class="pill-count">${state.soldiers.length}</span>
-          </button>
-          ${ordered.map(sq => {
-            const cnt = state.soldiers.filter(s => s.squadId === sq.id).length;
-            return `
-              <button class="pill-btn ${ui.personnelSquadFilter === sq.id ? 'active' : ''}" style="--pill-color:${sq.color}" onclick="setPersonnelSquadFilter('${sq.id}')">
-                <span class="pill-dot" style="background:${sq.color}"></span>
-                <span>${esc(getSquadTabLabel(sq))}</span>
-                <span class="pill-count">${cnt}</span>
-              </button>
-            `;
-          }).join('')}
-        </div>
-      `;
-
-      return `
-        ${filterPills}
-
-        <div class="row-gap">
-          <div class="search-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input id="personnel-search-input" class="input" type="text" value="${esc(ui.personnelSearch)}" placeholder="Пошук по ПІБ..." oninput="onPersonnelSearchInput(this.value)" />
-            <button id="personnel-search-clear" class="search-clear ${ui.personnelSearch ? '' : 'hidden'}" onclick="clearPersonnelSearch()" aria-label="Очистити">✕</button>
-          </div>
-          <button class="btn btn-sm btn-secondary" style="flex-shrink:0;min-height:44px" onclick="toggleAllPersonnelSquads()">
-            ${allOpen ? 'Згорнути всі' : 'Розгорнути всі'}
-          </button>
-        </div>
-
-        <div class="text-xs text-muted" style="padding:0 2px">
-          Всього у складі: <strong style="color:#fff">${state.soldiers.length}</strong> • Натисніть на відділення або прізвище, щоб розгорнути
-        </div>
-
-        <div id="personnel-list-container" class="stack">
-          ${buildPersonnelAccordionHtml()}
-        </div>
-
-        <button class="btn btn-secondary btn-full" onclick="openSquadModal()">+ Додати нове відділення</button>
-      `;
-    }
-
-    function buildPersonnelAccordionHtml() {
-      const ordered = getOrderedSquads().filter(sq => ui.personnelSquadFilter === 'all' || sq.id === ui.personnelSquadFilter);
-      if (ordered.length === 0) {
-        return `<div class="card empty-state">Немає відділень. Натисніть кнопку нижче, щоб створити відділення.</div>`;
-      }
-
-      const query = ui.personnelSearch.trim().toLowerCase();
-      let totalShown = 0;
-
-      const html = ordered.map(sq => {
-        const isKG = isGroupCmdSquad(sq);
-        const allMembers = state.soldiers.filter(s => s.squadId === sq.id);
-        const filteredMembers = sortSquadMembers(
-          allMembers.filter(s => !query || s.name.toLowerCase().includes(query) || (s.rank && s.rank.toLowerCase().includes(query)))
-        );
-
-        if (query && filteredMembers.length === 0) return '';
-        totalShown += filteredMembers.length;
-
-        const isOpen = query ? true : (ui.personnelSquadFilter === sq.id ? true : Boolean(ui.expandedPersonnelSquads[sq.id]));
-
-        return `
-          <div class="card-flush">
-            <div class="accordion-header ${isOpen ? 'open' : ''}" style="border-left:4px solid ${sq.color}; ${isKG ? 'background:linear-gradient(90deg, rgba(234,179,8,0.14) 0%, rgba(13,18,23,0.75) 75%);' : ''}" onclick="togglePersonnelSquad('${sq.id}')">
-              <div class="row-gap" style="min-width:0;flex:1">
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                <span class="pill-dot" style="background:${sq.color}"></span>
-                <div style="min-width:0">
-                  <div class="section-title" style="color:${isKG ? '#fde047' : '#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sq.name)}</div>
-                  <div class="text-xs text-muted">${isKG ? (allMembers.length ? esc(allMembers[0].name) : 'Не призначено') : 'Особового складу: ' + allMembers.length}</div>
-                </div>
-              </div>
-              <button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="event.stopPropagation(); openSoldierModal(null, '${sq.id}')">${isKG ? '+ Додати' : '+ Додати бійця'}</button>
+// ... existing code ... -->
+          <div class="field">
+            <label class="field-label" for="s-rank">Звання (використовується при копіюванні наряду)</label>
+            <input id="s-rank" class="input" type="text" value="${esc(existing?.rank || '')}" placeholder="Наприклад: солдат, мол. сержант" />
+            <div class="chips-wrap" style="margin-top:2px">
+              ${QUICK_RANKS.map(r => `
+                <button type="button" class="btn btn-sm btn-secondary" style="min-height:32px;padding:4px 9px" onclick="document.getElementById('s-rank').value='${r}'">${r}</button>
+              `).join('')}
             </div>
-
-            ${isOpen ? `
-              <div>
-                ${filteredMembers.length === 0
-                  ? `<div class="empty-state" style="padding:18px">${isKG ? 'Командира групи ще не додано' : 'У відділенні поки немає бійців'}</div>`
-                  : filteredMembers.map(s => {
-                      const st = getStatusObj(s.status);
-                      const isCardOpen = Boolean(ui.expandedSoldiers[s.id]);
-                      const stats = getSoldierStats(s.id, ui.year, ui.month);
-                      return `
-                        <div style="border-bottom:1px solid rgba(39,50,64,0.65); border-left:4px solid ${sq.color}; background:${s.isCommander || isKG ? 'linear-gradient(90deg, rgba(245,158,11,0.09) 0%, rgba(21,28,36,1) 72%)' : 'var(--card)'}">
-                          <button type="button" onclick="toggleSoldierCard('${s.id}')" style="width:100%; text-align:left; padding:11px 13px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                            <div class="soldier-info">
-                              <div class="soldier-name-line">
-                                <span class="soldier-name">${esc(s.name)}</span>
-                                ${isKG ? `<span class="badge badge-kg">★ КГ</span>` : (s.isCommander ? `<span class="badge badge-kv">★ КВ</span>` : '')}
-                                <span class="badge ${st.cls}">${st.short}</span>
-                              </div>
-                              ${s.rank ? `<div class="soldier-meta">${esc(s.rank)}</div>` : ''}
-                            </div>
-                            <span style="color:var(--muted);font-size:12px;flex-shrink:0">${isCardOpen ? '▲' : '▼'}</span>
-                          </button>
-                          ${isCardOpen ? `
-                            <div style="padding:0 13px 13px 13px; display:flex; flex-direction:column; gap:10px;">
-                              <div class="grid-2">
-                                <div style="padding:8px 10px;border-radius:9px;background:var(--bg);border:1px solid var(--border)">
-                                  <div class="text-xs text-muted">Нарядів (${MONTHS_UK[ui.month]} / всього)</div>
-                                  <div style="font-size:14px;font-weight:800;color:#fff;margin-top:2px">${stats.monthCount} / <span style="color:#4ade80">${stats.totalCount}</span></div>
-                                </div>
-                                <div style="padding:8px 10px;border-radius:9px;background:var(--bg);border:1px solid var(--border)">
-                                  <div class="text-xs text-muted">Останній наряд</div>
-                                  <div style="font-size:13px;font-weight:700;color:#fff;margin-top:2px">${formatDateShort(stats.lastDate)}</div>
-                                </div>
-                              </div>
-
-                              <div>
-                                <div class="text-xs text-muted" style="margin-bottom:5px;font-weight:600">Швидкий статус для розходу:</div>
-                                <div class="status-chips-grid">
-                                  ${SOLDIER_STATUSES.map(opt => {
-                                    const active = st.id === opt.id;
-                                    const cls = active ? (opt.id === 'active' ? 'active' : 'active-absent') : '';
-                                    return `<button type="button" class="status-chip-btn ${cls}" onclick="quickSetSoldierStatus('${s.id}', '${opt.id}')">${esc(opt.short)}</button>`;
-                                  }).join('')}
-                                </div>
-                              </div>
-
-                              <div class="grid-2">
-                                <button type="button" class="btn btn-sm btn-secondary" onclick="openSoldierModal('${s.id}')">Редагувати</button>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="promptDeleteSoldier('${s.id}')">Видалити</button>
-                              </div>
-                            </div>
-                          ` : ''}
-                        </div>
-                      `;
-                    }).join('')
-                }
-              </div>
-            ` : ''}
           </div>
-        `;
-      }).join('');
-
-      if (query && totalShown === 0) {
-        return `<div class="card empty-state">За запитом «${esc(ui.personnelSearch)}» нікого не знайдено.</div>`;
-      }
-      return html;
-    }
-
-    function openSoldierModal(soldierId = null, preselectedSquadId = null) {
-      const orderedSquads = getOrderedSquads();
-      if (orderedSquads.length === 0) {
-        showToast('Спочатку створіть відділення', 'error');
-        return;
-      }
-      const existing = soldierId ? state.soldiers.find(s => s.id === soldierId) : null;
-      const defaultSquad = existing?.squadId || preselectedSquadId || orderedSquads[0].id;
-      const isInitialKG = defaultSquad === GROUP_CMD_SQUAD_ID;
-      const curStatus = normalizeSoldierStatus(existing?.status);
-
-      openModal(`
-        <div class="modal-header">
-          <div class="modal-title">${existing ? 'Редагувати картку' : 'Додати військовослужбовця'}</div>
-          <button class="btn-icon" onclick="closeModal()">✕</button>
-        </div>
-        <form class="modal-body" onsubmit="saveSoldier(event, '${soldierId || ''}')">
-          <div class="field">
-            <label class="field-label" for="s-name">ПІБ (перша літера кожного слова — автоматично велика)</label>
-            <input id="s-name" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Прізвище Ім'я" oninput="capitalizeLive(this)" onblur="this.value = formatFullName(this.value)" />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="s-rank">Звання / Посада (необов'язково)</label>
-            <input id="s-rank" class="input" type="text" value="${esc(existing?.rank || '')}" placeholder="Наприклад: солдат, стрілець" />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="s-squad">Підрозділ / Відділення</label>
-            <select id="s-squad" class="select" onchange="document.getElementById('s-kv-wrap').classList.toggle('hidden', this.value === '${GROUP_CMD_SQUAD_ID}')">
-              ${orderedSquads.map(sq => `<option value="${sq.id}" ${defaultSquad === sq.id ? 'selected' : ''}>${esc(sq.name)}</option>`).join('')}
-            </select>
-          </div>
-
-          <label id="s-kv-wrap" class="checkbox-card ${isInitialKG ? 'hidden' : ''}" for="s-kv">
-            <div>
-              <div style="font-size:14px;font-weight:700;color:#fbbf24">★ Командир відділення</div>
-              <div class="text-xs text-muted">Закріплюється зверху списку відділення</div>
-            </div>
-            <input id="s-kv" type="checkbox" ${existing?.isCommander ? 'checked' : ''} />
-          </label>
-
-          <div class="field">
-            <label class="field-label" for="s-status">Постійний статус (підтягується в «Розхід»)</label>
-            <select id="s-status" class="select">
-              ${SOLDIER_STATUSES.map(st => `<option value="${st.id}" ${curStatus === st.id ? 'selected' : ''}>${esc(st.label)}</option>`).join('')}
-            </select>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-full">Зберегти</button>
-          ${existing ? `<button type="button" class="btn btn-danger btn-full" onclick="promptDeleteSoldier('${existing.id}')">Видалити бійця</button>` : ''}
-        </form>
-      `);
-      setTimeout(() => document.getElementById('s-name')?.focus(), 50);
-    }
-
-    function saveSoldier(e, soldierId) {
-      e.preventDefault();
-      const name = formatFullName(document.getElementById('s-name').value);
-      const rank = document.getElementById('s-rank').value.trim();
-      const squadId = document.getElementById('s-squad').value;
-      const isKG = squadId === GROUP_CMD_SQUAD_ID;
-      const isCommander = isKG ? true : document.getElementById('s-kv').checked;
-      const status = document.getElementById('s-status').value;
-      if (!name) return;
-
-      if (isCommander) {
-        state.soldiers.forEach(s => {
-          if (s.squadId === squadId && s.id !== soldierId) s.isCommander = false;
-        });
-      }
-
-      if (soldierId) {
-        const s = state.soldiers.find(x => x.id === soldierId);
-        if (s) {
-          s.name = name;
-          s.rank = rank;
-          s.squadId = squadId;
-          s.isCommander = isCommander;
-          s.status = status;
-        }
-      } else {
-        state.soldiers.push({ id: genId('s'), name, rank, squadId, isCommander, status });
-        ui.expandedPersonnelSquads[squadId] = true;
-      }
-      saveState();
-      closeModal();
-      render();
-      showToast(soldierId ? 'Дані оновлено' : 'Додано до складу');
-    }
-
-    function promptDeleteSoldier(soldierId) {
-      const s = getSoldierById(soldierId);
-      if (!s) return;
-      showConfirm(
-        `Видалити ${s.name}?`,
-        'Військовослужбовець та всі записи про його наряди й розхід будуть видалені.',
-        'Видалити',
-        () => {
-          state.soldiers = state.soldiers.filter(x => x.id !== soldierId);
-          state.duties = state.duties.filter(d => d.soldierId !== soldierId);
-          Object.keys(state.rozkhid).forEach(dt => {
-            if (state.rozkhid[dt]?.overrides) delete state.rozkhid[dt].overrides[soldierId];
-          });
-          saveState();
-          render();
-          showToast('Бійця видалено');
-        }
-      );
-    }
-
-    // =========================================================================
-    // ВКЛАДКА 5: НАЛАШТУВАННЯ
-    // =========================================================================
-    function renderSettingsTab() {
-      const backupStatusText = state.lastBackupAt
-        ? `Остання резервна копія: <strong style="color:#4ade80">${esc(state.lastBackupAt)}</strong>`
-        : `Резервна копія ще не створювалась`;
-
-      const orderedSquads = getOrderedSquads();
-
+<!-- ... existing code ... -->
       return `
-        <!-- 1. Версія застосунку -->
+        <!-- 1. Версія сайту -->
         <div class="version-row">
-          <span>Версія застосунку:</span>
+          <span>Версія сайту:</span>
           <span class="version-pill">${APP_VERSION} (оновлено ${APP_UPDATED_DATE})</span>
         </div>
 
@@ -3272,11 +935,43 @@
           </button>
         </div>
 
-        <!-- 3. Підрозділи та кольори -->
+        <!-- 3. Види нарядів -->
         <div class="card stack">
           <div class="row-between">
-            <span class="section-title">Підрозділи та кольори</span>
+            <span class="section-title">Види нарядів</span>
+            <button class="btn btn-sm btn-primary" onclick="openDutyTypeModal()">+ Додати</button>
+          </div>
+          <div class="stack">
+            ${state.dutyTypes.map(dt => `
+              <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);border-left:4px solid ${dt.color || '#4ade80'}">
+                <div style="min-width:0">
+                  <div class="row-gap">
+                    <span class="text-sm" style="font-weight:700;color:#fff">${esc(dt.name)}</span>
+                    <span class="badge badge-rec">${dt.maxPeople > 1 ? 'до ' + dt.maxPeople + ' ос.' : '1 ос.'}</span>
+                  </div>
+                  ${dt.desc ? `<div class="text-xs text-muted">${esc(dt.desc)}</div>` : ''}
+                </div>
+                <div class="row-gap" style="flex-shrink:0">
+                  <button class="btn btn-sm btn-secondary" onclick="openDutyTypeModal('${dt.id}')">Змінити</button>
+                  ${state.dutyTypes.length > 1
+                    ? `<button class="btn-icon danger" style="width:36px;height:36px" onclick="deleteDutyType('${dt.id}')" title="Видалити">✕</button>`
+                    : ''
+                  }
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- 4. Відділення та номер групи -->
+        <div class="card stack">
+          <div class="row-between">
+            <span class="section-title">Відділення та група</span>
             <button class="btn btn-sm btn-primary" onclick="openSquadModal()">+ Додати</button>
+          </div>
+          <div class="row-between" style="padding:8px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">
+            <label for="settings-group-num" class="field-label">Номер групи за замовчуванням:</label>
+            <input id="settings-group-num" class="input" style="max-width:120px;min-height:38px;padding:6px 10px;text-align:center;font-weight:800" type="text" value="${esc(state.groupNumber)}" placeholder="223" oninput="updateGroupNumber(this.value)" />
           </div>
           <div class="stack">
             ${orderedSquads.map(sq => {
@@ -3297,25 +992,6 @@
           </div>
         </div>
 
-        <!-- 4. Види нарядів -->
-        <div class="card stack">
-          <div class="row-between">
-            <span class="section-title">Види нарядів</span>
-            <button class="btn btn-sm btn-primary" onclick="openAddDutyTypeModal()">+ Додати</button>
-          </div>
-          <div class="stack">
-            ${state.dutyTypes.map(dt => `
-              <div class="row-between" style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">
-                <span class="text-sm" style="font-weight:600;color:#fff">${esc(dt.name)}</span>
-                ${state.dutyTypes.length > 1
-                  ? `<button class="btn btn-sm btn-danger" onclick="deleteDutyType('${dt.id}')">Видалити</button>`
-                  : `<span class="text-xs text-muted">Останній</span>`
-                }
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
         <!-- 5. Небезпечна зона -->
         <div class="card stack" style="border-color:rgba(239,68,68,0.35)">
           <span class="section-title" style="color:#f87171">Скидання даних</span>
@@ -3323,114 +999,71 @@
         </div>
       `;
     }
-
-    // --- Керування відділеннями ---
-    function openSquadModal(squadId = null) {
-      const existing = squadId ? state.squads.find(s => s.id === squadId) : null;
-      tempSquadColor = existing?.color || SQUAD_PALETTE[state.squads.length % SQUAD_PALETTE.length];
-
+// ... existing code ... -->
+    // --- Види нарядів ---
+    function openDutyTypeModal(dtId = null) {
+      const existing = dtId ? state.dutyTypes.find(d => d.id === dtId) : null;
+      tempDutyTypeColor = existing?.color || '#3b82f6';
       openModal(`
         <div class="modal-header">
-          <div class="modal-title">${existing ? 'Редагувати підрозділ' : 'Нове відділення'}</div>
+          <div class="modal-title">${existing ? 'Редагувати вид наряду' : 'Новий вид наряду'}</div>
           <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
-        <form class="modal-body" onsubmit="saveSquad(event, '${squadId || ''}')">
+        <form class="modal-body" onsubmit="saveDutyType(event, '${dtId || ''}')">
           <div class="field">
-            <label class="field-label" for="squad-name-input">Назва</label>
-            <input id="squad-name-input" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Наприклад: 4-те відділення" />
+            <label class="field-label" for="dt-name">Скорочена назва (виводиться при копіюванні)</label>
+            <input id="dt-name" class="input" type="text" required value="${esc(existing?.name || '')}" placeholder="Наприклад: ЧК, Дн, КПП" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="dt-desc">Опис (необов'язково)</label>
+            <input id="dt-desc" class="input" type="text" value="${esc(existing?.desc || '')}" placeholder="Наприклад: Днювальні курсу" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="dt-max">Кількість людей на наряд (1–10)</label>
+            <input id="dt-max" class="input" type="number" min="1" max="10" required value="${existing ? existing.maxPeople : 1}" />
           </div>
           <div class="field">
             <div class="field-label">Колір</div>
-            <div class="color-palette" id="squad-color-palette">
+            <div class="color-palette" id="dt-color-palette">
               ${SQUAD_PALETTE.map(c => `
-                <button type="button" class="color-swatch ${c === tempSquadColor ? 'selected' : ''}" style="background:${c}" onclick="pickSquadColor('${c}', this)" aria-label="Колір"></button>
+                <button type="button" class="color-swatch ${c === tempDutyTypeColor ? 'selected' : ''}" style="background:${c}" onclick="pickDutyTypeColor('${c}', this)" aria-label="Колір"></button>
               `).join('')}
             </div>
           </div>
-          <button type="submit" class="btn btn-primary btn-full">Зберегти</button>
-        </form>
-      `);
-      setTimeout(() => document.getElementById('squad-name-input')?.focus(), 50);
-    }
-
-    function pickSquadColor(hex, btn) {
-      tempSquadColor = hex;
-      document.querySelectorAll('#squad-color-palette .color-swatch').forEach(el => el.classList.remove('selected'));
-      btn.classList.add('selected');
-    }
-
-    function saveSquad(e, squadId) {
-      e.preventDefault();
-      const name = document.getElementById('squad-name-input').value.trim();
-      if (!name) return;
-      if (squadId) {
-        const sq = state.squads.find(x => x.id === squadId);
-        if (sq) { sq.name = name; sq.color = tempSquadColor; }
-      } else {
-        state.squads.push({ id: genId('sq'), name, color: tempSquadColor });
-      }
-      saveState();
-      closeModal();
-      render();
-      showToast(squadId ? 'Підрозділ оновлено' : 'Відділення додано');
-    }
-
-    function promptDeleteSquad(squadId) {
-      const sq = getSquadById(squadId);
-      const cnt = state.soldiers.filter(s => s.squadId === squadId).length;
-      showConfirm(
-        `Видалити «${sq.name}»?`,
-        cnt > 0
-          ? `У цьому відділенні є ${cnt} бійців. Вони та їхні наряди також будуть видалені.`
-          : 'Відділення буде видалено зі списку.',
-        'Видалити',
-        () => {
-          const sIds = new Set(state.soldiers.filter(s => s.squadId === squadId).map(s => s.id));
-          state.squads = state.squads.filter(s => s.id !== squadId);
-          state.soldiers = state.soldiers.filter(s => s.squadId !== squadId);
-          state.duties = state.duties.filter(d => !sIds.has(d.soldierId));
-          state.tasks = state.tasks.filter(t => !(t.targetType === 'squad' && t.targetSquadId === squadId));
-          Object.keys(state.rozkhid).forEach(dt => {
-            sIds.forEach(sid => { if (state.rozkhid[dt]?.overrides) delete state.rozkhid[dt].overrides[sid]; });
-          });
-          if (ui.scheduleSquadFilter === squadId) ui.scheduleSquadFilter = 'all';
-          if (ui.statsSquadFilter === squadId) ui.statsSquadFilter = 'all';
-          if (ui.tasksTargetFilter === squadId) ui.tasksTargetFilter = 'all';
-          if (ui.personnelSquadFilter === squadId) ui.personnelSquadFilter = 'all';
-          saveState();
-          render();
-          showToast('Відділення видалено');
-        }
-      );
-    }
-
-    // --- Види нарядів ---
-    function openAddDutyTypeModal() {
-      openModal(`
-        <div class="modal-header">
-          <div class="modal-title">Новий вид наряду</div>
-          <button class="btn-icon" onclick="closeModal()">✕</button>
-        </div>
-        <form class="modal-body" onsubmit="saveDutyType(event)">
-          <div class="field">
-            <label class="field-label" for="dt-name">Назва виду наряду</label>
-            <input id="dt-name" class="input" type="text" required placeholder="Наприклад: Черговий по роті" />
-          </div>
-          <button type="submit" class="btn btn-primary btn-full">Додати</button>
+          <button type="submit" class="btn btn-primary btn-full">${existing ? 'Зберегти' : 'Додати'}</button>
         </form>
       `);
       setTimeout(() => document.getElementById('dt-name')?.focus(), 50);
     }
 
-    function saveDutyType(e) {
+    function pickDutyTypeColor(hex, btn) {
+      tempDutyTypeColor = hex;
+      document.querySelectorAll('#dt-color-palette .color-swatch').forEach(el => el.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function saveDutyType(e, dtId = '') {
       e.preventDefault();
       const name = document.getElementById('dt-name').value.trim();
+      const desc = document.getElementById('dt-desc').value.trim();
+      const maxPeople = Math.min(10, Math.max(1, parseInt(document.getElementById('dt-max').value, 10) || 1));
       if (!name) return;
-      state.dutyTypes.push({ id: genId('dt'), name });
+
+      if (dtId) {
+        const dt = state.dutyTypes.find(x => x.id === dtId);
+        if (dt) {
+          dt.name = name;
+          dt.desc = desc;
+          dt.maxPeople = maxPeople;
+          dt.color = tempDutyTypeColor;
+        }
+      } else {
+        state.dutyTypes.push({ id: genId('dt'), name, desc, maxPeople, color: tempDutyTypeColor });
+      }
       saveState();
       closeModal();
       render();
-      showToast('Вид наряду додано');
+      showToast(dtId ? 'Вид наряду оновлено' : 'Вид наряду додано');
     }
 
     function deleteDutyType(id) {
@@ -3440,54 +1073,7 @@
       render();
       showToast('Вид наряду видалено');
     }
-
-    // --- Резервне копіювання ---
-    function buildBackupPayload() {
-      return {
-        app: 'pomichnyk_vzvodu',
-        version: APP_VERSION,
-        exportedAt: toDateTimeHuman(new Date()),
-        groupNumber: state.groupNumber,
-        squads: state.squads,
-        soldiers: state.soldiers,
-        dutyTypes: state.dutyTypes,
-        duties: state.duties,
-        tasks: state.tasks,
-        rozkhid: state.rozkhid
-      };
-    }
-
-    function downloadFile(content, filename, mime) {
-      const blob = new Blob([content], { type: mime });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function exportBackupJSON() {
-      const now = new Date();
-      state.lastBackupAt = toDateTimeHuman(now);
-      saveState();
-      downloadFile(JSON.stringify(buildBackupPayload(), null, 2), `pomichnyk_vzvodu_backup_${toISODate(now)}.json`, 'application/json');
-      render();
-      showToast('Резервну копію JSON збережено');
-    }
-
-    function copyBackupText() {
-      const now = new Date();
-      const text = JSON.stringify(buildBackupPayload());
-      if (copyToClipboard(text, 'Код резервної копії скопійовано')) {
-        state.lastBackupAt = toDateTimeHuman(now);
-        saveState();
-        render();
-      }
-    }
-
+// ... existing code ... -->
     function parseAndValidateBackup(rawText) {
       const parsed = JSON.parse(rawText);
       if (!parsed || !Array.isArray(parsed.squads) || !Array.isArray(parsed.soldiers) || !Array.isArray(parsed.duties)) {
@@ -3497,164 +1083,11 @@
         groupNumber: typeof parsed.groupNumber === 'string' && parsed.groupNumber.trim() ? parsed.groupNumber : '223',
         squads: ensureGroupCmdSquad(parsed.squads),
         soldiers: parsed.soldiers.map(s => ({ ...s, status: normalizeSoldierStatus(s.status) })),
-        dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
-          ? parsed.dutyTypes
-          : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+        dutyTypes: normalizeDutyTypes(parsed.dutyTypes),
         duties: parsed.duties,
         tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
         rozkhid: migrateRozkhidMap(parsed.rozkhid),
         lastBackupAt: state.lastBackupAt
       };
     }
-
-    function confirmApplyBackup(validatedState) {
-      showConfirm(
-        'Відновити дані з резервної копії?',
-        `Поточні дані будуть замінені. У копії: підрозділів — ${validatedState.squads.length}, о/с — ${validatedState.soldiers.length}, нарядів — ${validatedState.duties.length}, задач — ${validatedState.tasks.length}.`,
-        'Відновити',
-        () => {
-          state = validatedState;
-          saveState();
-          render();
-          showToast('Дані успішно відновлено');
-        },
-        false
-      );
-    }
-
-    function handleImportJSONFile(event) {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const validated = parseAndValidateBackup(e.target.result);
-          confirmApplyBackup(validated);
-        } catch (err) {
-          showToast('Помилка: некоректний файл резервної копії', 'error');
-        } finally {
-          event.target.value = '';
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function openPasteBackupModal() {
-      openModal(`
-        <div class="modal-header">
-          <div class="modal-title">Вставити резервну копію з тексту</div>
-          <button class="btn-icon" onclick="closeModal()">✕</button>
-        </div>
-        <form class="modal-body" onsubmit="submitPasteBackup(event)">
-          <div class="field">
-            <label class="field-label" for="paste-backup-area">Вставте раніше скопійований код JSON:</label>
-            <textarea id="paste-backup-area" class="textarea" style="min-height:130px;font-family:monospace;font-size:13px" required placeholder='{"app":"pomichnyk_vzvodu", ...}'></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary btn-full">Перевірити та відновити</button>
-        </form>
-      `);
-      setTimeout(() => document.getElementById('paste-backup-area')?.focus(), 50);
-    }
-
-    function submitPasteBackup(e) {
-      e.preventDefault();
-      const raw = document.getElementById('paste-backup-area').value.trim();
-      try {
-        const validated = parseAndValidateBackup(raw);
-        confirmApplyBackup(validated);
-      } catch (err) {
-        showToast('Помилка: некоректний код резервної копії', 'error');
-      }
-    }
-
-    function exportCSV() {
-      const y = ui.year;
-      const m = ui.month;
-      const header = ['Підрозділ / Відділення', 'ПІБ', 'Звання/Посада', 'Посада (КГ/КВ)', 'Статус', `За ${MONTHS_UK[m]} ${y}`, 'За весь час', 'Останній наряд'];
-      const rows = [header];
-
-      for (const sq of getOrderedSquads()) {
-        const isKG = isGroupCmdSquad(sq);
-        const members = sortSquadMembers(state.soldiers.filter(s => s.squadId === sq.id));
-        for (const s of members) {
-          const st = getSoldierStats(s.id, y, m);
-          rows.push([
-            sq.name,
-            s.name,
-            s.rank || '',
-            isKG ? 'КГ' : (s.isCommander ? 'КВ' : ''),
-            getStatusObj(s.status).label,
-            st.monthCount,
-            st.totalCount,
-            formatDateShort(st.lastDate)
-          ]);
-        }
-      }
-
-      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
-      downloadFile('\uFEFF' + csv, `oblik_naryadiv_${y}_${String(m + 1).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8;');
-      showToast('CSV-файл збережено');
-    }
-
-    function promptResetAllStep1() {
-      showConfirm(
-        'Очистити всі дані? (Крок 1 з 2)',
-        'Будуть видалені всі бійці, графік нарядів, розхід та задачі. Рекомендуємо спочатку зберегти резервну копію.',
-        'Продовжити',
-        () => setTimeout(() => promptResetAllStep2(), 120),
-        true
-      );
-    }
-
-    function promptResetAllStep2() {
-      showConfirm(
-        'Точно видалити все? (Крок 2 з 2)',
-        'Цю дію неможливо скасувати. Залишаться лише базові порожні підрозділи, види нарядів та номер групи 223.',
-        'Так, очистити все',
-        () => {
-          state = createEmptyInitialState();
-          saveState();
-          render();
-          showToast('Усі дані очищено');
-        },
-        true
-      );
-    }
-
-    // =========================================================================
-    // ГОЛОВНИЙ РЕНДЕР
-    // =========================================================================
-    function render() {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-      const activeNav = document.getElementById(`nav-${ui.activeTab}`);
-      if (activeNav) activeNav.classList.add('active');
-
-      const activeTasksCnt = state.tasks.filter(t => t.status !== 'done').length;
-      const badge = document.getElementById('nav-tasks-badge');
-      if (activeTasksCnt > 0) {
-        badge.textContent = activeTasksCnt > 99 ? '99+' : activeTasksCnt;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-
-      const main = document.getElementById('main-content');
-      if (ui.activeTab === 'duties') {
-        main.innerHTML = renderDutiesTab();
-      } else if (ui.activeTab === 'tasks') {
-        main.innerHTML = renderTasksTab();
-      } else if (ui.activeTab === 'rozkhid') {
-        main.innerHTML = renderRozkhidTab();
-      } else if (ui.activeTab === 'personnel') {
-        main.innerHTML = renderPersonnelTab();
-      } else if (ui.activeTab === 'settings') {
-        main.innerHTML = renderSettingsTab();
-      }
-    }
-
-    // Ініціалізація при завантаженні
-    loadState();
-    render();
-  </script>
-</body>
-</html>
+// ... existing code ... -->
