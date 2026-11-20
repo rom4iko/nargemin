@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.4.1</title>
+  <title>Помічник взводу v3.4.2</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -653,7 +653,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.4.1';
+    var APP_VERSION = 'v3.4.2';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -685,17 +685,17 @@
     ];
 
     var ROZKHID_CATS = [
-      { key: 'priyom_shp', label: 'Прийом шпиталь', auto: null },
-      { key: 'priyom_laz', label: 'Прийом лазарет', auto: null },
-      { key: 'sh',         label: 'Ш',              auto: null },
-      { key: 'l',          label: 'Л',              auto: null },
-      { key: 'vd',         label: 'Вд',             auto: null },
-      { key: 'vp',         label: 'Вп',             auto: null },
-      { key: 'n',          label: 'Н',              auto: 'today_duty' },
-      { key: 'g',          label: 'Г',              auto: null },
-      { key: 'pk',         label: 'Пк',             auto: null },
-      { key: 'hv',         label: 'Хв',             auto: null },
-      { key: 'starodob',   label: 'Стародобовий',   auto: 'yesterday_duty' }
+      { key: 'priyom_shp', label: 'Прийом шпиталь', hint: '',                auto: null },
+      { key: 'priyom_laz', label: 'Прийом лазарет', hint: '',                auto: null },
+      { key: 'sh',         label: 'Ш',              hint: 'Шпиталь',         auto: null },
+      { key: 'l',          label: 'Л',              hint: 'Лазарет',         auto: null },
+      { key: 'vd',         label: 'Вд',             hint: 'Відрядження',     auto: null },
+      { key: 'vp',         label: 'Вп',             hint: 'Відпустка',       auto: null },
+      { key: 'n',          label: 'Н',              hint: 'Наряд',           auto: 'today_duty' },
+      { key: 'g',          label: 'Г',              hint: 'Гуртожиток',      auto: null },
+      { key: 'pk',         label: 'Пк',             hint: 'Поза казармою',   auto: null },
+      { key: 'hv',         label: 'Хв',             hint: 'Хворий',          auto: null },
+      { key: 'starodob',   label: 'Стародобовий',   hint: 'Вчорашній наряд', auto: 'yesterday_duty' }
     ];
 
     var PRESENCE_STATUSES = [
@@ -2269,7 +2269,7 @@
 
         return '<div class="rozkhid-row ' + (cnt > 0 ? 'has-count' : '') + '">' +
           '<div class="row-between">' +
-            '<div class="fw-bold text-sm">' + esc(c.label) + '</div>' +
+            '<div class="fw-bold text-sm">' + esc(c.label) + (c.hint ? ' <span class="text-xs text-muted">(' + esc(c.hint) + ')</span>' : '') + '</div>' +
             '<div class="row" style="gap:6px">' +
               (mode !== 'view' ? '<button type="button" class="btn btn-xs btn-secondary" onclick="openRozkhidPickerModal(\'' + c.key + '\')">ПІБ (' + entry.ids.length + ')</button>' : '') +
               (mode === 'all' ? (
@@ -2369,7 +2369,7 @@
 
       openModal(
         '<div class="modal-header">' +
-          '<div><div class="modal-title">' + esc(cat.label) + ' • ' + fmtUA(ui.rozkhidDate) + '</div>' +
+          '<div><div class="modal-title">' + esc(cat.label) + (cat.hint ? ' (' + esc(cat.hint) + ')' : '') + ' • ' + fmtUA(ui.rozkhidDate) + '</div>' +
           '<div class="text-xs text-muted">Обрано: ' + entry.ids.length + ' ос.</div></div>' +
           '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal();render()">✕</button>' +
         '</div>' +
@@ -2421,7 +2421,7 @@
       }).join('');
 
       var cOpts = SCHEDULE_CATS.map(function(c) {
-        return '<option value="' + c.key + '">' + esc(c.label) + '</option>';
+        return '<option value="' + c.key + '">' + esc(c.label) + (c.hint ? ' (' + esc(c.hint) + ')' : '') + '</option>';
       }).join('');
 
       var defDate = ui.rozkhidDate || todayISO();
