@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="uk" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Облік нарядів взводу</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              bg: '#0f1419',
+              card: '#1a2129',
+              cardHover: '#222b35',
+              border: '#2a3441',
+              olive: '#5c8a47',
+              oliveHover: '#4d753b',
+              emerald: '#4caf50',
+              text: '#e6edf3',
+              muted: '#8b949e'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Базові стилі для плавної прокрутки та відсутності горизонтального скролу */
+    html, body {
+      background-color: #0f1419;
+      color: #e6edf3;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Приховування скролбару для горизонтальних фільтрів */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Плавна поява модальних вікон */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.18s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-tactical-bg text-tactical-text antialiased selection:bg-tactical-olive selection:text-white">
+
+  <!-- Головний контейнер (mobile-first, до 600px по центру на ПК) -->
+  <div id="app" class="max-w-[600px] mx-auto min-h-screen flex flex-col relative pb-24">
+
+    <!-- Верхня шапка -->
+    <header class="sticky top-0 z-30 bg-tactical-bg/95 backdrop-blur border-b border-tactical-border px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-tactical-olive/20 border border-tactical-olive/50 flex items-center justify-center text-tactical-emerald">
+          <!-- Іконка щита -->
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold leading-tight tracking-tight text-white">Облік нарядів взводу</h1>
+          <p class="text-[11px] text-tactical-muted leading-tight">Локальний журнал • Офлайн</p>
+        </div>
+      </div>
+      <div id="header-right-action"></div>
+    </header>
+
+    <!-- Банер демо-даних (показується лише якщо активні початкові демо-дані) -->
+    <div id="demo-banner" class="hidden mx-4 mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3">
+      <div class="text-xs text-amber-200 leading-snug">
+        <span class="font-semibold text-amber-400">Демо-режим:</span> завантажено тестові дані взводу.
+      </div>
+      <button onclick="promptClearDemo()" class="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold border border-amber-500/40 transition">
+        Очистити
+      </button>
+    </div>
+
+    <!-- Основний контент активної вкладки -->
+    <main id="main-content" class="flex-1 px-4 pt-3 space-y-4">
+      <!-- Рендериться динамічно через JS -->
+    </main>
+
+    <!-- Фіксована нижня навігація (4 вкладки) -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-tactical-card/95 backdrop-blur border-t border-tactical-border">
+      <div class="max-w-[600px] mx-auto grid grid-cols-4 h-16">
+        <button onclick="switchTab('schedule')" id="nav-schedule" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Графік</span>
+        </button>
+        <button onclick="switchTab('stats')" id="nav-stats" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Облік</span>
+        </button>
+        <button onclick="switchTab('personnel')" id="nav-personnel" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Склад</span>
+        </button>
+        <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex flex-col items-center justify-center gap-1 text-xs font-medium transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Налаштування</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Контейнер для модальних вікон -->
+  <div id="modal-root" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4">
+    <div id="modal-box" class="w-full max-w-[560px] max-h-[90vh] bg-tactical-card border-t sm:border border-tactical-border rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+      <!-- Контент модального вікна -->
+    </div>
+  </div>
+
+  <!-- Контейнер для сповіщень (Toast) -->
+  <div id="toast-root" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2 w-[90%] max-w-[400px]"></div>
+
+  <!-- Прихований інпут для імпорту JSON -->
+  <input type="file" id="import-json-input" accept=".json,application/json" class="hidden" onchange="handleImportJSON(event)" />
+
+  <script>
+    // =========================================================================
+    // КОНСТАНТИ ТА СТАН ЗАСТОСУНКУ
+    // =========================================================================
+    const STORAGE_KEY = 'platoon_duty_tracker_v1';
+
+    const MONTHS_UK = [
+      'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+      'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
+    ];
+
+    const MONTHS_GENITIVE_UK = [
+      'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+      'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'
+    ];
+
+    const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+
+    const STATUS_OPTIONS = [
+      { id: 'active', label: 'В строю', badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+      { id: 'leave', label: 'Відпустка', badge: 'bg-blue-500/15 text-blue-400 border-blue-500/30' },
+      { id: 'medical', label: 'Лікування', badge: 'bg-red-500/15 text-red-400 border-red-500/30' },
+      { id: 'trip', label: 'Відрядження', badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30' }
+    ];
+
+    const DUTY_COLORS = [
+      { id: 'emerald', label: 'Зелений', dot: 'bg-emerald-400', badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+      { id: 'amber', label: 'Бурштиновий', dot: 'bg-amber-400', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+      { id: 'blue', label: 'Синій', dot: 'bg-blue-400', badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
+      { id: 'red', label: 'Червоний', dot: 'bg-red-400', badge: 'bg-red-500/15 text-red-300 border-red-500/30' },
+      { id: 'purple', label: 'Фіолетовий', dot: 'bg-purple-400', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
+      { id: 'slate', label: 'Сірий', dot: 'bg-slate-400', badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30' }
+    ];
+
+    const DEFAULT_DUTY_TYPES = [
+      { id: 'dt_1', name: 'Черговий', color: 'amber' },
+      { id: 'dt_2', name: 'Днювальний', color: 'emerald' },
+      { id: 'dt_3', name: 'КПП', color: 'blue' },
+      { id: 'dt_4', name: 'Патруль', color: 'red' },
+      { id: 'dt_5', name: 'Господарчий', color: 'slate' }
+    ];
+
+    // Глобальний стан
+    let state = {
+      isDemo: false,
+      squads: [],       // [{ id, name }]
+      soldiers: [],     // [{ id, name, rank, squadId, status }]
+      dutyTypes: [],    // [{ id, name, color }]
+      duties: []        // [{ id, date: 'YYYY-MM-DD', soldierId, dutyTypeId }]
+    };
+
+    // UI стан
+    const today = new Date();
+    let ui = {
+      activeTab: 'schedule',
+      year: today.getFullYear(),
+      month: today.getMonth(), // 0-11
+      selectedDate: formatDateISO(today),
+      scheduleSquadFilter: 'all',
+      statsSquadFilter: 'all',
+      statsSort: 'squad' // 'squad' | 'month_asc' | 'month_desc' | 'total_desc'
+    };
+
+    // =========================================================================
+    // УТИЛІТИ
+    // =========================================================================
+    function generateId(prefix = 'id') {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    function formatDateISO(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateHuman(isoStr) {
+      const [y, m, d] = isoStr.split('-').map(Number);
+      return `${d} ${MONTHS_GENITIVE_UK[m - 1]} ${y}`;
+    }
+
+    function getMonthPrefix(year, month) {
+      return `${year}-${String(month + 1).padStart(2, '0')}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getStatusObj(statusId) {
+      return STATUS_OPTIONS.find(s => s.id === statusId) || STATUS_OPTIONS[0];
+    }
+
+    function getColorObj(colorId) {
+      return DUTY_COLORS.find(c => c.id === colorId) || DUTY_COLORS[0];
+    }
+
+    function getDutyTypeById(id) {
+      return state.dutyTypes.find(dt => dt.id === id) || { id, name: 'Наряд', color: 'slate' };
+    }
+
+    function getSquadById(id) {
+      return state.squads.find(s => s.id === id) || { id, name: 'Без відділення' };
+    }
+
+    function getSoldierById(id) {
+      return state.soldiers.find(s => s.id === id);
+    }
+
+    // Підрахунок нарядів бійця за вказаний місяць та всього
+    function getSoldierCounts(soldierId, year, month) {
+      const prefix = getMonthPrefix(year, month);
+      let monthCount = 0;
+      let totalCount = 0;
+      for (const d of state.duties) {
+        if (d.soldierId === soldierId) {
+          totalCount++;
+          if (d.date.startsWith(prefix)) {
+            monthCount++;
+          }
+        }
+      }
+      return { monthCount, totalCount };
+    }
+
+    // =========================================================================
+    // ЗБЕРЕЖЕННЯ ТА ДЕМО-ДАНІ
+    // =========================================================================
+    function createDemoData() {
+      const y = today.getFullYear();
+      const m = today.getMonth();
+      const prefix = getMonthPrefix(y, m);
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const day = (n) => `${prefix}-${String(Math.min(n, daysInMonth)).padStart(2, '0')}`;
+
+      return {
+        isDemo: true,
+        squads: [
+          { id: 'sq_1', name: '1-ше відділення' },
+          { id: 'sq_2', name: '2-ге відділення' },
+          { id: 'sq_3', name: '3-тє відділення' }
+        ],
+        soldiers: [
+          { id: 's_1', name: 'Іваненко О.П.', rank: 'мол. сержант', squadId: 'sq_1', status: 'active' },
+          { id: 's_2', name: 'Петренко В.М.', rank: 'солдат', squadId: 'sq_1', status: 'active' },
+          { id: 's_3', name: 'Коваленко Д.І.', rank: 'ст. солдат', squadId: 'sq_1', status: 'leave' },
+          { id: 's_4', name: 'Бондаренко С.В.', rank: 'сержант', squadId: 'sq_2', status: 'active' },
+          { id: 's_5', name: 'Ткаченко А.О.', rank: 'солдат', squadId: 'sq_2', status: 'active' },
+          { id: 's_6', name: 'Мельник Р.С.', rank: 'солдат', squadId: 'sq_2', status: 'medical' },
+          { id: 's_7', name: 'Шевченко М.Ю.', rank: 'мол. сержант', squadId: 'sq_3', status: 'active' },
+          { id: 's_8', name: 'Кравченко І.А.', rank: 'солдат', squadId: 'sq_3', status: 'active' },
+          { id: 's_9', name: 'Олійник В.Г.', rank: 'ст. солдат', squadId: 'sq_3', status: 'trip' }
+        ],
+        dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+        duties: [
+          { id: 'd_1', date: day(2), soldierId: 's_1', dutyTypeId: 'dt_1' },
+          { id: 'd_2', date: day(2), soldierId: 's_2', dutyTypeId: 'dt_2' },
+          { id: 'd_3', date: day(5), soldierId: 's_4', dutyTypeId: 'dt_1' },
+          { id: 'd_4', date: day(5), soldierId: 's_5', dutyTypeId: 'dt_3' },
+          { id: 'd_5', date: day(8), soldierId: 's_7', dutyTypeId: 'dt_4' },
+          { id: 'd_6', date: day(8), soldierId: 's_8', dutyTypeId: 'dt_2' },
+          { id: 'd_7', date: day(today.getDate()), soldierId: 's_1', dutyTypeId: 'dt_3' },
+          { id: 'd_8', date: day(today.getDate()), soldierId: 's_5', dutyTypeId: 'dt_2' }
+        ]
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          state = createDemoData();
+          saveState();
+          return;
+        }
+        const parsed = JSON.parse(raw);
+        state = {
+          isDemo: Boolean(parsed.isDemo),
+          squads: Array.isArray(parsed.squads) ? parsed.squads : [],
+          soldiers: Array.isArray(parsed.soldiers) ? parsed.soldiers : [],
+          dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length ? parsed.dutyTypes : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+          duties: Array.isArray(parsed.duties) ? parsed.duties : []
+        };
+      } catch (e) {
+        console.error('Помилка читання localStorage:', e);
+        state = createDemoData();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error('Помилка збереження в localStorage:', e);
+        showToast('Не вдалося зберегти дані у пам\'ять браузера', 'error');
+      }
+    }
+
+    // =========================================================================
+    // СПОВІЩЕННЯ ТА МОДАЛЬНІ ВІКНА
+    // =========================================================================
+    function showToast(message, type = 'success') {
+      const root = document.getElementById('toast-root');
+      const el = document.createElement('div');
+      const styles = type === 'error'
+        ? 'bg-red-900/95 border-red-500/50 text-red-100'
+        : 'bg-tactical-card border-tactical-olive/60 text-white';
+      el.className = `px-4 py-2.5 rounded-xl border shadow-lg text-sm font-medium text-center animate-fade-in ${styles}`;
+      el.textContent = message;
+      root.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.2s';
+        setTimeout(() => el.remove(), 220);
+      }, 2400);
+    }
+
+    function openModal(htmlContent) {
+      const root = document.getElementById('modal-root');
+      const box = document.getElementById('modal-box');
+      box.innerHTML = htmlContent;
+      root.classList.remove('hidden');
+      root.classList.add('flex');
+    }
+
+    function closeModal() {
+      const root = document.getElementById('modal-root');
+      root.classList.add('hidden');
+      root.classList.remove('flex');
+    }
+
+    // Закриття модалки по кліку на фон
+    document.getElementById('modal-root').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-root') closeModal();
+    });
+
+    function showConfirm(title, message, confirmText, onConfirm, isDanger = true) {
+      const btnClass = isDanger
+        ? 'bg-red-600 hover:bg-red-700 text-white'
+        : 'bg-tactical-olive hover:bg-tactical-oliveHover text-white';
+      openModal(`
+        <div class="p-5 space-y-4">
+          <h3 class="text-lg font-bold text-white">${escapeHtml(title)}</h3>
+          <p class="text-sm text-tactical-muted leading-relaxed">${escapeHtml(message)}</p>
+          <div class="flex gap-2.5 pt-2">
+            <button onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-tactical-bg border border-tactical-border text-sm font-semibold text-tactical-text hover:bg-tactical-cardHover transition">
+              Скасувати
+            </button>
+            <button id="confirm-action-btn" class="flex-1 py-3 rounded-xl text-sm font-semibold transition ${btnClass}">
+              ${escapeHtml(confirmText)}
+            </button>
+          </div>
+        </div>
+      `);
+      document.getElementById('confirm-action-btn').onclick = () => {
+        closeModal();
+        onConfirm();
+      };
+    }
+
+    function promptClearDemo() {
+      showConfirm(
+        'Очистити демо-дані?',
+        'Тестові відділення, бійці та наряди будуть видалені. Ви зможете одразу додати свій склад взводу.',
+        'Очистити та почати з нуля',
+        () => {
+          state = {
+            isDemo: false,
+            squads: [
+              { id: generateId('sq'), name: '1-ше відділення' },
+              { id: generateId('sq'), name: '2-ге відділення' },
+              { id: generateId('sq'), name: '3-тє відділення' }
+            ],
+            soldiers: [],
+            dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+            duties: []
+          };
+          saveState();
+          render();
+          showToast('Демо-дані очищено. Додайте бійців у вкладці «Склад»');
+        },
+        false
+      );
+    }
+
+    // =========================================================================
+    // НАВІГАЦІЯ ТА ПЕРЕМИКАЧ МІСЯЦЯ
+    // =========================================================================
+    function switchTab(tab) {
+      ui.activeTab = tab;
+      render();
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    function changeMonth(delta) {
+      ui.month += delta;
+      if (ui.month < 0) {
+        ui.month = 11;
+        ui.year--;
+      } else if (ui.month > 11) {
+        ui.month = 0;
+        ui.year++;
+      }
+      // Оновлюємо вибрану дату на 1-ше число нового місяця (або сьогодні, якщо це поточний місяць)
+      if (ui.year === today.getFullYear() && ui.month === today.getMonth()) {
+        ui.selectedDate = formatDateISO(today);
+      } else {
+        ui.selectedDate = `${ui.year}-${String(ui.month + 1).padStart(2, '0')}-01`;
+      }
+      render();
+    }
+
+    function renderMonthSwitcher() {
+      return `
+        <div class="flex items-center justify-between bg-tactical-card border border-tactical-border rounded-xl p-1.5">
+          <button onclick="changeMonth(-1)" class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-tactical-cardHover active:scale-95 transition text-tactical-text" aria-label="Попередній місяць">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="text-sm font-bold tracking-wide text-white uppercase">
+            ${MONTHS_UK[ui.month]} ${ui.year}
+          </div>
+          <button onclick="changeMonth(1)" class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-tactical-cardHover active:scale-95 transition text-tactical-text" aria-label="Наступний місяць">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      `;
+    }
+
+    function renderSquadPills(activeFilter, onSelectFnName) {
+      const pills = [
+        { id: 'all', name: 'Усі' },
+        ...state.squads
+      ];
+      return `
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          ${pills.map(p => {
+            const isActive = activeFilter === p.id;
+            const cls = isActive
+              ? 'bg-tactical-olive text-white border-tactical-olive'
+              : 'bg-tactical-card text-tactical-muted border-tactical-border hover:text-white';
+            return `
+              <button onclick="${onSelectFnName}('${p.id}')" class="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition ${cls}">
+                ${escapeHtml(p.name)}
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 1: ГРАФІК (SCHEDULE)
+    // =========================================================================
+    function setScheduleSquadFilter(id) {
+      ui.scheduleSquadFilter = id;
+      render();
+    }
+
+    function selectCalendarDate(isoDate) {
+      ui.selectedDate = isoDate;
+      render();
+    }
+
+    function renderScheduleTab() {
+      const year = ui.year;
+      const month = ui.month;
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      // Понеділок = 0 ... Неділя = 6
+      let startOffset = firstDay.getDay() - 1;
+      if (startOffset < 0) startOffset = 6;
+
+      const todayIso = formatDateISO(today);
+      const monthPrefix = getMonthPrefix(year, month);
+
+      // Фільтруємо наряди поточного місяця за вибраним відділенням
+      const filteredDutiesByDate = {};
+      for (const d of state.duties) {
+        if (!d.date.startsWith(monthPrefix)) continue;
+        const soldier = getSoldierById(d.soldierId);
+        if (!soldier) continue;
+        if (ui.scheduleSquadFilter !== 'all' && soldier.squadId !== ui.scheduleSquadFilter) continue;
+        if (!filteredDutiesByDate[d.date]) filteredDutiesByDate[d.date] = [];
+        filteredDutiesByDate[d.date].push(d);
+      }
+
+      // Генерація клітинок календаря
+      let calendarCells = '';
+      for (let i = 0; i < startOffset; i++) {
+        calendarCells += `<div class="h-12 rounded-lg"></div>`;
+      }
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+        const dayDuties = filteredDutiesByDate[iso] || [];
+        const isSelected = ui.selectedDate === iso;
+        const isToday = todayIso === iso;
+
+        let cellClass = 'bg-tactical-bg/60 border-transparent text-tactical-text hover:bg-tactical-cardHover';
+        if (isSelected) {
+          cellClass = 'bg-tactical-olive/25 border-tactical-olive text-white ring-1 ring-tactical-olive';
+        } else if (isToday) {
+          cellClass = 'bg-tactical-cardHover border-tactical-muted/50 text-white';
+        }
+
+        // Кольорові крапки (макс 4)
+        const dotsHtml = dayDuties.slice(0, 4).map(d => {
+          const dt = getDutyTypeById(d.dutyTypeId);
+          const col = getColorObj(dt.color);
+          return `<span class="w-1.5 h-1.5 rounded-full ${col.dot}"></span>`;
+        }).join('');
+
+        calendarCells += `
+          <button onclick="selectCalendarDate('${iso}')" class="h-12 rounded-lg border flex flex-col items-center justify-between py-1.5 transition relative ${cellClass}">
+            <span class="text-xs font-semibold leading-none ${isToday && !isSelected ? 'text-tactical-emerald' : ''}">${day}</span>
+            <div class="flex items-center justify-center gap-0.5 h-2">
+              ${dotsHtml}
+              ${dayDuties.length > 4 ? `<span class="text-[9px] text-tactical-muted leading-none">+</span>` : ''}
+            </div>
+          </button>
+        `;
+      }
+
+      // Наряди на вибраний день
+      const selectedDayDuties = (state.duties.filter(d => {
+        if (d.date !== ui.selectedDate) return false;
+        const s = getSoldierById(d.soldierId);
+        if (!s) return false;
+        if (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter) return false;
+        return true;
+      }));
+
+      const dayDutiesListHtml = selectedDayDuties.length === 0
+        ? `<div class="text-center py-6 text-sm text-tactical-muted">На цю дату нарядів не призначено.</div>`
+        : `<div class="space-y-2">
+            ${selectedDayDuties.map(d => {
+              const soldier = getSoldierById(d.soldierId);
+              const squad = getSquadById(soldier.squadId);
+              const dt = getDutyTypeById(d.dutyTypeId);
+              const col = getColorObj(dt.color);
+              return `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-tactical-bg border border-tactical-border">
+                  <div class="min-w-0 pr-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold border ${col.badge}">${escapeHtml(dt.name)}</span>
+                      <span class="text-sm font-semibold text-white truncate">${escapeHtml(soldier.name)}</span>
+                    </div>
+                    <div class="text-xs text-tactical-muted mt-1">
+                      ${escapeHtml(squad.name)}${soldier.rank ? ' • ' + escapeHtml(soldier.rank) : ''}
+                    </div>
+                  </div>
+                  <button onclick="removeDuty('${d.id}')" class="w-9 h-9 shrink-0 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition" title="Видалити наряд">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>`;
+
+      return `
+        ${renderMonthSwitcher()}
+        ${renderSquadPills(ui.scheduleSquadFilter, 'setScheduleSquadFilter')}
+
+        <!-- Календарна сітка -->
+        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3">
+          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
+            ${WEEKDAYS_SHORT.map((w, idx) => `<div class="text-[11px] font-semibold ${idx >= 5 ? 'text-amber-400/80' : 'text-tactical-muted'}">${w}</div>`).join('')}
+          </div>
+          <div class="grid grid-cols-7 gap-1">
+            ${calendarCells}
+          </div>
+        </div>
+
+        <!-- Деталі вибраного дня -->
+        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-bold text-white">${formatDateHuman(ui.selectedDate)}</h2>
+              <p class="text-xs text-tactical-muted">Призначено нарядів: ${selectedDayDuties.length}</p>
+            </div>
+            <button onclick="openAssignDutyModal('${ui.selectedDate}')" class="px-3.5 py-2.5 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Призначити наряд</span>
+            </button>
+          </div>
+          ${dayDutiesListHtml}
+        </div>
+      `;
+    }
+
+    function removeDuty(dutyId) {
+      state.duties = state.duties.filter(d => d.id !== dutyId);
+      saveState();
+      render();
+      showToast('Наряд видалено');
+    }
+
+    // Модальне вікно призначення наряду
+    let assignModalState = { date: '', dutyTypeId: '' };
+
+    function openAssignDutyModal(isoDate) {
+      if (state.soldiers.length === 0) {
+        showToast('Спочатку додайте військовослужбовців у вкладці «Склад»', 'error');
+        return;
+      }
+      assignModalState.date = isoDate;
+      assignModalState.dutyTypeId = state.dutyTypes[0]?.id || '';
+      renderAssignDutyModal();
+    }
+
+    function selectAssignDutyType(dtId) {
+      assignModalState.dutyTypeId = dtId;
+      renderAssignDutyModal();
+    }
+
+    function renderAssignDutyModal() {
+      const [y, m] = assignModalState.date.split('-').map(Number);
+      const targetYear = y;
+      const targetMonth = m - 1;
+
+      // Знаходимо мінімальну кількість нарядів за місяць серед активних бійців для підсвітки
+      const activeCounts = state.soldiers
+        .filter(s => s.status === 'active')
+        .map(s => getSoldierCounts(s.id, targetYear, targetMonth).monthCount);
+      const minMonthCount = activeCounts.length ? Math.min(...activeCounts) : 0;
+
+      // Бійці, які вже в наряді на цю дату
+      const busyTodayIds = new Set(state.duties.filter(d => d.date === assignModalState.date).map(d => d.soldierId));
+
+      // Групуємо бійців по відділеннях, всередині сортуємо за найменшою кількістю нарядів за місяць
+      const groupsHtml = state.squads.map(sq => {
+        const members = state.soldiers
+          .filter(s => s.squadId === sq.id)
+          .map(s => ({
+            ...s,
+            counts: getSoldierCounts(s.id, targetYear, targetMonth)
+          }))
+          .sort((a, b) => {
+            // Активні зверху
+            if (a.status === 'active' && b.status !== 'active') return -1;
+            if (a.status !== 'active' && b.status === 'active') return 1;
+            // Потім менше за місяць, потім менше всього
+            if (a.counts.monthCount !== b.counts.monthCount) return a.counts.monthCount - b.counts.monthCount;
+            return a.counts.totalCount - b.counts.totalCount;
+          });
+
+        if (members.length === 0) return '';
+
+        return `
+          <div class="space-y-1.5">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-tactical-muted px-1 pt-2">${escapeHtml(sq.name)}</div>
+            ${members.map(s => {
+              const st = getStatusObj(s.status);
+              const isLowLoad = s.status === 'active' && s.counts.monthCount === minMonthCount;
+              const isBusy = busyTodayIds.has(s.id);
+              return `
+                <button onclick="confirmAssignDuty('${s.id}')" class="w-full text-left p-3 rounded-xl border transition flex items-center justify-between gap-2 ${
+                  isLowLoad
+                    ? 'bg-tactical-olive/10 border-tactical-olive/40 hover:bg-tactical-olive/20'
+                    : 'bg-tactical-bg border-tactical-border hover:bg-tactical-cardHover'
+                } ${s.status !== 'active' ? 'opacity-65' : ''}">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm font-semibold text-white">${escapeHtml(s.name)}</span>
+                      ${isLowLoad ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-tactical-olive/30 text-emerald-300 font-semibold">Рекомендовано</span>` : ''}
+                      ${isBusy ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">Вже в наряді</span>` : ''}
+                    </div>
+                    <div class="flex items-center gap-2 mt-1">
+                      ${s.status !== 'active' ? `<span class="text-[10px] px-1.5 py-0.5 rounded border font-semibold ${st.badge}">${st.label}</span>` : ''}
+                      ${s.rank ? `<span class="text-xs text-tactical-muted">${escapeHtml(s.rank)}</span>` : ''}
+                    </div>
+                  </div>
+                  <div class="shrink-0 text-right">
+                    <div class="text-xs font-bold ${isLowLoad ? 'text-tactical-emerald' : 'text-white'}">${s.counts.monthCount} <span class="text-[10px] font-normal text-tactical-muted">міс</span></div>
+                    <div class="text-[11px] text-tactical-muted">${s.counts.totalCount} всього</div>
+                  </div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }).join('');
+
+      openModal(`
+        <div class="p-4 border-b border-tactical-border flex items-center justify-between shrink-0">
+          <div>
+            <h3 class="text-base font-bold text-white">Призначити наряд</h3>
+            <p class="text-xs text-tactical-muted">${formatDateHuman(assignModalState.date)}</p>
+          </div>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        </div>
+
+        <div class="p-4 overflow-y-auto space-y-4">
+          <!-- Вибір типу наряду -->
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-2">1. Оберіть вид наряду:</label>
+            <div class="flex flex-wrap gap-2">
+              ${state.dutyTypes.map(dt => {
+                const col = getColorObj(dt.color);
+                const selected = assignModalState.dutyTypeId === dt.id;
+                return `
+                  <button onclick="selectAssignDutyType('${dt.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 ${
+                    selected
+                      ? 'bg-tactical-olive text-white border-tactical-olive ring-2 ring-tactical-olive/40'
+                      : 'bg-tactical-bg text-tactical-text border-tactical-border hover:bg-tactical-cardHover'
+                  }">
+                    <span class="w-2 h-2 rounded-full ${col.dot}"></span>
+                    <span>${escapeHtml(dt.name)}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Вибір військовослужбовця -->
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1">2. Оберіть військовослужбовця (відсортовано за навантаженням):</label>
+            <div class="space-y-2">
+              ${groupsHtml || '<div class="text-sm text-tactical-muted py-4 text-center">Немає бійців</div>'}
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    function confirmAssignDuty(soldierId) {
+      if (!assignModalState.dutyTypeId) {
+        showToast('Оберіть вид наряду', 'error');
+        return;
+      }
+      state.duties.push({
+        id: generateId('duty'),
+        date: assignModalState.date,
+        soldierId,
+        dutyTypeId: assignModalState.dutyTypeId
+      });
+      saveState();
+      closeModal();
+      render();
+      showToast('Наряд призначено');
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 2: ОБЛІК (STATISTICS & ACCOUNTING)
+    // =========================================================================
+    function setStatsSquadFilter(id) {
+      ui.statsSquadFilter = id;
+      render();
+    }
+
+    function setStatsSort(val) {
+      ui.statsSort = val;
+      render();
+    }
+
+    function renderStatsTab() {
+      const year = ui.year;
+      const month = ui.month;
+      const monthPrefix = getMonthPrefix(year, month);
+
+      // Фільтруємо бійців
+      const filteredSoldiers = state.soldiers
+        .filter(s => ui.statsSquadFilter === 'all' || s.squadId === ui.statsSquadFilter)
+        .map(s => ({
+          ...s,
+          counts: getSoldierCounts(s.id, year, month)
+        }));
+
+      const totalDutiesMonth = filteredSoldiers.reduce((acc, s) => acc + s.counts.monthCount, 0);
+      const activeSoldiersCount = filteredSoldiers.filter(s => s.status === 'active').length;
+      const avgPerSoldier = activeSoldiersCount > 0 ? (totalDutiesMonth / activeSoldiersCount).toFixed(1) : '0.0';
+      const maxMonthCount = Math.max(1, ...filteredSoldiers.map(s => s.counts.monthCount));
+
+      // Сортування
+      let listHtml = '';
+      if (filteredSoldiers.length === 0) {
+        listHtml = `<div class="bg-tactical-card border border-tactical-border rounded-2xl p-6 text-center text-sm text-tactical-muted">Немає даних для відображення.</div>`;
+      } else if (ui.statsSort === 'squad') {
+        const squadsToShow = ui.statsSquadFilter === 'all'
+          ? state.squads
+          : state.squads.filter(sq => sq.id === ui.statsSquadFilter);
+
+        listHtml = squadsToShow.map(sq => {
+          const members = filteredSoldiers.filter(s => s.squadId === sq.id);
+          if (members.length === 0) return '';
+          return `
+            <div class="bg-tactical-card border border-tactical-border rounded-2xl overflow-hidden">
+              <div class="px-4 py-2.5 bg-tactical-bg/60 border-b border-tactical-border flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-tactical-muted">${escapeHtml(sq.name)}</span>
+                <span class="text-[11px] text-tactical-muted">Міс. / Всього</span>
+              </div>
+              <div class="divide-y divide-tactical-border/60">
+                ${members.map(s => renderStatsSoldierRow(s, maxMonthCount, false)).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        const sorted = [...filteredSoldiers].sort((a, b) => {
+          if (ui.statsSort === 'month_asc') return a.counts.monthCount - b.counts.monthCount || a.counts.totalCount - b.counts.totalCount;
+          if (ui.statsSort === 'month_desc') return b.counts.monthCount - a.counts.monthCount || b.counts.totalCount - a.counts.totalCount;
+          return b.counts.totalCount - a.counts.totalCount || b.counts.monthCount - a.counts.monthCount;
+        });
+        listHtml = `
+          <div class="bg-tactical-card border border-tactical-border rounded-2xl overflow-hidden">
+            <div class="px-4 py-2.5 bg-tactical-bg/60 border-b border-tactical-border flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-tactical-muted">Рейтинг навантаження</span>
+              <span class="text-[11px] text-tactical-muted">Міс. / Всього</span>
+            </div>
+            <div class="divide-y divide-tactical-border/60">
+              ${sorted.map(s => renderStatsSoldierRow(s, maxMonthCount, true)).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        ${renderMonthSwitcher()}
+
+        <!-- KPI Картки -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3 text-center">
+            <div class="text-xl font-bold text-white">${totalDutiesMonth}</div>
+            <div class="text-[11px] text-tactical-muted leading-tight mt-0.5">Нарядів за місяць</div>
+          </div>
+          <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3 text-center">
+            <div class="text-xl font-bold text-tactical-emerald">${avgPerSoldier}</div>
+            <div class="text-[11px] text-tactical-muted leading-tight mt-0.5">Середнє на бійця</div>
+          </div>
+          <div class="bg-tactical-card border border-tactical-border rounded-2xl p-3 text-center">
+            <div class="text-xl font-bold text-white">${activeSoldiersCount}</div>
+            <div class="text-[11px] text-tactical-muted leading-tight mt-0.5">В строю</div>
+          </div>
+        </div>
+
+        ${renderSquadPills(ui.statsSquadFilter, 'setStatsSquadFilter')}
+
+        <!-- Сортування -->
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs text-tactical-muted font-medium">Сортування:</span>
+          <select onchange="setStatsSort(this.value)" class="bg-tactical-card border border-tactical-border rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-tactical-olive">
+            <option value="squad" ${ui.statsSort === 'squad' ? 'selected' : ''}>За відділенням</option>
+            <option value="month_asc" ${ui.statsSort === 'month_asc' ? 'selected' : ''}>Менше за місяць</option>
+            <option value="month_desc" ${ui.statsSort === 'month_desc' ? 'selected' : ''}>Більше за місяць</option>
+            <option value="total_desc" ${ui.statsSort === 'total_desc' ? 'selected' : ''}>Більше всього</option>
+          </select>
+        </div>
+
+        <!-- Список обліку -->
+        <div class="space-y-3">
+          ${listHtml}
+        </div>
+      `;
+    }
+
+    function renderStatsSoldierRow(s, maxMonthCount, showSquad) {
+      const pct = Math.round((s.counts.monthCount / maxMonthCount) * 100);
+      const st = getStatusObj(s.status);
+      const squad = getSquadById(s.squadId);
+      return `
+        <button onclick="openSoldierHistoryModal('${s.id}')" class="w-full text-left px-4 py-3 hover:bg-tactical-cardHover transition flex items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold text-white truncate">${escapeHtml(s.name)}</span>
+              ${s.status !== 'active' ? `<span class="text-[10px] px-1.5 py-0.5 rounded border font-semibold ${st.badge}">${st.label}</span>` : ''}
+            </div>
+            ${showSquad ? `<div class="text-[11px] text-tactical-muted mt-0.5">${escapeHtml(squad.name)}</div>` : ''}
+            <!-- Смужка навантаження -->
+            <div class="w-full h-1.5 bg-tactical-bg rounded-full overflow-hidden mt-2">
+              <div class="h-full bg-tactical-olive rounded-full transition-all" style="width: ${pct}%"></div>
+            </div>
+          </div>
+          <div class="shrink-0 flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-base font-bold text-white leading-none">${s.counts.monthCount}</div>
+              <div class="text-[10px] text-tactical-muted mt-0.5">за міс.</div>
+            </div>
+            <div class="w-px h-7 bg-tactical-border"></div>
+            <div class="text-right min-w-[34px]">
+              <div class="text-sm font-semibold text-tactical-emerald leading-none">${s.counts.totalCount}</div>
+              <div class="text-[10px] text-tactical-muted mt-0.5">всього</div>
+            </div>
+          </div>
+        </button>
+      `;
+    }
+
+    function openSoldierHistoryModal(soldierId) {
+      const s = getSoldierById(soldierId);
+      if (!s) return;
+      const squad = getSquadById(s.squadId);
+      const counts = getSoldierCounts(s.id, ui.year, ui.month);
+      const history = state.duties
+        .filter(d => d.soldierId === s.id)
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      openModal(`
+        <div class="p-4 border-b border-tactical-border flex items-center justify-between shrink-0">
+          <div>
+            <h3 class="text-base font-bold text-white">${escapeHtml(s.name)}</h3>
+            <p class="text-xs text-tactical-muted">${escapeHtml(squad.name)}${s.rank ? ' • ' + escapeHtml(s.rank) : ''}</p>
+          </div>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        </div>
+        <div class="p-4 overflow-y-auto space-y-4">
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="p-3 rounded-xl bg-tactical-bg border border-tactical-border text-center">
+              <div class="text-lg font-bold text-white">${counts.monthCount}</div>
+              <div class="text-[11px] text-tactical-muted">${MONTHS_UK[ui.month]} ${ui.year}</div>
+            </div>
+            <div class="p-3 rounded-xl bg-tactical-bg border border-tactical-border text-center">
+              <div class="text-lg font-bold text-tactical-emerald">${counts.totalCount}</div>
+              <div class="text-[11px] text-tactical-muted">За весь час</div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-tactical-muted mb-2">Історія нарядів (${history.length})</h4>
+            ${history.length === 0
+              ? `<div class="text-sm text-tactical-muted text-center py-6">Історія нарядів порожня.</div>`
+              : `<div class="space-y-2">
+                  ${history.map(d => {
+                    const dt = getDutyTypeById(d.dutyTypeId);
+                    const col = getColorObj(dt.color);
+                    return `
+                      <div class="flex items-center justify-between p-2.5 rounded-xl bg-tactical-bg border border-tactical-border">
+                        <span class="text-xs font-medium text-white">${formatDateHuman(d.date)}</span>
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold border ${col.badge}">${escapeHtml(dt.name)}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>`
+            }
+          </div>
+        </div>
+      `);
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 3: СКЛАД (PERSONNEL & SQUADS)
+    // =========================================================================
+    function renderPersonnelTab() {
+      const squadsHtml = state.squads.length === 0
+        ? `<div class="bg-tactical-card border border-tactical-border rounded-2xl p-6 text-center text-sm text-tactical-muted">Додайте хоча б одне відділення.</div>`
+        : state.squads.map(sq => {
+            const members = state.soldiers.filter(s => s.squadId === sq.id);
+            return `
+              <div class="bg-tactical-card border border-tactical-border rounded-2xl overflow-hidden">
+                <div class="px-4 py-3 bg-tactical-bg/60 border-b border-tactical-border flex items-center justify-between">
+                  <div>
+                    <h3 class="text-sm font-bold text-white">${escapeHtml(sq.name)}</h3>
+                    <p class="text-[11px] text-tactical-muted">Особового складу: ${members.length}</p>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="openSquadModal('${sq.id}')" class="px-2.5 py-1.5 rounded-lg bg-tactical-card border border-tactical-border text-xs text-tactical-muted hover:text-white transition">Змінити</button>
+                    <button onclick="promptDeleteSquad('${sq.id}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400 hover:bg-red-500/20 transition">✕</button>
+                  </div>
+                </div>
+                <div class="divide-y divide-tactical-border/60">
+                  ${members.length === 0
+                    ? `<div class="p-4 text-xs text-tactical-muted text-center">У відділенні поки немає бійців</div>`
+                    : members.map(s => {
+                        const st = getStatusObj(s.status);
+                        return `
+                          <div class="px-4 py-3 flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                              <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-sm font-semibold text-white">${escapeHtml(s.name)}</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded border font-semibold ${st.badge}">${st.label}</span>
+                              </div>
+                              ${s.rank ? `<div class="text-xs text-tactical-muted mt-0.5">${escapeHtml(s.rank)}</div>` : ''}
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                              <button onclick="openSoldierModal('${s.id}')" class="p-2 rounded-lg bg-tactical-bg border border-tactical-border text-tactical-muted hover:text-white transition" title="Редагувати">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                              </button>
+                              <button onclick="promptDeleteSoldier('${s.id}')" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" title="Видалити">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                              </button>
+                            </div>
+                          </div>
+                        `;
+                      }).join('')
+                  }
+                </div>
+              </div>
+            `;
+          }).join('');
+
+      return `
+        <div class="grid grid-cols-2 gap-2.5">
+          <button onclick="openSoldierModal()" class="py-3 px-3 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-xs font-bold flex items-center justify-center gap-1.5 transition">
+            <span>+ Додати бійця</span>
+          </button>
+          <button onclick="openSquadModal()" class="py-3 px-3 rounded-xl bg-tactical-card border border-tactical-border hover:bg-tactical-cardHover text-white text-xs font-bold flex items-center justify-center gap-1.5 transition">
+            <span>+ Нове відділення</span>
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          ${squadsHtml}
+        </div>
+      `;
+    }
+
+    function openSquadModal(squadId = null) {
+      const existing = squadId ? state.squads.find(s => s.id === squadId) : null;
+      openModal(`
+        <div class="p-4 border-b border-tactical-border flex items-center justify-between">
+          <h3 class="text-base font-bold text-white">${existing ? 'Редагувати відділення' : 'Нове відділення'}</h3>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        </div>
+        <form onsubmit="saveSquad(event, '${squadId || ''}')" class="p-4 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1.5">Назва відділення</label>
+            <input id="squad-name-input" type="text" required value="${escapeHtml(existing?.name || '')}" placeholder="Наприклад: 4-те відділення" class="w-full px-3.5 py-3 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-sm font-bold transition">
+            Зберегти
+          </button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('squad-name-input')?.focus(), 50);
+    }
+
+    function saveSquad(e, squadId) {
+      e.preventDefault();
+      const name = document.getElementById('squad-name-input').value.trim();
+      if (!name) return;
+      if (squadId) {
+        const sq = state.squads.find(s => s.id === squadId);
+        if (sq) sq.name = name;
+      } else {
+        state.squads.push({ id: generateId('sq'), name });
+      }
+      state.isDemo = false;
+      saveState();
+      closeModal();
+      render();
+      showToast(squadId ? 'Відділення оновлено' : 'Відділення додано');
+    }
+
+    function promptDeleteSquad(squadId) {
+      const sq = getSquadById(squadId);
+      const count = state.soldiers.filter(s => s.squadId === squadId).length;
+      showConfirm(
+        `Видалити «${sq.name}»?`,
+        count > 0
+          ? `У цьому відділенні є ${count} бійців. Вони та їхні наряди також будуть видалені.`
+          : 'Відділення буде видалено зі списку.',
+        'Видалити',
+        () => {
+          const soldierIds = new Set(state.soldiers.filter(s => s.squadId === squadId).map(s => s.id));
+          state.squads = state.squads.filter(s => s.id !== squadId);
+          state.soldiers = state.soldiers.filter(s => s.squadId !== squadId);
+          state.duties = state.duties.filter(d => !soldierIds.has(d.soldierId));
+          if (ui.scheduleSquadFilter === squadId) ui.scheduleSquadFilter = 'all';
+          if (ui.statsSquadFilter === squadId) ui.statsSquadFilter = 'all';
+          saveState();
+          render();
+          showToast('Відділення видалено');
+        }
+      );
+    }
+
+    function openSoldierModal(soldierId = null) {
+      if (state.squads.length === 0) {
+        showToast('Спочатку створіть хоча б одне відділення', 'error');
+        return;
+      }
+      const existing = soldierId ? state.soldiers.find(s => s.id === soldierId) : null;
+      openModal(`
+        <div class="p-4 border-b border-tactical-border flex items-center justify-between">
+          <h3 class="text-base font-bold text-white">${existing ? 'Редагувати бійця' : 'Додати військовослужбовця'}</h3>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        </div>
+        <form onsubmit="saveSoldier(event, '${soldierId || ''}')" class="p-4 space-y-3.5 overflow-y-auto">
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1">ПІБ (Прізвище та ініціали)</label>
+            <input id="soldier-name" type="text" required value="${escapeHtml(existing?.name || '')}" placeholder="Наприклад: Коваленко І.В." class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1">Звання / Посада (необов'язково)</label>
+            <input id="soldier-rank" type="text" value="${escapeHtml(existing?.rank || '')}" placeholder="Наприклад: солдат, стрілець" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1">Відділення</label>
+            <select id="soldier-squad" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive">
+              ${state.squads.map(sq => `<option value="${sq.id}" ${existing?.squadId === sq.id ? 'selected' : ''}>${escapeHtml(sq.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1">Статус</label>
+            <select id="soldier-status" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive">
+              ${STATUS_OPTIONS.map(st => `<option value="${st.id}" ${(existing?.status || 'active') === st.id ? 'selected' : ''}>${st.label}</option>`).join('')}
+            </select>
+          </div>
+          <button type="submit" class="w-full py-3 mt-2 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-sm font-bold transition">
+            Зберегти
+          </button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('soldier-name')?.focus(), 50);
+    }
+
+    function saveSoldier(e, soldierId) {
+      e.preventDefault();
+      const name = document.getElementById('soldier-name').value.trim();
+      const rank = document.getElementById('soldier-rank').value.trim();
+      const squadId = document.getElementById('soldier-squad').value;
+      const status = document.getElementById('soldier-status').value;
+      if (!name) return;
+
+      if (soldierId) {
+        const s = state.soldiers.find(x => x.id === soldierId);
+        if (s) {
+          s.name = name;
+          s.rank = rank;
+          s.squadId = squadId;
+          s.status = status;
+        }
+      } else {
+        state.soldiers.push({ id: generateId('s'), name, rank, squadId, status });
+      }
+      state.isDemo = false;
+      saveState();
+      closeModal();
+      render();
+      showToast(soldierId ? 'Дані оновлено' : 'Бійця додано');
+    }
+
+    function promptDeleteSoldier(soldierId) {
+      const s = getSoldierById(soldierId);
+      if (!s) return;
+      showConfirm(
+        `Видалити ${s.name}?`,
+        'Військовослужбовець та всі записи про його наряди будуть видалені.',
+        'Видалити',
+        () => {
+          state.soldiers = state.soldiers.filter(x => x.id !== soldierId);
+          state.duties = state.duties.filter(d => d.soldierId !== soldierId);
+          saveState();
+          render();
+          showToast('Бійця видалено');
+        }
+      );
+    }
+
+    // =========================================================================
+    // ВКЛАДКА 4: НАЛАШТУВАННЯ (SETTINGS & LOCAL BACKUP)
+    // =========================================================================
+    function renderSettingsTab() {
+      return `
+        <!-- Види нарядів -->
+        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-white">Види нарядів</h2>
+            <button onclick="openAddDutyTypeModal()" class="px-3 py-1.5 rounded-lg bg-tactical-olive hover:bg-tactical-oliveHover text-white text-xs font-bold transition">
+              + Додати
+            </button>
+          </div>
+          <div class="space-y-2">
+            ${state.dutyTypes.map(dt => {
+              const col = getColorObj(dt.color);
+              return `
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-tactical-bg border border-tactical-border">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-3 h-3 rounded-full ${col.dot}"></span>
+                    <span class="text-sm font-medium text-white">${escapeHtml(dt.name)}</span>
+                  </div>
+                  ${state.dutyTypes.length > 1
+                    ? `<button onclick="deleteDutyType('${dt.id}')" class="px-2 py-1 rounded-lg text-xs text-red-400 hover:bg-red-500/15 transition">Видалити</button>`
+                    : `<span class="text-[11px] text-tactical-muted">Останній</span>`
+                  }
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Експорт та Резервне копіювання -->
+        <div class="bg-tactical-card border border-tactical-border rounded-2xl p-4 space-y-3">
+          <h2 class="text-sm font-bold text-white">Локальний бекап та експорт</h2>
+          <p class="text-xs text-tactical-muted leading-relaxed">
+            Усі дані зберігаються виключно на вашому пристрої. Рекомендуємо періодично зберігати резервну копію.
+          </p>
+          <div class="space-y-2.5 pt-1">
+            <button onclick="exportCSV()" class="w-full py-3 px-4 rounded-xl bg-tactical-olive/20 hover:bg-tactical-olive/30 border border-tactical-olive/50 text-emerald-300 text-sm font-semibold flex items-center justify-center gap-2 transition">
+              <span>Експорт обліку за ${MONTHS_UK[ui.month]} (CSV для Excel)</span>
+            </button>
+            <button onclick="exportJSON()" class="w-full py-3 px-4 rounded-xl bg-tactical-bg hover:bg-tactical-cardHover border border-tactical-border text-white text-sm font-semibold transition">
+              Експорт резервної копії (JSON)
+            </button>
+            <button onclick="document.getElementById('import-json-input').click()" class="w-full py-3 px-4 rounded-xl bg-tactical-bg hover:bg-tactical-cardHover border border-tactical-border text-white text-sm font-semibold transition">
+              Імпорт з файлу (JSON)
+            </button>
+          </div>
+        </div>
+
+        <!-- Небезпечна зона -->
+        <div class="bg-tactical-card border border-red-500/30 rounded-2xl p-4 space-y-3">
+          <h2 class="text-sm font-bold text-red-400">Скидання даних</h2>
+          <button onclick="promptResetAll()" class="w-full py-3 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm font-bold transition">
+            Очистити всі дані
+          </button>
+        </div>
+      `;
+    }
+
+    function openAddDutyTypeModal() {
+      openModal(`
+        <div class="p-4 border-b border-tactical-border flex items-center justify-between">
+          <h3 class="text-base font-bold text-white">Новий вид наряду</h3>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-tactical-bg flex items-center justify-center text-tactical-muted hover:text-white">✕</button>
+        </div>
+        <form onsubmit="saveDutyType(event)" class="p-4 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1.5">Назва</label>
+            <input id="dt-name" type="text" required placeholder="Наприклад: Черговий по роті" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-tactical-muted mb-1.5">Колір мітки</label>
+            <select id="dt-color" class="w-full px-3.5 py-2.5 rounded-xl bg-tactical-bg border border-tactical-border text-sm text-white focus:outline-none focus:border-tactical-olive">
+              ${DUTY_COLORS.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
+            </select>
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-tactical-olive hover:bg-tactical-oliveHover text-white text-sm font-bold transition">
+            Додати
+          </button>
+        </form>
+      `);
+      setTimeout(() => document.getElementById('dt-name')?.focus(), 50);
+    }
+
+    function saveDutyType(e) {
+      e.preventDefault();
+      const name = document.getElementById('dt-name').value.trim();
+      const color = document.getElementById('dt-color').value;
+      if (!name) return;
+      state.dutyTypes.push({ id: generateId('dt'), name, color });
+      saveState();
+      closeModal();
+      render();
+      showToast('Вид наряду додано');
+    }
+
+    function deleteDutyType(dtId) {
+      if (state.dutyTypes.length <= 1) return;
+      state.dutyTypes = state.dutyTypes.filter(dt => dt.id !== dtId);
+      saveState();
+      render();
+      showToast('Вид наряду видалено');
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportJSON() {
+      const dateStr = formatDateISO(new Date());
+      downloadFile(JSON.stringify(state, null, 2), `oblik_naryadiv_backup_${dateStr}.json`, 'application/json');
+      showToast('Резервну копію збережено');
+    }
+
+    function handleImportJSON(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!Array.isArray(parsed.squads) || !Array.isArray(parsed.soldiers) || !Array.isArray(parsed.duties)) {
+            throw new Error('Невірний формат файлу');
+          }
+          state = {
+            isDemo: false,
+            squads: parsed.squads,
+            soldiers: parsed.soldiers,
+            dutyTypes: Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length ? parsed.dutyTypes : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+            duties: parsed.duties
+          };
+          saveState();
+          render();
+          showToast('Дані успішно відновлено');
+        } catch (err) {
+          showToast('Помилка: некоректний JSON-файл', 'error');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportCSV() {
+      const year = ui.year;
+      const month = ui.month;
+      const header = ['Відділення', 'ПІБ', 'Звання/Посада', 'Статус', `За ${MONTHS_UK[month]} ${year}`, 'Всього за весь час'];
+      const rows = [header];
+
+      for (const sq of state.squads) {
+        const members = state.soldiers.filter(s => s.squadId === sq.id);
+        for (const s of members) {
+          const counts = getSoldierCounts(s.id, year, month);
+          const st = getStatusObj(s.status);
+          rows.push([sq.name, s.name, s.rank || '', st.label, counts.monthCount, counts.totalCount]);
+        }
+      }
+
+      const csvBody = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+      // UTF-8 BOM для коректного відкриття кирилиці в Excel
+      const bom = '\uFEFF';
+      downloadFile(bom + csvBody, `oblik_${year}_${String(month + 1).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8;');
+      showToast('CSV-файл сформовано');
+    }
+
+    function promptResetAll() {
+      showConfirm(
+        'Очистити всі дані?',
+        'Усі відділення, бійці та історія нарядів будуть безповоротно видалені з цього пристрою.',
+        'Очистити все',
+        () => {
+          state = {
+            isDemo: false,
+            squads: [],
+            soldiers: [],
+            dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
+            duties: []
+          };
+          saveState();
+          render();
+          showToast('Усі дані очищено');
+        }
+      );
+    }
+
+    // =========================================================================
+    // ГОЛОВНИЙ РЕНДЕР
+    // =========================================================================
+    function render() {
+      // Демо-банер
+      const demoBanner = document.getElementById('demo-banner');
+      if (state.isDemo) {
+        demoBanner.classList.remove('hidden');
+      } else {
+        demoBanner.classList.add('hidden');
+      }
+
+      // Активна кнопка нижньої навігації
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-tactical-emerald');
+        btn.classList.add('text-tactical-muted');
+      });
+      const activeBtn = document.getElementById(`nav-${ui.activeTab}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-tactical-muted');
+        activeBtn.classList.add('text-tactical-emerald');
+      }
+
+      // Контент вкладки
+      const main = document.getElementById('main-content');
+      if (ui.activeTab === 'schedule') {
+        main.innerHTML = renderScheduleTab();
+      } else if (ui.activeTab === 'stats') {
+        main.innerHTML = renderStatsTab();
+      } else if (ui.activeTab === 'personnel') {
+        main.innerHTML = renderPersonnelTab();
+      } else if (ui.activeTab === 'settings') {
+        main.innerHTML = renderSettingsTab();
+      }
+    }
+
+    // Ініціалізація при завантаженні
+    loadState();
+    render();
+  </script>
+</body>
+</html>
