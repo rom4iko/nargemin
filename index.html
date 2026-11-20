@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#0b1117" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%2310b981' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23f59e0b'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.3</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1117'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%23131c26' stroke='%2310b981' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23f59e0b'/%3E%3C/svg%3E" />
+  <title>Помічник взводу v3.3.1</title>
   <style>
     /* =========================================================================
-       ТЕМНА ТАКТИЧНА ТЕМА (SLATE / EMERALD / AMBER — IPHONE SAFARI / ANDROID)
+       ТЕМНА ТАКТИЧНА ТЕМА (MOBILE-FIRST, SAFE-AREA IPHONE / ANDROID)
        ========================================================================= */
     :root {
-      --bg: #0b1120;
-      --bg-elev: #111827;
-      --card: #162032;
-      --card-hover: #1e293b;
-      --border: #263449;
-      --border-strong: #334155;
+      --bg: #0b1117;
+      --bg-elev: #101822;
+      --card: #131c26;
+      --card-hover: #1b2736;
+      --border: #233244;
+      --border-strong: #32465e;
       --text: #f1f5f9;
-      --muted: #94a3b8;
+      --muted: #8ea1b8;
       --emerald: #10b981;
       --emerald-dark: #059669;
       --amber: #f59e0b;
@@ -49,10 +49,10 @@
     input[type="date"] { color-scheme: dark; }
 
     /* Аварійний банер помилок */
-    #fatal-error-box {
-      display: none; position: fixed; inset: 12px; z-index: 9999;
-      background: #2b1115; border: 2px solid #ef4444; border-radius: 14px;
-      padding: 16px; color: #fecaca; overflow: auto;
+    #fatal-error-bar {
+      display: none; position: fixed; top: calc(6px + var(--safe-top)); left: 10px; right: 10px; z-index: 9999;
+      background: #3b1219; border: 1.5px solid var(--danger); border-radius: 12px;
+      padding: 10px 12px; color: #fecaca; font-size: 12.5px; box-shadow: 0 10px 28px rgba(0,0,0,0.6);
     }
 
     /* Екран входу за PIN-кодом */
@@ -62,8 +62,8 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
     }
     .pin-logo {
-      width: 64px; height: 64px; border-radius: 18px;
-      background: rgba(16, 185, 129, 0.16); border: 1.5px solid rgba(16, 185, 129, 0.5);
+      width: 66px; height: 66px; border-radius: 18px;
+      background: rgba(16, 185, 129, 0.14); border: 1.5px solid rgba(16, 185, 129, 0.5);
       color: var(--emerald); display: flex; align-items: center; justify-content: center;
     }
     .pin-dots { display: flex; gap: 16px; justify-content: center; margin: 4px 0; }
@@ -84,13 +84,13 @@
 
     /* Головна оболонка */
     .app {
-      max-width: 600px; margin: 0 auto; min-height: 100vh;
-      display: flex; flex-direction: column; padding-bottom: calc(84px + var(--safe-bottom));
+      max-width: 620px; margin: 0 auto; min-height: 100vh;
+      display: flex; flex-direction: column; padding-bottom: calc(86px + var(--safe-bottom));
     }
     .header {
       position: sticky; top: 0; z-index: 30;
       padding: calc(8px + var(--safe-top)) 12px 8px;
-      background: rgba(11, 17, 32, 0.94);
+      background: rgba(11, 17, 23, 0.94);
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -98,7 +98,7 @@
     .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .brand-icon {
       width: 34px; height: 34px; border-radius: 10px;
-      background: rgba(16, 185, 129, 0.16); border: 1px solid rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.45);
       color: var(--emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .brand-title { font-size: 14.5px; font-weight: 800; color: #fff; line-height: 1.15; white-space: nowrap; }
@@ -115,20 +115,20 @@
       background: var(--card); border: 1px solid var(--border); color: var(--text);
       display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; min-height: 36px;
     }
-    .sync-pill.online { border-color: rgba(16, 185, 129, 0.5); color: #6ee7b7; background: rgba(16, 185, 129, 0.1); }
-    .sync-pill.offline { border-color: rgba(239, 68, 68, 0.45); color: #fca5a5; }
-    .sync-pill.syncing { border-color: rgba(56, 189, 248, 0.45); color: #7dd3fc; }
+    .sync-pill.online { border-color: rgba(16, 185, 129, 0.55); color: #6ee7b7; background: rgba(16, 185, 129, 0.12); }
+    .sync-pill.offline { border-color: rgba(239, 68, 68, 0.5); color: #fca5a5; background: rgba(239, 68, 68, 0.1); }
+    .sync-pill.syncing { border-color: rgba(56, 189, 248, 0.5); color: #7dd3fc; }
 
     .main { flex: 1; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
 
-    /* Нижня навігація + червоний бейдж задач */
+    /* Нижня навігація */
     .nav {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
-      background: rgba(17, 24, 39, 0.96);
+      background: rgba(16, 24, 34, 0.97);
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border-top: 1px solid var(--border); padding-bottom: var(--safe-bottom);
     }
-    .nav-inner { max-width: 600px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; }
+    .nav-inner { max-width: 620px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; }
     .nav-btn {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 4px; font-size: 10.5px; font-weight: 700; color: var(--muted); min-height: 44px;
@@ -138,21 +138,21 @@
     .nav-badge {
       position: absolute; top: -6px; right: -10px;
       min-width: 18px; height: 18px; padding: 0 4px;
-      border-radius: 999px; background: #ef4444; color: #ffffff;
-      border: 2px solid #111827; font-size: 10px; font-weight: 800; line-height: 1;
+      border-radius: 999px; background: var(--danger); color: #ffffff;
+      border: 2px solid #101822; font-size: 10px; font-weight: 800; line-height: 1;
       display: inline-flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5);
     }
 
     /* Картки, сітки, типографіка */
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; }
     .card-flush { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .stack { display: flex; flex-direction: column; gap: 10px; }
     .stack-sm { display: flex; flex-direction: column; gap: 6px; }
     .row { display: flex; align-items: center; gap: 8px; }
     .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .wrap { flex-wrap: wrap; }
     .min0 { min-width: 0; flex: 1; }
     .text-xs { font-size: 12px; }
@@ -161,7 +161,7 @@
     .fw-bold { font-weight: 700; }
     .fw-800 { font-weight: 800; }
     .section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #cbd5e1; }
-    .empty-state { text-align: center; padding: 20px 12px; color: var(--muted); font-size: 13.5px; }
+    .empty-state { text-align: center; padding: 18px 12px; color: var(--muted); font-size: 13.5px; }
     .info-banner {
       padding: 9px 12px; border-radius: 11px; font-size: 12px; color: #bae6fd;
       background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3);
@@ -171,43 +171,37 @@
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       min-height: 44px; padding: 9px 14px; border-radius: 11px;
-      font-weight: 700; font-size: 13.5px; text-align: center; transition: transform 0.1s;
+      font-weight: 700; font-size: 13.5px; text-align: center; transition: transform 0.08s, background 0.12s;
     }
     .btn:active { transform: scale(0.98); }
-    .btn-sm { min-height: 38px; padding: 6px 11px; font-size: 12px; border-radius: 9px; }
+    .btn-sm { min-height: 38px; padding: 6px 11px; font-size: 12.5px; border-radius: 9px; }
     .btn-xs { min-height: 34px; padding: 4px 9px; font-size: 11.5px; border-radius: 8px; }
     .btn-full { width: 100%; }
     .btn-primary { background: var(--emerald-dark); color: #fff; }
     .btn-secondary { background: var(--bg-elev); color: var(--text); border: 1px solid var(--border); }
     .btn-info { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.35); }
     .btn-warn { background: rgba(245, 158, 11, 0.16); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.38); }
 
     .btn-icon {
       width: 44px; height: 44px; border-radius: 10px; background: var(--bg-elev);
       border: 1px solid var(--border); color: var(--text);
       display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px;
     }
-    .btn-icon-sm { width: 38px; height: 38px; border-radius: 9px; font-size: 13px; }
-    .btn-icon.danger { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
+    .btn-icon-sm { width: 36px; height: 36px; border-radius: 9px; font-size: 13px; }
+    .btn-icon.danger { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.35); color: #fca5a5; }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field-label { font-size: 12px; font-weight: 700; color: var(--muted); }
     .input, .select, .textarea {
-      width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px;
+      width: 100%; min-height: 44px; padding: 9px 12px; border-radius: 10px;
       background: var(--bg); border: 1px solid var(--border); color: #fff; outline: none;
     }
+    .input-sm, .select-sm { min-height: 38px; padding: 6px 10px; font-size: 13px; }
     .input:focus, .select:focus, .textarea:focus { border-color: var(--emerald); }
     .textarea { min-height: 76px; resize: vertical; }
 
-    /* Сегмент-кнопки, фільтри, бейджі */
-    .seg-control {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
-      background: var(--card); border: 1px solid var(--border); padding: 4px; border-radius: 12px;
-    }
-    .seg-btn { min-height: 38px; padding: 4px 6px; border-radius: 9px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
-    .seg-btn.active { background: var(--emerald-dark); color: #fff; }
-
+    /* Фільтри, бейджі, чіпи */
     .pills-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
     .pills-scroll::-webkit-scrollbar { display: none; }
     .pill {
@@ -230,96 +224,121 @@
     .badge-err { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.38); }
     .badge-muted { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.28); }
 
+    .name-chip {
+      display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px;
+      border-radius: 7px; font-size: 11px; font-weight: 600;
+      background: var(--bg-elev); border: 1px solid var(--border); color: #cbd5e1;
+    }
+
     /* Календар нарядів */
-    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 6px; }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 5px; }
     .cal-weekdays div { font-size: 11px; font-weight: 700; color: var(--muted); }
     .cal-weekdays .wknd { color: #fbbf24; }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .cal-cell {
-      height: 46px; border-radius: 9px; border: 1px solid transparent;
-      background: rgba(11, 17, 32, 0.65); color: var(--text);
-      display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 5px 2px;
+      height: 48px; border-radius: 9px; border: 1px solid transparent;
+      background: rgba(11, 17, 23, 0.72); color: var(--text);
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4px 2px;
     }
-    .cal-cell.today { border-color: rgba(16, 185, 129, 0.6); }
-    .cal-cell.selected { background: rgba(16, 185, 129, 0.28); border-color: var(--emerald); color: #fff; }
+    .cal-cell.today { border-color: rgba(16, 185, 129, 0.65); }
+    .cal-cell.selected { background: rgba(16, 185, 129, 0.26); border-color: var(--emerald); color: #fff; }
     .cal-num { font-size: 12.5px; font-weight: 700; line-height: 1; }
-    .cal-dots { display: flex; gap: 2px; height: 6px; align-items: center; }
+    .cal-bottom { display: flex; align-items: center; gap: 2px; min-height: 12px; }
     .cal-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .cal-cnt { font-size: 9.5px; font-weight: 800; color: #6ee7b7; }
 
-    /* Акордеони, склад, статуси присутності */
+    /* Картки типів нарядів */
+    .duty-type-card {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px 11px; border-left-width: 4px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .picker-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 12px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border);
+      cursor: pointer; transition: border-color 0.12s, background 0.12s;
+    }
+    .picker-row.assigned { background: rgba(16, 185, 129, 0.14); border-color: var(--emerald); }
+    .picker-row:active { background: var(--card-hover); }
+
+    /* Розхід: KPI та швидкий редактор категорій */
+    .kpi-box { background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 9px 6px; text-align: center; }
+    .kpi-val { font-size: 19px; font-weight: 800; color: #fff; line-height: 1.1; }
+    .kpi-lbl { font-size: 10.5px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+    .cat-row {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px 11px; display: flex; flex-direction: column; gap: 7px;
+    }
+    .cat-row.overridden { border-color: rgba(245, 158, 11, 0.55); }
+    .stepper { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .step-btn {
+      width: 36px; height: 36px; border-radius: 9px; background: var(--card); border: 1px solid var(--border-strong);
+      color: #fff; font-size: 18px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .step-btn:active { background: var(--emerald-dark); border-color: var(--emerald); }
+    .step-val {
+      min-width: 30px; text-align: center; font-size: 16px; font-weight: 800; color: #fff;
+    }
+    .step-val.manual { color: #fde047; }
+
+    /* Акордеони, таблиці, списки */
     .acc-header {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      min-height: 48px; padding: 10px 12px; background: rgba(11, 17, 32, 0.6); cursor: pointer; user-select: none;
+      min-height: 46px; padding: 10px 12px; background: rgba(11, 17, 23, 0.65); cursor: pointer; user-select: none;
     }
-    .chevron { display: inline-block; transition: transform 0.18s; color: var(--muted); flex-shrink: 0; font-size: 13px; }
+    .chevron { display: inline-block; transition: transform 0.16s; color: var(--muted); flex-shrink: 0; font-size: 12px; }
     .acc-header.open .chevron { transform: rotate(90deg); color: #fff; }
     .acc-body { border-top: 1px solid var(--border); }
+
     .soldier-item { border-bottom: 1px solid var(--border); background: var(--bg); }
     .soldier-item:last-child { border-bottom: none; }
     .soldier-row {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      min-height: 50px; padding: 10px 12px; cursor: pointer;
+      min-height: 48px; padding: 9px 12px; cursor: pointer;
     }
-    .soldier-expand { padding: 10px 12px 12px; background: rgba(22, 32, 50, 0.72); border-top: 1px dashed var(--border); }
-    .soldier-name { font-size: 14px; font-weight: 700; color: #fff; }
+    .soldier-expand { padding: 10px 12px 12px; background: rgba(19, 28, 38, 0.85); border-top: 1px dashed var(--border); }
 
-    .presence-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-    .presence-btn {
-      min-height: 36px; padding: 6px 8px; border-radius: 9px; font-size: 11.5px; font-weight: 700;
-      background: var(--card); border: 1px solid var(--border); color: var(--muted); text-align: center;
+    .checkbox-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      min-height: 46px; padding: 9px 12px; background: var(--bg); border-bottom: 1px solid var(--border); cursor: pointer;
     }
-    .presence-btn.active-ok { background: rgba(16, 185, 129, 0.22); border-color: var(--emerald); color: #6ee7b7; }
-    .presence-btn.active-warn { background: rgba(245, 158, 11, 0.22); border-color: var(--amber); color: #fde68a; }
+    .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--emerald); flex-shrink: 0; }
 
     /* Задачі */
     .task-card {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 13px; display: flex; flex-direction: column; gap: 10px;
+      padding: 13px; display: flex; flex-direction: column; gap: 9px;
     }
-    .status-group-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .status-group-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .status-btn {
-      min-height: 36px; padding: 6px 6px; border-radius: 9px; font-size: 11.5px; font-weight: 700;
+      min-height: 36px; padding: 5px 4px; border-radius: 9px; font-size: 11.5px; font-weight: 700;
       background: var(--bg); border: 1px solid var(--border); color: var(--muted); text-align: center;
     }
-    .status-btn.st-new { background: rgba(148, 163, 184, 0.2); border-color: #94a3b8; color: #f1f5f9; }
     .status-btn.st-in_progress { background: rgba(56, 189, 248, 0.2); border-color: var(--blue); color: #7dd3fc; }
     .status-btn.st-done { background: rgba(16, 185, 129, 0.22); border-color: var(--emerald); color: #6ee7b7; }
     .status-btn.st-failed { background: rgba(239, 68, 68, 0.22); border-color: var(--danger); color: #fca5a5; }
 
-    /* Розхід, KPI, прев'ю */
-    .kpi-box { background: var(--bg); border: 1px solid var(--border); border-radius: 11px; padding: 10px; text-align: center; }
-    .kpi-val { font-size: 20px; font-weight: 800; color: #fff; }
-    .kpi-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .preview-pre {
       margin: 0; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border);
       color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 12.5px; white-space: pre-wrap; word-break: break-word; line-height: 1.48;
     }
+
     .toggle-pill {
-      display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 10px;
+      display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 7px 10px;
       background: var(--bg); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer;
     }
-    .toggle-pill input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--emerald); flex-shrink: 0; }
-    .checkbox-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      min-height: 46px; padding: 10px 12px; background: var(--bg); border-bottom: 1px solid var(--border); cursor: pointer;
-    }
-    .checkbox-row.locked { opacity: 0.48; cursor: not-allowed; }
-    .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--emerald); flex-shrink: 0; }
-
-    /* Матриця прав та діагностика Firebase */
+    .toggle-pill input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--emerald); flex-shrink: 0; }
     .perm-block {
       padding: 10px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border);
       display: flex; flex-direction: column; gap: 8px;
     }
-    .diag-box {
-      padding: 9px 11px; border-radius: 10px; font-size: 12px; line-height: 1.4; word-break: break-word;
-    }
+    .diag-box { padding: 9px 11px; border-radius: 10px; font-size: 12px; line-height: 1.4; word-break: break-word; }
     .diag-ok { background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.4); color: #a7f3d0; }
     .diag-err { background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.45); color: #fecaca; }
     .diag-info { background: rgba(56, 189, 248, 0.14); border: 1px solid rgba(56, 189, 248, 0.4); color: #bae6fd; }
 
-    /* Присутність (Хто онлайн) */
+    /* Presence */
     .presence-row {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
       padding: 10px 12px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border);
@@ -327,6 +346,12 @@
     .presence-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .presence-dot.on { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.75); }
     .presence-dot.off { background: #475569; }
+
+    /* Таблиця обліку нарядів */
+    .stats-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .stats-table th, .stats-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+    .stats-table th { color: var(--muted); font-size: 11px; font-weight: 700; background: var(--bg-elev); }
+    .stats-table td.num, .stats-table th.num { text-align: center; }
 
     /* Модальні вікна та Toast */
     .modal-backdrop {
@@ -342,11 +367,11 @@
     }
     @media (min-width: 520px) { .modal-box { border-radius: 18px; padding-bottom: 0; } }
     .modal-header {
-      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      padding: 13px 15px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0;
     }
-    .modal-title { font-size: 16px; font-weight: 800; color: #fff; }
-    .modal-body { padding: 14px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .modal-title { font-size: 15.5px; font-weight: 800; color: #fff; }
+    .modal-body { padding: 13px 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 11px; }
 
     .toast-root {
       position: fixed; top: calc(62px + var(--safe-top)); left: 50%; transform: translateX(-50%);
@@ -354,16 +379,16 @@
     }
     .toast {
       padding: 10px 14px; border-radius: 11px; text-align: center; font-size: 13px; font-weight: 700;
-      color: #fff; background: #1e293b; border: 1px solid rgba(16, 185, 129, 0.6); box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      color: #fff; background: #162230; border: 1px solid rgba(16, 185, 129, 0.65); box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     }
-    .toast.error { background: #3a171c; border-color: rgba(239, 68, 68, 0.65); color: #fecaca; }
+    .toast.error { background: #3a151b; border-color: rgba(239, 68, 68, 0.65); color: #fecaca; }
 
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <!-- Аварійний блок діагностики помилок -->
-  <div id="fatal-error-box"></div>
+  <!-- Аварійна панель помилок -->
+  <div id="fatal-error-bar"></div>
 
   <!-- Екран входу за PIN-кодом -->
   <div id="pin-screen" class="pin-screen hidden"></div>
@@ -385,8 +410,8 @@
         </div>
       </div>
       <div class="row" style="gap:6px;flex-shrink:0">
-        <button id="header-sync-pill" class="sync-pill" onclick="onHeaderSyncPillClick()" title="Хто онлайн / Статус">⚪ Локально</button>
-        <button class="btn-icon btn-icon-sm" onclick="logoutSession()" title="Вийти / Змінити PIN" aria-label="Вийти">🚪</button>
+        <button type="button" id="header-sync-pill" class="sync-pill" onclick="onHeaderSyncPillClick()" title="Хто онлайн / Статус">⚪ Локально</button>
+        <button type="button" class="btn-icon btn-icon-sm" onclick="logoutSession()" title="Вийти / Змінити PIN" aria-label="Вийти">🚪</button>
       </div>
     </header>
 
@@ -394,13 +419,13 @@
 
     <nav class="nav" aria-label="Головне меню">
       <div class="nav-inner">
-        <button class="nav-btn" id="nav-duties" onclick="switchTab('duties')">
+        <button type="button" class="nav-btn" id="nav-duties" onclick="switchTab('duties')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
           <span>Наряди</span>
         </button>
-        <button class="nav-btn" id="nav-tasks" onclick="switchTab('tasks')">
+        <button type="button" class="nav-btn" id="nav-tasks" onclick="switchTab('tasks')">
           <span class="nav-icon-wrap">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -409,19 +434,19 @@
           </span>
           <span>Задачі</span>
         </button>
-        <button class="nav-btn" id="nav-rozkhid" onclick="switchTab('rozkhid')">
+        <button type="button" class="nav-btn" id="nav-rozkhid" onclick="switchTab('rozkhid')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
           </svg>
           <span>Розхід</span>
         </button>
-        <button class="nav-btn" id="nav-personnel" onclick="switchTab('personnel')">
+        <button type="button" class="nav-btn" id="nav-personnel" onclick="switchTab('personnel')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
           <span>Склад</span>
         </button>
-        <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+        <button type="button" class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
@@ -431,7 +456,7 @@
     </nav>
   </div>
 
-  <!-- Модальне вікно, Toast та прихований input для імпорту JSON -->
+  <!-- Модальне вікно, Toast та прихований input імпорту JSON -->
   <div id="modal-root" class="modal-backdrop" onclick="if(event.target.id==='modal-root') closeModal()">
     <div id="modal-box" class="modal-box"></div>
   </div>
@@ -440,23 +465,24 @@
 
   <script>
     // =========================================================================
-    // 0. ГЛОБАЛЬНИЙ ЗАХИСТ ВІД БІЛОГО ЕКРАНУ (WINDOW.ONERROR)
+    // 0. ГЛОБАЛЬНИЙ ЗАХИСТ ВІД ПОМИЛОК (WINDOW.ONERROR)
     // =========================================================================
     function showFatalError(msg) {
-      var box = document.getElementById('fatal-error-box');
-      if (!box) return;
-      box.style.display = 'block';
-      box.innerHTML =
-        '<div style="font-size:16px;font-weight:800;margin-bottom:8px">Помилка запуску «Помічника взводу»</div>' +
-        '<div style="font-size:13px;font-family:monospace;white-space:pre-wrap;margin-bottom:14px">' + String(msg || 'Невідома помилка') + '</div>' +
-        '<button type="button" onclick="location.reload()" style="padding:10px 14px;border-radius:10px;background:#ef4444;color:#fff;font-weight:700">Перезавантажити</button>';
+      var bar = document.getElementById('fatal-error-bar');
+      if (!bar) return;
+      bar.style.display = 'block';
+      bar.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+          '<div><b>Помилка:</b> ' + String(msg || 'Невідома помилка') + '</div>' +
+          '<button type="button" onclick="this.parentNode.parentNode.style.display=\'none\'" style="color:#fff;font-weight:800;padding:4px 8px">✕</button>' +
+        '</div>';
     }
     window.onerror = function(message, source, lineno, colno) {
-      showFatalError(message + (lineno ? (' (рядок ' + lineno + ':' + colno + ')') : ''));
+      showFatalError(message + (lineno ? (' (р.' + lineno + ':' + colno + ')') : ''));
       return false;
     };
     window.onunhandledrejection = function(ev) {
-      var r = ev && ev.reason ? (ev.reason.message || String(ev.reason)) : 'Unhandled promise rejection';
+      var r = ev && ev.reason ? (ev.reason.message || String(ev.reason)) : 'Promise rejection';
       showFatalError(r);
     };
 
@@ -472,8 +498,8 @@
         if (!ctx) return;
 
         var bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
-        bgGrad.addColorStop(0, '#0f172a');
-        bgGrad.addColorStop(1, '#1e293b');
+        bgGrad.addColorStop(0, '#0b1117');
+        bgGrad.addColorStop(1, '#1b2736');
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, 512, 512);
 
@@ -483,11 +509,6 @@
           ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, 512); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(512, g); ctx.stroke();
         }
-        ctx.beginPath();
-        ctx.arc(256, 256, 212, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
-        ctx.lineWidth = 4;
-        ctx.stroke();
 
         ctx.save();
         ctx.shadowColor = 'rgba(16, 185, 129, 0.35)';
@@ -501,8 +522,8 @@
         ctx.lineTo(114, 134);
         ctx.closePath();
         var shieldGrad = ctx.createLinearGradient(114, 76, 398, 444);
-        shieldGrad.addColorStop(0, '#1e293b');
-        shieldGrad.addColorStop(1, '#0b1120');
+        shieldGrad.addColorStop(0, '#1b2736');
+        shieldGrad.addColorStop(1, '#0b1117');
         ctx.fillStyle = shieldGrad;
         ctx.fill();
         ctx.lineWidth = 14;
@@ -511,8 +532,7 @@
         ctx.restore();
 
         var cx = 256, cy = 224, spikes = 5, outerR = 68, innerR = 29;
-        var rot = (Math.PI / 2) * 3;
-        var step = Math.PI / spikes;
+        var rot = (Math.PI / 2) * 3, step = Math.PI / spikes;
         ctx.beginPath();
         ctx.moveTo(cx, cy - outerR);
         for (var i = 0; i < spikes; i++) {
@@ -560,8 +580,8 @@
           short_name: 'Помічник',
           start_url: window.location.href,
           display: 'standalone',
-          background_color: '#0f172a',
-          theme_color: '#0f172a',
+          background_color: '#0b1117',
+          theme_color: '#0b1117',
           icons: [{ src: pngDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }]
         };
         var blob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
@@ -573,26 +593,26 @@
     })();
 
     // =========================================================================
-    // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
+    // 1. КОНСТАНТИ, РОЛІ, КАТЕГОРІЇ РОЗХОДУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.3';
+    var APP_VERSION = 'v3.3.1';
     var APP_UPDATED = '20.11.2026';
-    var STORAGE_KEY = 'pomichnyk_vzvodu_v33';
+    var STORAGE_KEY = 'pomichnyk_vzvodu_v331';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
-    var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role_v33';
+    var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role_v331';
     var LEGACY_KEYS = [
-      'pomichnyk_vzvodu_v321', 'pomichnyk_vzvodu_v32', 'pomichnyk_vzvodu_v31',
-      'pomichnyk_vzvodu_v30', 'pomichnyk_vzvodu_v3', 'pomichnyk_vzvodu_v27',
-      'pomichnyk_vzvodu_data', 'platoon_helper_state'
+      'pomichnyk_vzvodu_v33', 'pomichnyk_vzvodu_v321', 'pomichnyk_vzvodu_v32',
+      'pomichnyk_vzvodu_v31', 'pomichnyk_vzvodu_v30', 'pomichnyk_vzvodu_v3',
+      'pomichnyk_vzvodu_v27', 'pomichnyk_vzvodu_data', 'platoon_helper_state'
     ];
 
     var ROLE_ORDER = ['admin', 'kg', 'kv1', 'kv2', 'kv3'];
     var ROLES_META = {
-      admin: { key: 'admin', label: 'Адмін', short: '🛡️ Адмін', squadId: null, cssClass: '' },
-      kg:    { key: 'kg',    label: 'КГ (Командир групи)', short: '⭐ КГ', squadId: 'group_cmd', cssClass: 'kg' },
-      kv1:   { key: 'kv1',   label: 'КВ 1-го відділення', short: '🔹 КВ 1', squadId: 'sq_1', cssClass: 'kv' },
-      kv2:   { key: 'kv2',   label: 'КВ 2-го відділення', short: '🔹 КВ 2', squadId: 'sq_2', cssClass: 'kv' },
-      kv3:   { key: 'kv3',   label: 'КВ 3-го відділення', short: '🔹 КВ 3', squadId: 'sq_3', cssClass: 'kv' }
+      admin: { key: 'admin', label: 'Адмін',               short: '🛡️ Адмін', squadId: null,        cssClass: '' },
+      kg:    { key: 'kg',    label: 'КГ (Командир групи)', short: '⭐ КГ',    squadId: 'group_cmd', cssClass: 'kg' },
+      kv1:   { key: 'kv1',   label: 'КВ 1-го відділення',  short: '🔹 КВ 1',  squadId: 'sq_1',      cssClass: 'kv' },
+      kv2:   { key: 'kv2',   label: 'КВ 2-го відділення',  short: '🔹 КВ 2',  squadId: 'sq_2',      cssClass: 'kv' },
+      kv3:   { key: 'kv3',   label: 'КВ 3-го відділення',  short: '🔹 КВ 3',  squadId: 'sq_3',      cssClass: 'kv' }
     };
 
     var DEFAULT_PINS = { admin: '1111', kg: '1222', kv1: '1001', kv2: '2002', kv3: '3003' };
@@ -604,25 +624,39 @@
       kv3: { dutiesEdit: false, tasksCreate: false, tasksStatus: true, tasksViewAll: false, rozkhidMode: 'all', skladMode: 'view' }
     };
 
+    // Категорії розходу (включаючи onDuty + 6 категорій відсутності)
+    var ROZKHID_CATEGORIES = [
+      { key: 'onDuty',    icon: '🛡️', label: 'В наряді',         short: 'Наряд',      badgeClass: 'badge-info', isDuty: true },
+      { key: 'sick',      icon: '🤒', label: 'Хворі / Медпункт', short: 'Хворі',      badgeClass: 'badge-err',  isDuty: false },
+      { key: 'hospital',  icon: '🏥', label: 'Шпиталь',          short: 'Шпиталь',    badgeClass: 'badge-err',  isDuty: false },
+      { key: 'leave',     icon: '🏖️', label: 'Відпустка',        short: 'Відпустка',  badgeClass: 'badge-warn', isDuty: false },
+      { key: 'trip',      icon: '🚗', label: 'Відрядження',      short: 'Відрядж.',   badgeClass: 'badge-warn', isDuty: false },
+      { key: 'dismissed', icon: '🚪', label: 'Звільнення',       short: 'Звільнення', badgeClass: 'badge-warn', isDuty: false },
+      { key: 'other',     icon: '📌', label: 'Інше',             short: 'Інше',       badgeClass: 'badge-muted',isDuty: false }
+    ];
+
+    var ABSENCE_CATEGORIES = ROZKHID_CATEGORIES.filter(function(c) { return !c.isDuty; });
+
+    // Постійні статуси особового складу
     var PRESENCE_STATUSES = [
-      { key: 'in_service',    label: 'В строю',                 short: 'В строю',    badgeClass: 'badge-ok' },
-      { key: 'duty',          label: 'Наряд',                   short: 'Наряд',      badgeClass: 'badge-info' },
-      { key: 'sick',          label: 'Хворий / Санчастина',     short: 'Хворий',     badgeClass: 'badge-err' },
-      { key: 'leave',         label: 'Відпустка / Звільнення',  short: 'Відпустка',  badgeClass: 'badge-warn' },
-      { key: 'business_trip', label: 'Відрядження',             short: 'Відрядж.',   badgeClass: 'badge-warn' },
-      { key: 'other',         label: 'Інше',                    short: 'Інше',       badgeClass: 'badge-muted' }
+      { key: 'in_service', label: 'В строю',          short: 'В строю',    badgeClass: 'badge-ok' },
+      { key: 'sick',       label: 'Хворий / Медпункт',short: 'Хворий',     badgeClass: 'badge-err' },
+      { key: 'hospital',   label: 'Шпиталь',          short: 'Шпиталь',    badgeClass: 'badge-err' },
+      { key: 'leave',      label: 'Відпустка',        short: 'Відпустка',  badgeClass: 'badge-warn' },
+      { key: 'trip',       label: 'Відрядження',      short: 'Відрядж.',   badgeClass: 'badge-warn' },
+      { key: 'dismissed',  label: 'Звільнення',       short: 'Звільнення', badgeClass: 'badge-warn' },
+      { key: 'other',      label: 'Інше',             short: 'Інше',       badgeClass: 'badge-muted' }
     ];
 
     var TASK_RECIPIENTS = [
       { label: 'Усім командирам відділень', targetRole: 'all', targetSquadId: 'all' },
-      { label: 'Командиру групи (КГ)',      targetRole: 'kg',  targetSquadId: 'group_cmd' },
-      { label: 'Командиру 1-го відділення', targetRole: 'kv1', targetSquadId: 'sq_1' },
-      { label: 'Командиру 2-го відділення', targetRole: 'kv2', targetSquadId: 'sq_2' },
-      { label: 'Командиру 3-го відділення', targetRole: 'kv3', targetSquadId: 'sq_3' }
+      { label: 'КГ (Командиру групи)',      targetRole: 'kg',  targetSquadId: 'group_cmd' },
+      { label: 'КВ 1-го відділення',        targetRole: 'kv1', targetSquadId: 'sq_1' },
+      { label: 'КВ 2-го відділення',        targetRole: 'kv2', targetSquadId: 'sq_2' },
+      { label: 'КВ 3-го відділення',        targetRole: 'kv3', targetSquadId: 'sq_3' }
     ];
 
     var TASK_STATUSES = [
-      { key: 'new',         label: 'Нова',        badgeClass: 'badge-muted' },
       { key: 'in_progress', label: 'В роботі',    badgeClass: 'badge-info' },
       { key: 'done',        label: 'Виконано',    badgeClass: 'badge-ok' },
       { key: 'failed',      label: 'Не виконано', badgeClass: 'badge-err' }
@@ -631,11 +665,16 @@
     var MONTHS_NOM = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 
     // =========================================================================
-    // 2. УТИЛІТИ ДАТ, HTML, КЛІПБОРДУ ТА БЕЗПЕЧНОГО СХОВИЩА
+    // 2. УТИЛІТИ ДАТ, HTML, КЛІПБОРДУ ТА СХОВИЩА
     // =========================================================================
     function pad2(n) { return String(n).padStart(2, '0'); }
     function toISO(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
     function todayISO() { return toISO(new Date()); }
+    function addDaysISO(iso, days) {
+      var p = String(iso || todayISO()).split('-');
+      var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) + days);
+      return toISO(d);
+    }
     function fmtUA(iso) {
       if (!iso) return '';
       var p = String(iso).split('-');
@@ -697,7 +736,7 @@
     function safeSSRemove(key) { try { sessionStorage.removeItem(key); } catch (e) {} }
 
     // =========================================================================
-    // 3. ТОЧНА СХЕМА ДАНИХ ТА УНІВЕРСАЛЬНА НОРМАЛІЗАЦІЯ
+    // 3. ТОЧНА СХЕМА ДАНИХ ТА УНІВЕРСАЛЬНИЙ ІМПОРТ
     // =========================================================================
     function createDefaultState() {
       return {
@@ -743,21 +782,27 @@
 
     function normalizePresenceStatus(rawStatus) {
       var s = String(rawStatus || 'in_service');
-      var valid = PRESENCE_STATUSES.some(function(p) { return p.key === s; });
-      if (valid) return s;
+      if (s === 'business_trip' || s === 'vd') return 'trip';
       if (s === 'present') return 'in_service';
-      if (s === 'sh' || s === 'l' || s === 'hv') return 'sick';
-      if (s === 'vd') return 'business_trip';
+      if (s === 'sh' || s === 'hv') return 'sick';
+      if (s === 'l') return 'hospital';
       if (s === 'vp') return 'leave';
-      if (s === 'n') return 'duty';
-      return 'in_service';
+      var valid = PRESENCE_STATUSES.some(function(p) { return p.key === s; });
+      return valid ? s : 'in_service';
+    }
+
+    function normalizeReasonKey(raw) {
+      var s = String(raw || 'other');
+      if (s === 'business_trip' || s === 'vd') return 'trip';
+      if (s === 'in_service' || s === 'present') return 'in_service';
+      if (ROZKHID_CATEGORIES.some(function(c) { return c.key === s; })) return s;
+      return 'other';
     }
 
     function normalizeState(raw) {
       var def = createDefaultState();
       if (!raw || typeof raw !== 'object') return def;
 
-      // Підтримка squads
       var rawSquads = toArraySafe(raw.squads);
       var squads = rawSquads.length ? rawSquads.map(function(sq) {
         return {
@@ -768,7 +813,6 @@
         };
       }) : def.squads;
 
-      // Підтримка dutyTypes
       var rawDutyTypes = toArraySafe(raw.dutyTypes);
       var dutyTypes = rawDutyTypes.length ? rawDutyTypes.map(function(dt) {
         return {
@@ -780,26 +824,29 @@
         };
       }) : def.dutyTypes;
 
-      // Підтримка rolePermissions (та fallback зі старого поля permissions)
       var rolePermissions = JSON.parse(JSON.stringify(DEFAULT_ROLE_PERMISSIONS));
       var srcPerms = raw.rolePermissions || raw.permissions;
       if (srcPerms && typeof srcPerms === 'object') {
         ['kg', 'kv1', 'kv2', 'kv3'].forEach(function(rk) {
           var p = srcPerms[rk];
           if (p && typeof p === 'object') {
+            var rMode = p.rozkhidMode || DEFAULT_ROLE_PERMISSIONS[rk].rozkhidMode;
+            if (rMode === 'own') rMode = 'squad';
+            var sMode = p.skladMode || p.personnelMode || DEFAULT_ROLE_PERMISSIONS[rk].skladMode;
+            if (sMode === 'own_status') sMode = 'squad_status';
+            if (sMode === 'all') sMode = 'all_edit';
             rolePermissions[rk] = {
               dutiesEdit: p.dutiesEdit !== undefined ? Boolean(p.dutiesEdit) : DEFAULT_ROLE_PERMISSIONS[rk].dutiesEdit,
               tasksCreate: p.tasksCreate !== undefined ? Boolean(p.tasksCreate) : DEFAULT_ROLE_PERMISSIONS[rk].tasksCreate,
               tasksStatus: p.tasksStatus !== undefined ? Boolean(p.tasksStatus) : (p.tasksUpdate !== undefined ? Boolean(p.tasksUpdate) : DEFAULT_ROLE_PERMISSIONS[rk].tasksStatus),
               tasksViewAll: p.tasksViewAll !== undefined ? Boolean(p.tasksViewAll) : DEFAULT_ROLE_PERMISSIONS[rk].tasksViewAll,
-              rozkhidMode: p.rozkhidMode || DEFAULT_ROLE_PERMISSIONS[rk].rozkhidMode,
-              skladMode: p.skladMode || (p.personnelMode === 'all' ? 'all_edit' : (p.personnelMode || DEFAULT_ROLE_PERMISSIONS[rk].skladMode))
+              rozkhidMode: rMode,
+              skladMode: sMode
             };
           }
         });
       }
 
-      // Універсальна підтримка personnel (personnel / people / soldiers)
       var rawPeople = toArraySafe(raw.personnel);
       if (!rawPeople.length) rawPeople = toArraySafe(raw.people);
       if (!rawPeople.length) rawPeople = toArraySafe(raw.soldiers);
@@ -817,7 +864,6 @@
         };
       });
 
-      // Універсальна підтримка duties (масив записів {id, date, dutyTypeId, personId, note} або старий об'єкт за датами)
       var duties = [];
       if (Array.isArray(raw.duties)) {
         duties = raw.duties.filter(function(d) { return d && d.date && d.dutyTypeId && d.personId; }).map(function(d) {
@@ -825,8 +871,7 @@
             id: String(d.id || genId('d')),
             date: String(d.date),
             dutyTypeId: String(d.dutyTypeId),
-            personId: String(d.personId),
-            note: String(d.note || '')
+            personId: String(d.personId)
           };
         });
       } else if (raw.duties && typeof raw.duties === 'object') {
@@ -836,7 +881,7 @@
             Object.keys(dayObj).forEach(function(dtId) {
               toArraySafe(dayObj[dtId]).forEach(function(pid) {
                 if (typeof pid === 'string') {
-                  duties.push({ id: genId('d'), date: dateKey, dutyTypeId: dtId, personId: pid, note: '' });
+                  duties.push({ id: genId('d'), date: dateKey, dutyTypeId: dtId, personId: pid });
                 }
               });
             });
@@ -844,15 +889,14 @@
         });
       }
 
-      // Універсальна підтримка tasks
       var rawTasks = toArraySafe(raw.tasks);
       var tasks = rawTasks.filter(function(t) { return t && (t.title || t.text); }).map(function(t) {
         var matchedRec = TASK_RECIPIENTS.find(function(r) {
           return r.targetRole === t.targetRole || r.label === t.target;
         });
-        var st = String(t.status || 'new');
-        if (st === 'received') st = 'in_progress';
-        if (['new', 'in_progress', 'done', 'failed'].indexOf(st) === -1) st = 'new';
+        var st = String(t.status || 'in_progress');
+        if (st === 'new' || st === 'received') st = 'in_progress';
+        if (['in_progress', 'done', 'failed'].indexOf(st) === -1) st = 'in_progress';
         return {
           id: String(t.id || genId('t')),
           title: String(t.title || t.text || '').trim(),
@@ -861,10 +905,24 @@
           targetRole: String(t.targetRole || (matchedRec ? matchedRec.targetRole : 'all')),
           targetSquadId: mapLegacySquadId(t.targetSquadId || (matchedRec ? matchedRec.targetSquadId : 'all')),
           priority: (t.priority === 'high' || t.priority === 'low') ? t.priority : 'normal',
+          dueDate: String(t.dueDate || ''),
           status: st,
           createdBy: String(t.createdBy || t.author || ''),
           createdAt: t.createdAt || fmtTimeNow(),
           updatedAt: t.updatedAt || t.createdAt || fmtTimeNow()
+        };
+      });
+
+      var scheduledAbsences = toArraySafe(raw.scheduledAbsences).filter(function(a) {
+        return a && a.personId && a.startDate && a.endDate;
+      }).map(function(a) {
+        return {
+          id: String(a.id || genId('abs')),
+          personId: String(a.personId),
+          reason: normalizeReasonKey(a.reason || 'other'),
+          startDate: String(a.startDate),
+          endDate: String(a.endDate),
+          note: String(a.note || '')
         };
       });
 
@@ -877,7 +935,7 @@
         personnel: personnel,
         duties: duties,
         tasks: tasks,
-        scheduledAbsences: toArraySafe(raw.scheduledAbsences),
+        scheduledAbsences: scheduledAbsences,
         rozkhidManual: raw.rozkhidManual && typeof raw.rozkhidManual === 'object' ? raw.rozkhidManual : {},
         rozkhidNumeric: raw.rozkhidNumeric && typeof raw.rozkhidNumeric === 'object' ? raw.rozkhidNumeric : {},
         rozkhidCleared: raw.rozkhidCleared && typeof raw.rozkhidCleared === 'object' ? raw.rozkhidCleared : {},
@@ -909,25 +967,27 @@
 
     var ui = {
       tab: 'duties',
-      dutiesSubtab: 'calendar',
       calYear: new Date().getFullYear(),
       calMonth: new Date().getMonth(),
       selectedDate: todayISO(),
-      tasksFilterRecipient: 'all',
-      tasksFilterStatus: 'all',
+      showDutiesTable: false,
+      dutyPicker: { dtId: null, search: '', squad: 'all' },
+      tasksFilter: 'active',
+      rozkhidDate: todayISO(),
+      showRozkhidRoster: false,
+      rozkhidPicker: { catKey: null, search: '', squad: 'all' },
       personnelSearch: '',
       personnelSquadFilter: 'all',
       expandedSoldiers: {},
-      collapsedSquads: {},
-      dutyModalSelection: []
+      collapsedSquads: {}
     };
 
-    // Стан синхронізації Firebase та Присутності ("Хто онлайн")
+    // Стан Firebase та Присутності
     var fbUrl = safeLSGet(FB_URL_STORAGE_KEY) || '';
-    var fbStatus = fbUrl ? 'offline' : 'local'; // 'local' | 'online' | 'offline' | 'syncing'
+    var fbStatus = fbUrl ? 'offline' : 'local';
     var fbDiag = { type: 'info', text: fbUrl ? 'Очікується перевірка підключення...' : 'Хмарну базу ще не підключено.' };
     var fbLastSyncText = '';
-    var fbPresenceMap = {}; // { admin: { role, label, lastSeen }, ... }
+    var fbPresenceMap = {};
     var fbPollTimer = null;
     var fbHeartbeatTimer = null;
     var fbPushTimer = null;
@@ -943,7 +1003,9 @@
       }
     }
 
-    // Хелпери прав доступу
+    // =========================================================================
+    // 4. ПРАВА ДОСТУПУ ТА РОЛЬОВА ФІЛЬТРАЦІЯ
+    // =========================================================================
     function getRoleMeta(role) { return ROLES_META[role] || ROLES_META.kv1; }
     function isAdmin() { return currentRole === 'admin'; }
     function getPerm(role) {
@@ -960,11 +1022,15 @@
     function getSkladMode() { return isAdmin() ? 'all_edit' : (getPerm().skladMode || 'view'); }
     function getMySquadId() { return getRoleMeta(currentRole).squadId; }
 
+    function canEditRozkhid() {
+      var m = getRozkhidMode();
+      return m === 'all' || m === 'squad';
+    }
+
     function canEditPersonPresence(person) {
-      var rMode = getRozkhidMode();
       var sMode = getSkladMode();
-      if (rMode === 'all' || sMode === 'all_edit') return true;
-      if ((rMode === 'own' || sMode === 'own_status') && person && person.squadId === getMySquadId()) return true;
+      if (sMode === 'all_edit') return true;
+      if (sMode === 'squad_status' && person && person.squadId === getMySquadId()) return true;
       return false;
     }
 
@@ -979,11 +1045,13 @@
       if (task.targetRole && task.targetRole === r) return true;
       var mySq = getRoleMeta(r).squadId;
       if (mySq && task.targetSquadId && task.targetSquadId === mySq) return true;
+      var myLabel = getRoleMeta(r).label.toLowerCase();
+      if (task.target && task.target.toLowerCase().indexOf(myLabel.slice(0, 6)) !== -1) return true;
       return false;
     }
 
     // =========================================================================
-    // 4. FIREBASE REALTIME DATABASE REST API + PRESENCE ("ХТО ОНЛАЙН")
+    // 5. FIREBASE REALTIME DATABASE REST API + PRESENCE ("ХТО ОНЛАЙН")
     // =========================================================================
     function normalizeFirebaseBaseUrl(raw) {
       var str = String(raw || '').trim();
@@ -1015,7 +1083,8 @@
       var count = 0;
       ROLE_ORDER.forEach(function(rk) {
         var rec = fbPresenceMap[rk];
-        if (rec && rec.lastSeen && (now - Number(rec.lastSeen)) <= 75000) count++;
+        var ts = rec ? Number(rec.ts || rec.lastSeen || 0) : 0;
+        if (ts > 0 && (now - ts) < 70000) count++;
       });
       if (fbStatus === 'online' && currentRole && count === 0) count = 1;
       return count;
@@ -1025,15 +1094,10 @@
       var pill = document.getElementById('header-sync-pill');
       if (!pill) return;
       pill.className = 'sync-pill ' + (fbStatus === 'online' ? 'online' : fbStatus === 'offline' ? 'offline' : fbStatus === 'syncing' ? 'syncing' : '');
-      if (fbStatus === 'online') {
-        pill.textContent = '🟢 ' + getOnlineCount() + ' онлайн';
-      } else if (fbStatus === 'offline') {
-        pill.textContent = '🔴 Офлайн';
-      } else if (fbStatus === 'syncing') {
-        pill.textContent = '🔄 Синхр...';
-      } else {
-        pill.textContent = '⚪ Локально';
-      }
+      if (fbStatus === 'online') pill.textContent = '🟢 ' + getOnlineCount() + ' онлайн';
+      else if (fbStatus === 'offline') pill.textContent = '🔴 Офлайн';
+      else if (fbStatus === 'syncing') pill.textContent = '🔄 Синхр...';
+      else pill.textContent = '⚪ Локально';
     }
 
     function setFbDiag(type, text) {
@@ -1048,8 +1112,7 @@
     function isUserActivelyEditing() {
       var a = document.activeElement;
       if (!a) return false;
-      var tag = a.tagName;
-      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+      return a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT';
     }
 
     function fbFetchJSON(url, options) {
@@ -1073,11 +1136,11 @@
       if (!base || !currentRole) return;
       var meta = getRoleMeta(currentRole);
       var now = Date.now();
-      fbPresenceMap[currentRole] = { role: currentRole, label: meta.label, lastSeen: now };
+      fbPresenceMap[currentRole] = { role: currentRole, label: meta.label, ts: now };
       fbFetchJSON(base + '/presence/' + currentRole + '.json', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: currentRole, label: meta.label, lastSeen: now })
+        body: JSON.stringify({ role: currentRole, label: meta.label, ts: now })
       }).then(function(res) {
         if (res.ok) updateSyncPillUI();
       });
@@ -1097,7 +1160,7 @@
     function openPresenceModal() {
       if (!fbUrl) {
         switchTab('settings');
-        showToast('Підключіть Firebase у Налаштуваннях, щоб бачити, хто онлайн');
+        showToast('Підключіть Firebase у Налаштуваннях');
         return;
       }
       fetchPresenceMap().then(function() {
@@ -1105,13 +1168,13 @@
         var rows = ROLE_ORDER.map(function(rk) {
           var meta = ROLES_META[rk];
           var rec = fbPresenceMap[rk];
-          var lastSeen = rec && rec.lastSeen ? Number(rec.lastSeen) : 0;
-          var isOnline = lastSeen > 0 && (now - lastSeen) <= 75000;
-          var statusText = 'Ще не заходив(ла)';
+          var ts = rec ? Number(rec.ts || rec.lastSeen || 0) : 0;
+          var isOnline = ts > 0 && (now - ts) < 70000;
+          var statusText = 'Не заходив(ла)';
           if (isOnline) {
             statusText = 'Онлайн зараз';
-          } else if (lastSeen > 0) {
-            var mins = Math.max(1, Math.round((now - lastSeen) / 60000));
+          } else if (ts > 0) {
+            var mins = Math.max(1, Math.round((now - ts) / 60000));
             if (mins < 60) statusText = 'Був(ла) ' + mins + ' хв тому';
             else if (mins < 1440) statusText = 'Був(ла) ' + Math.round(mins / 60) + ' год тому';
             else statusText = 'Був(ла) ' + Math.round(mins / 1440) + ' дн тому';
@@ -1187,9 +1250,9 @@
         setFbDiag('ok', 'Онлайн (HTTP ' + res.status + '). Синхронізовано: ' + fbLastSyncText);
         if (changed && currentRole) {
           updateTasksBadge();
-          if (!isUserActivelyEditing()) render();
+          if (!isUserActivelyEditing() && !isModalOpen()) render();
         }
-        if (!silent && forceApply) showToast('Дані завантажено з хмари (' + state.personnel.length + ' осіб)');
+        if (!silent && forceApply) showToast('Завантажено з хмари (' + state.personnel.length + ' осіб)');
         return res;
       });
     }
@@ -1302,7 +1365,7 @@
     }
 
     // =========================================================================
-    // 5. ХЕЛПЕРИ ОСОБОВОГО СКЛАДУ ТА ВІДДІЛЕНЬ
+    // 6. ХЕЛПЕРИ СКЛАДУ, ВІДДІЛЕНЬ ТА РОЗРАХУНКУ ВІДСУТНОСТІ НА ДАТУ
     // =========================================================================
     function getOrderedSquads() {
       return state.squads.slice().sort(function(a, b) {
@@ -1332,6 +1395,9 @@
     function getPresenceMeta(key) {
       return PRESENCE_STATUSES.find(function(x) { return x.key === key; }) || PRESENCE_STATUSES[0];
     }
+    function getRozkhidCatMeta(key) {
+      return ROZKHID_CATEGORIES.find(function(x) { return x.key === key; }) || ROZKHID_CATEGORIES[ROZKHID_CATEGORIES.length - 1];
+    }
 
     function getLeaderBadgeHtml(person, squad) {
       if (!person || !person.isLeader) return '';
@@ -1341,8 +1407,35 @@
       return '<span class="badge badge-kv">★ КВ</span>';
     }
 
+    // Ефективний статус бійця на конкретну дату (для Нарядів і Розходу)
+    function getPersonEffectiveReasonOnDate(person, dateIso) {
+      if (!person) return 'in_service';
+      var manualDay = state.rozkhidManual && state.rozkhidManual[dateIso];
+      if (manualDay && manualDay[person.id]) {
+        return normalizeReasonKey(manualDay[person.id]);
+      }
+      var isCleared = Boolean(state.rozkhidCleared && state.rozkhidCleared[dateIso]);
+      if (!isCleared) {
+        // 1. Перевірка запланованих відсутностей на період
+        for (var i = 0; i < state.scheduledAbsences.length; i++) {
+          var abs = state.scheduledAbsences[i];
+          if (abs.personId === person.id && dateIso >= abs.startDate && dateIso <= abs.endDate) {
+            return normalizeReasonKey(abs.reason);
+          }
+        }
+        // 2. Постійний статус зі Складу
+        var permSt = normalizePresenceStatus(person.presenceStatus);
+        if (permSt !== 'in_service') return permSt;
+      }
+      return 'in_service';
+    }
+
+    function isPersonOnDutyOnDate(personId, dateIso) {
+      return state.duties.some(function(d) { return d.date === dateIso && d.personId === personId; });
+    }
+
     // =========================================================================
-    // 6. ЕКРАН ВХОДУ ЗА PIN-КОДОМ
+    // 7. ЕКРАН ВХОДУ ЗА PIN-КОДОМ
     // =========================================================================
     function renderPinScreen() {
       var el = document.getElementById('pin-screen');
@@ -1436,21 +1529,331 @@
     }
 
     // =========================================================================
-    // 7. ВКЛАДКА 1: НАРЯДИ (ГРАФІК + ОБЛІК)
+    // 8. ВКЛАДКА 1: НАРЯДИ (БЕЗДОГАННЕ ПРИЗНАЧЕННЯ, АВТОПІДБІР ТА ОБЛІК)
     // =========================================================================
+    function getDutiesForDate(dateIso) {
+      return state.duties.filter(function(d) { return d.date === dateIso; });
+    }
     function getDutiesForDateAndType(dateIso, dutyTypeId) {
       return state.duties.filter(function(d) { return d.date === dateIso && d.dutyTypeId === dutyTypeId; });
     }
 
-    function renderDutiesTab() {
-      var sub =
-        '<div class="seg-control">' +
-          '<button type="button" class="seg-btn ' + (ui.dutiesSubtab === 'calendar' ? 'active' : '') + '" onclick="ui.dutiesSubtab=\'calendar\';render()">📅 Графік</button>' +
-          '<button type="button" class="seg-btn ' + (ui.dutiesSubtab === 'stats' ? 'active' : '') + '" onclick="ui.dutiesSubtab=\'stats\';render()">📊 Облік</button>' +
+    function getDutyStatsMaps(year, month) {
+      var prefix = year + '-' + pad2(month + 1);
+      var monthMap = {}, totalMap = {}, byTypeMap = {};
+      state.duties.forEach(function(d) {
+        totalMap[d.personId] = (totalMap[d.personId] || 0) + 1;
+        if (!byTypeMap[d.personId]) byTypeMap[d.personId] = {};
+        byTypeMap[d.personId][d.dutyTypeId] = (byTypeMap[d.personId][d.dutyTypeId] || 0) + 1;
+        if (String(d.date || '').indexOf(prefix) === 0) {
+          monthMap[d.personId] = (monthMap[d.personId] || 0) + 1;
+        }
+      });
+      return { monthMap: monthMap, totalMap: totalMap, byTypeMap: byTypeMap };
+    }
+
+    function addDuty(dateIso, dutyTypeId, personId) {
+      if (!canEditDuties()) return false;
+      var exists = state.duties.some(function(d) {
+        return d.date === dateIso && d.dutyTypeId === dutyTypeId && d.personId === personId;
+      });
+      if (exists) return false;
+      state.duties.push({ id: genId('d'), date: dateIso, dutyTypeId: dutyTypeId, personId: personId });
+      saveState(true);
+      return true;
+    }
+
+    function removeDuty(dutyId) {
+      if (!canEditDuties()) return;
+      state.duties = state.duties.filter(function(d) { return d.id !== dutyId; });
+      saveState(true);
+      render();
+    }
+
+    function toggleDutyAssignment(dateIso, dutyTypeId, personId) {
+      if (!canEditDuties()) return;
+      var existing = state.duties.find(function(d) {
+        return d.date === dateIso && d.dutyTypeId === dutyTypeId && d.personId === personId;
+      });
+      if (existing) {
+        state.duties = state.duties.filter(function(d) { return d.id !== existing.id; });
+        saveState(true);
+      } else {
+        var dt = getDutyTypeById(dutyTypeId);
+        var current = getDutiesForDateAndType(dateIso, dutyTypeId);
+        if (dt && current.length >= (Number(dt.maxCount) || 1)) {
+          showToast('Ліміт для «' + dt.shortName + '» (' + dt.maxCount + ') вже заповнено', true);
+          return;
+        }
+        addDuty(dateIso, dutyTypeId, personId);
+      }
+      renderDutyPickerModal();
+      render();
+    }
+
+    function autoPickDutiesForDate(dateIso) {
+      if (!canEditDuties()) return;
+      if (!state.personnel.length) { showToast('Особовий склад порожній', true); return; }
+
+      var parts = dateIso.split('-');
+      var stats = getDutyStatsMaps(Number(parts[0]), Number(parts[1]) - 1);
+      var yesterday = addDaysISO(dateIso, -1);
+      var assignedToday = {};
+      getDutiesForDate(dateIso).forEach(function(d) { assignedToday[d.personId] = true; });
+      var addedCount = 0;
+
+      state.dutyTypes.forEach(function(dt) {
+        var need = (Number(dt.maxCount) || 1) - getDutiesForDateAndType(dateIso, dt.id).length;
+        if (need <= 0) return;
+
+        var candidates = state.personnel.filter(function(p) {
+          if (assignedToday[p.id]) return false;
+          if (getPersonEffectiveReasonOnDate(p, dateIso) !== 'in_service') return false;
+          return true;
+        }).sort(function(a, b) {
+          var aYest = isPersonOnDutyOnDate(a.id, yesterday) ? 1 : 0;
+          var bYest = isPersonOnDutyOnDate(b.id, yesterday) ? 1 : 0;
+          if (aYest !== bYest) return aYest - bYest;
+          var aM = stats.monthMap[a.id] || 0, bM = stats.monthMap[b.id] || 0;
+          if (aM !== bM) return aM - bM;
+          var aT = stats.totalMap[a.id] || 0, bT = stats.totalMap[b.id] || 0;
+          if (aT !== bT) return aT - bT;
+          return a.fullName.localeCompare(b.fullName, 'uk');
+        });
+
+        for (var i = 0; i < need && i < candidates.length; i++) {
+          var p = candidates[i];
+          state.duties.push({ id: genId('d'), date: dateIso, dutyTypeId: dt.id, personId: p.id });
+          assignedToday[p.id] = true;
+          stats.monthMap[p.id] = (stats.monthMap[p.id] || 0) + 1;
+          stats.totalMap[p.id] = (stats.totalMap[p.id] || 0) + 1;
+          addedCount++;
+        }
+      });
+
+      if (addedCount > 0) {
+        saveState(true);
+        showToast('⚡ Автопідбір: призначено ' + addedCount + ' ос.');
+        render();
+      } else {
+        showToast('Усі слоти вже заповнені або немає вільних бійців');
+      }
+    }
+
+    function clearDutiesForDate(dateIso) {
+      if (!canEditDuties()) return;
+      var had = getDutiesForDate(dateIso).length;
+      if (!had) { showToast('На цю дату нарядів немає'); return; }
+      state.duties = state.duties.filter(function(d) { return d.date !== dateIso; });
+      saveState(true);
+      showToast('Наряди на ' + fmtUA(dateIso) + ' очищено');
+      render();
+    }
+
+    function copyDutyForDate(iso) {
+      var lines = ['Наряд ' + state.groupNumber + ' на ' + fmtUA(iso)];
+      state.dutyTypes.forEach(function(dt) {
+        lines.push('');
+        lines.push(dt.shortName + ':');
+        var list = getDutiesForDateAndType(iso, dt.id).map(function(d) { return getPersonById(d.personId); }).filter(Boolean);
+        if (!list.length) lines.push('—');
+        else list.forEach(function(p) { lines.push('• ' + p.rank + ' ' + p.fullName); });
+      });
+      copyText(lines.join('\n'), 'Наряд скопійовано');
+    }
+
+    function openDutyPickerModal(dtId) {
+      if (!canEditDuties()) return;
+      ui.dutyPicker = { dtId: dtId, search: '', squad: 'all' };
+      renderDutyPickerModal();
+    }
+
+    function renderDutyPickerModal() {
+      var dtId = ui.dutyPicker.dtId;
+      var dt = getDutyTypeById(dtId);
+      if (!dt) return;
+
+      var dateIso = ui.selectedDate;
+      var parts = dateIso.split('-');
+      var stats = getDutyStatsMaps(Number(parts[0]), Number(parts[1]) - 1);
+      var yesterday = addDaysISO(dateIso, -1);
+      var assignedThisType = getDutiesForDateAndType(dateIso, dtId);
+      var assignedThisMap = {};
+      assignedThisType.forEach(function(d) { assignedThisMap[d.personId] = true; });
+      var assignedAnyToday = {};
+      getDutiesForDate(dateIso).forEach(function(d) { assignedAnyToday[d.personId] = d.dutyTypeId; });
+
+      var q = String(ui.dutyPicker.search || '').trim().toLowerCase();
+      var sqFilter = ui.dutyPicker.squad || 'all';
+
+      var people = state.personnel.filter(function(p) {
+        if (sqFilter !== 'all' && p.squadId !== sqFilter) return false;
+        if (q && p.fullName.toLowerCase().indexOf(q) === -1 && p.rank.toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      }).sort(function(a, b) {
+        var aThis = assignedThisMap[a.id] ? 0 : 1;
+        var bThis = assignedThisMap[b.id] ? 0 : 1;
+        if (aThis !== bThis) return aThis - bThis;
+
+        var aBusy = (assignedAnyToday[a.id] || getPersonEffectiveReasonOnDate(a, dateIso) !== 'in_service') ? 1 : 0;
+        var bBusy = (assignedAnyToday[b.id] || getPersonEffectiveReasonOnDate(b, dateIso) !== 'in_service') ? 1 : 0;
+        if (aBusy !== bBusy) return aBusy - bBusy;
+
+        var aM = stats.monthMap[a.id] || 0, bM = stats.monthMap[b.id] || 0;
+        if (aM !== bM) return aM - bM;
+
+        var aT = stats.totalMap[a.id] || 0, bT = stats.totalMap[b.id] || 0;
+        if (aT !== bT) return aT - bT;
+        return a.fullName.localeCompare(b.fullName, 'uk');
+      });
+
+      var sqPills =
+        '<button type="button" class="pill ' + (sqFilter === 'all' ? 'active' : '') + '" data-picker-sq="all">Усі</button>' +
+        getOrderedSquads().map(function(sq) {
+          var shortLbl = sq.isCmdGroup ? 'КГ' : sq.name.replace(' відділення', '');
+          return '<button type="button" class="pill ' + (sqFilter === sq.id ? 'active' : '') + '" data-picker-sq="' + esc(sq.id) + '">' +
+            '<span class="dot" style="background:' + esc(sq.color) + '"></span>' + esc(shortLbl) + '</button>';
+        }).join('');
+
+      var rowsHtml = people.length ? people.map(function(p) {
+        var sq = getSquadById(p.squadId);
+        var isHere = Boolean(assignedThisMap[p.id]);
+        var otherDuty = assignedAnyToday[p.id] && !isHere;
+        var wasYest = isPersonOnDutyOnDate(p.id, yesterday);
+        var effReason = getPersonEffectiveReasonOnDate(p, dateIso);
+        var mCnt = stats.monthMap[p.id] || 0;
+        var tCnt = stats.totalMap[p.id] || 0;
+
+        var warns = '';
+        if (otherDuty) warns += '<span class="badge badge-warn">Вже в наряді сьогодні</span>';
+        if (wasYest) warns += '<span class="badge badge-info">Був вчора</span>';
+        if (effReason !== 'in_service') warns += '<span class="badge badge-err">Відсутній (' + esc(getRozkhidCatMeta(effReason).short) + ')</span>';
+
+        return '<div class="picker-row ' + (isHere ? 'assigned' : '') + '" data-toggle-duty-pid="' + esc(p.id) + '">' +
+          '<div class="min0 stack-sm" style="gap:3px">' +
+            '<div class="row" style="gap:6px">' +
+              '<span class="dot" style="background:' + esc(sq ? sq.color : '#64748b') + '"></span>' +
+              '<span class="fw-bold text-sm">' + esc(p.fullName) + '</span>' +
+            '</div>' +
+            '<div class="text-xs text-muted">' + esc(p.rank) + ' • Міс: <b style="color:#fff">' + mCnt + '</b> | Всього: <b style="color:#fff">' + tCnt + '</b></div>' +
+            (warns ? '<div class="row wrap" style="gap:4px">' + warns + '</div>' : '') +
+          '</div>' +
+          '<div style="flex-shrink:0">' +
+            (isHere ? '<span class="badge badge-ok">✓ Обрано</span>' : '<span class="badge badge-muted">+ Обрати</span>') +
+          '</div>' +
         '</div>';
+      }).join('') : '<div class="empty-state">Немає бійців за фільтром</div>';
 
-      if (ui.dutiesSubtab === 'stats') return sub + renderDutiesStats();
+      openModal(
+        '<div class="modal-header">' +
+          '<div>' +
+            '<div class="modal-title">' + esc(dt.shortName) + ' • ' + fmtUA(dateIso) + '</div>' +
+            '<div class="text-xs text-muted">Призначено: <b style="color:#fff">' + assignedThisType.length + ' / ' + dt.maxCount + '</b> (натисніть на бійця)</div>' +
+          '</div>' +
+          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body" id="duty-picker-body">' +
+          '<input id="duty-picker-search" class="input input-sm" type="search" placeholder="Пошук бійця..." value="' + esc(ui.dutyPicker.search) + '" />' +
+          '<div class="pills-scroll">' + sqPills + '</div>' +
+          '<div class="stack-sm">' + rowsHtml + '</div>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="closeModal()">Готово</button>' +
+        '</div>'
+      );
 
+      // Надійна прив'язка подій без inline-екранування
+      var bodyEl = document.getElementById('duty-picker-body');
+      var searchEl = document.getElementById('duty-picker-search');
+      if (searchEl) {
+        searchEl.oninput = function() {
+          ui.dutyPicker.search = this.value;
+          renderDutyPickerModal();
+          var again = document.getElementById('duty-picker-search');
+          if (again) { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+        };
+      }
+      if (bodyEl) {
+        bodyEl.onclick = function(ev) {
+          var sqBtn = ev.target.closest('[data-picker-sq]');
+          if (sqBtn) {
+            ui.dutyPicker.squad = sqBtn.getAttribute('data-picker-sq');
+            renderDutyPickerModal();
+            return;
+          }
+          var rowEl = ev.target.closest('[data-toggle-duty-pid]');
+          if (rowEl) {
+            var pid = rowEl.getAttribute('data-toggle-duty-pid');
+            toggleDutyAssignment(dateIso, dtId, pid);
+          }
+        };
+      }
+    }
+
+    function openDutyTypesModal() {
+      if (!canEditDuties()) return;
+      var listHtml = state.dutyTypes.map(function(dt) {
+        return '<div class="row-between" style="padding:9px 11px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">' +
+          '<div class="row min0"><span class="dot" style="background:' + esc(dt.color) + '"></span>' +
+            '<div class="min0"><div class="fw-bold text-sm">' + esc(dt.shortName) + '</div><div class="text-xs text-muted">Макс. людей: ' + dt.maxCount + '</div></div>' +
+          '</div>' +
+          (state.dutyTypes.length > 1 ? '<button type="button" class="btn-icon btn-icon-sm danger" data-del-dt="' + esc(dt.id) + '">✕</button>' : '') +
+        '</div>';
+      }).join('');
+
+      openModal(
+        '<div class="modal-header"><div class="modal-title">⚙️ Види нарядів</div><button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
+        '<div class="modal-body" id="duty-types-body">' +
+          '<div class="stack-sm">' + listHtml + '</div>' +
+          '<div class="card stack-sm" style="background:var(--bg)">' +
+            '<div class="section-title">Додати вид наряду</div>' +
+            '<input id="new-dt-name" class="input input-sm" type="text" placeholder="Назва (напр. Патруль)" />' +
+            '<div class="grid-2">' +
+              '<input id="new-dt-max" class="input input-sm" type="number" min="1" max="20" value="1" placeholder="Кількість" />' +
+              '<select id="new-dt-color" class="select select-sm">' +
+                '<option value="#3b82f6">Синій</option><option value="#10b981">Зелений</option>' +
+                '<option value="#f59e0b">Жовтий</option><option value="#f43f5e">Червоний</option><option value="#a855f7">Фіолетовий</option>' +
+              '</select>' +
+            '</div>' +
+            '<button type="button" class="btn btn-sm btn-primary btn-full" onclick="addDutyTypeFromModal()">+ Додати вид</button>' +
+          '</div>' +
+        '</div>'
+      );
+
+      var b = document.getElementById('duty-types-body');
+      if (b) {
+        b.onclick = function(ev) {
+          var delBtn = ev.target.closest('[data-del-dt]');
+          if (delBtn) {
+            var id = delBtn.getAttribute('data-del-dt');
+            state.dutyTypes = state.dutyTypes.filter(function(x) { return x.id !== id; });
+            state.duties = state.duties.filter(function(d) { return d.dutyTypeId !== id; });
+            saveState(true);
+            openDutyTypesModal();
+            render();
+          }
+        };
+      }
+    }
+
+    function addDutyTypeFromModal() {
+      var name = (document.getElementById('new-dt-name').value || '').trim();
+      var maxC = Math.max(1, Number(document.getElementById('new-dt-max').value) || 1);
+      var color = document.getElementById('new-dt-color').value || '#3b82f6';
+      if (!name) { showToast('Введіть назву виду наряду', true); return; }
+      state.dutyTypes.push({ id: genId('dt'), shortName: name, name: name, maxCount: maxC, color: color });
+      saveState(true);
+      showToast('Вид наряду додано');
+      openDutyTypesModal();
+      render();
+    }
+
+    function changeCalMonth(delta) {
+      var d = new Date(ui.calYear, ui.calMonth + delta, 1);
+      ui.calYear = d.getFullYear();
+      ui.calMonth = d.getMonth();
+      render();
+    }
+
+    function renderDutiesTab() {
       var y = ui.calYear, m = ui.calMonth;
       var firstDay = new Date(y, m, 1);
       var daysInMonth = new Date(y, m + 1, 0).getDate();
@@ -1461,15 +1864,17 @@
       for (var b = 0; b < startDow; b++) cells += '<div></div>';
       for (var d = 1; d <= daysInMonth; d++) {
         var iso = y + '-' + pad2(m + 1) + '-' + pad2(d);
+        var dayDuties = getDutiesForDate(iso);
         var dots = '';
         state.dutyTypes.forEach(function(dt) {
-          if (getDutiesForDateAndType(iso, dt.id).length > 0) {
+          if (dayDuties.some(function(x) { return x.dutyTypeId === dt.id; })) {
             dots += '<span class="cal-dot" style="background:' + esc(dt.color) + '"></span>';
           }
         });
+        var cntHtml = dayDuties.length ? '<span class="cal-cnt">' + dayDuties.length + '</span>' : '';
         var cls = 'cal-cell' + (iso === today ? ' today' : '') + (iso === ui.selectedDate ? ' selected' : '');
-        cells += '<button type="button" class="' + cls + '" onclick="ui.selectedDate=\'' + iso + '\';render()">' +
-          '<span class="cal-num">' + d + '</span><span class="cal-dots">' + dots + '</span></button>';
+        cells += '<button type="button" class="' + cls + '" data-cal-date="' + iso + '">' +
+          '<span class="cal-num">' + d + '</span><span class="cal-bottom">' + dots + cntHtml + '</span></button>';
       }
 
       var calendarCard =
@@ -1480,7 +1885,7 @@
             '<button type="button" class="btn-icon btn-icon-sm" onclick="changeCalMonth(1)">▶</button>' +
           '</div>' +
           '<div class="cal-weekdays"><div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="wknd">Сб</div><div class="wknd">Нд</div></div>' +
-          '<div class="cal-grid">' + cells + '</div>' +
+          '<div class="cal-grid" id="duties-cal-grid">' + cells + '</div>' +
         '</div>';
 
       var editable = canEditDuties();
@@ -1493,251 +1898,168 @@
           return '<div class="row-between" style="padding:7px 9px;border-radius:9px;background:var(--bg);border:1px solid var(--border)">' +
             '<div class="min0">' +
               '<div class="fw-bold text-sm">' + esc(p.rank) + ' ' + esc(p.fullName) + '</div>' +
-              '<div class="text-xs text-muted">' + esc(sq ? sq.name : '') + '</div>' +
+              '<div class="row" style="gap:5px;margin-top:2px">' +
+                '<span class="dot" style="background:' + esc(sq ? sq.color : '#64748b') + '"></span>' +
+                '<span class="text-xs text-muted">' + esc(sq ? sq.name : '') + '</span>' +
+              '</div>' +
             '</div>' +
-            (editable ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="removeDutyRecord(\'' + rec.id + '\')">✕</button>' : '') +
+            (editable ? '<button type="button" class="btn-icon btn-icon-sm danger" data-remove-duty="' + esc(rec.id) + '" aria-label="Прибрати">✕</button>' : '') +
           '</div>';
-        }).join('') : '<div class="text-xs text-muted">Не призначено</div>';
+        }).join('') : '<div class="text-xs text-muted">Ще нікого не призначено</div>';
 
-        return '<div class="stack-sm" style="padding:10px;border-radius:11px;background:rgba(11,17,32,0.55);border:1px solid var(--border)">' +
+        return '<div class="duty-type-card" style="border-left-color:' + esc(dt.color) + '">' +
           '<div class="row-between">' +
-            '<div class="row"><span class="dot" style="background:' + esc(dt.color) + '"></span><span class="fw-800">' + esc(dt.shortName) + '</span><span class="text-xs text-muted">(' + recs.length + '/' + dt.maxCount + ')</span></div>' +
-            (editable ? '<button type="button" class="btn btn-xs btn-primary" onclick="openAssignDutyModal(\'' + dt.id + '\')">+ Призначити</button>' : '') +
+            '<div class="row"><span class="fw-800">' + esc(dt.shortName) + '</span><span class="badge badge-muted">' + recs.length + ' / ' + dt.maxCount + '</span></div>' +
+            (editable ? '<button type="button" class="btn btn-xs btn-primary" data-assign-dt="' + esc(dt.id) + '">+ Призначити</button>' : '') +
           '</div>' +
           listHtml +
         '</div>';
       }).join('');
 
+      var actionBar = editable
+        ? '<div class="row wrap" style="gap:6px">' +
+            '<button type="button" class="btn btn-xs btn-warn" onclick="autoPickDutiesForDate(ui.selectedDate)">⚡ Автопідбір</button>' +
+            '<button type="button" class="btn btn-xs btn-danger" onclick="clearDutiesForDate(ui.selectedDate)">🧹 Очистити день</button>' +
+            '<button type="button" class="btn btn-xs btn-info" onclick="copyDutyForDate(ui.selectedDate)">📋 Копіювати</button>' +
+            '<button type="button" class="btn btn-xs btn-secondary" onclick="openDutyTypesModal()">⚙️ Види</button>' +
+          '</div>'
+        : '<div class="row-between"><div class="info-banner min0">Режим перегляду нарядів</div><button type="button" class="btn btn-xs btn-info" onclick="copyDutyForDate(ui.selectedDate)">📋 Копіювати</button></div>';
+
       var dayCard =
-        '<div class="card stack">' +
-          '<div class="row-between">' +
-            '<div class="fw-800">Наряд на ' + fmtUA(ui.selectedDate) + '</div>' +
-            '<button type="button" class="btn btn-sm btn-info" onclick="copyDutyForDate(\'' + ui.selectedDate + '\')">📋 Скопіювати</button>' +
-          '</div>' +
-          (!editable ? '<div class="info-banner">Режим перегляду нарядів.</div>' : '') +
+        '<div class="card stack" id="duties-day-card">' +
+          '<div class="fw-800" style="font-size:15px">Наряди на ' + fmtUA(ui.selectedDate) + '</div>' +
+          actionBar +
           dutyBlocks +
         '</div>';
 
-      return sub + calendarCard + dayCard;
-    }
-
-    function renderDutiesStats() {
-      var prefix = ui.calYear + '-' + pad2(ui.calMonth + 1);
-      var monthCounts = {}, totalCounts = {};
-      state.duties.forEach(function(d) {
-        totalCounts[d.personId] = (totalCounts[d.personId] || 0) + 1;
-        if (String(d.date || '').indexOf(prefix) === 0) {
-          monthCounts[d.personId] = (monthCounts[d.personId] || 0) + 1;
-        }
-      });
-
-      var header =
-        '<div class="card row-between">' +
-          '<button type="button" class="btn-icon btn-icon-sm" onclick="changeCalMonth(-1)">◀</button>' +
-          '<div class="fw-800">Облік: ' + MONTHS_NOM[ui.calMonth] + ' ' + ui.calYear + '</div>' +
-          '<button type="button" class="btn-icon btn-icon-sm" onclick="changeCalMonth(1)">▶</button>' +
-        '</div>';
-
-      if (!state.personnel.length) {
-        return header + '<div class="card empty-state">Особовий склад порожній. Додайте бійців у вкладці «Склад» або відновіть бекап у Налаштуваннях.</div>';
-      }
-
-      var groups = getOrderedSquads().map(function(sq) {
-        var list = getPeopleBySquad(sq.id);
-        if (!list.length) return '';
-        var rows = list.map(function(p) {
-          return '<div class="row-between" style="padding:9px 12px;border-bottom:1px solid var(--border);background:var(--bg)">' +
-            '<div class="min0 row" style="gap:6px">' + getLeaderBadgeHtml(p, sq) + '<span class="fw-bold text-sm">' + esc(p.fullName) + '</span></div>' +
-            '<div class="row" style="gap:6px;flex-shrink:0">' +
-              '<span class="badge badge-info">Міс: ' + (monthCounts[p.id] || 0) + '</span>' +
-              '<span class="badge badge-ok">Всього: ' + (totalCounts[p.id] || 0) + '</span>' +
-            '</div>' +
-          '</div>';
-        }).join('');
-        return '<div class="card-flush">' +
-          '<div class="acc-header" style="cursor:default"><div class="row"><span class="dot" style="background:' + esc(sq.color) + '"></span><span class="fw-800">' + esc(sq.name) + '</span></div><span class="text-xs text-muted">' + list.length + ' ос.</span></div>' +
-          '<div class="acc-body">' + rows + '</div>' +
-        '</div>';
-      }).join('');
-
-      return header + groups;
-    }
-
-    function changeCalMonth(delta) {
-      var d = new Date(ui.calYear, ui.calMonth + delta, 1);
-      ui.calYear = d.getFullYear();
-      ui.calMonth = d.getMonth();
-      render();
-    }
-
-    function removeDutyRecord(dutyId) {
-      if (!canEditDuties()) return;
-      state.duties = state.duties.filter(function(d) { return d.id !== dutyId; });
-      saveState(true);
-      render();
-    }
-
-    function openAssignDutyModal(dtId) {
-      if (!canEditDuties()) return;
-      ui.dutyModalSelection = getDutiesForDateAndType(ui.selectedDate, dtId).map(function(d) { return d.personId; });
-      renderAssignDutyModal(dtId);
-    }
-
-    function renderAssignDutyModal(dtId) {
-      var dt = getDutyTypeById(dtId);
-      if (!dt) return;
-      var maxC = Number(dt.maxCount) || 1;
-      var sel = ui.dutyModalSelection;
-
-      var body = !state.personnel.length
-        ? '<div class="empty-state">Особовий склад порожній.</div>'
-        : getOrderedSquads().map(function(sq) {
+      // Згортувана таблиця обліку нарядів
+      var stats = getDutyStatsMaps(ui.calYear, ui.calMonth);
+      var tableBody = '';
+      if (ui.showDutiesTable) {
+        if (!state.personnel.length) {
+          tableBody = '<div class="empty-state">Особовий склад порожній.</div>';
+        } else {
+          var thTypes = state.dutyTypes.map(function(dt) {
+            return '<th class="num">' + esc(dt.shortName.slice(0, 5)) + '</th>';
+          }).join('');
+          tableBody = getOrderedSquads().map(function(sq) {
             var list = getPeopleBySquad(sq.id);
             if (!list.length) return '';
             var rows = list.map(function(p) {
-              var checked = sel.indexOf(p.id) !== -1;
-              var locked = !checked && sel.length >= maxC;
-              return '<label class="checkbox-row ' + (locked ? 'locked' : '') + '">' +
-                '<div class="min0 row" style="gap:6px">' + getLeaderBadgeHtml(p, sq) + '<span class="fw-bold text-sm">' + esc(p.rank) + ' ' + esc(p.fullName) + '</span></div>' +
-                '<input type="checkbox" ' + (checked ? 'checked' : '') + ' ' + (locked ? 'disabled' : '') + ' onchange="toggleDutyModalPerson(\'' + dtId + '\',\'' + p.id + '\')" />' +
-              '</label>';
+              var perType = state.dutyTypes.map(function(dt) {
+                var c = (stats.byTypeMap[p.id] && stats.byTypeMap[p.id][dt.id]) || 0;
+                return '<td class="num text-muted">' + c + '</td>';
+              }).join('');
+              return '<tr>' +
+                '<td class="fw-bold">' + esc(p.fullName) + '</td>' +
+                '<td class="num" style="color:#7dd3fc;font-weight:800">' + (stats.monthMap[p.id] || 0) + '</td>' +
+                '<td class="num" style="color:#6ee7b7;font-weight:800">' + (stats.totalMap[p.id] || 0) + '</td>' +
+                perType +
+              '</tr>';
             }).join('');
-            return '<div class="card-flush">' +
-              '<div class="acc-header" style="cursor:default"><div class="row"><span class="dot" style="background:' + esc(sq.color) + '"></span><span class="fw-800 text-sm">' + esc(sq.name) + '</span></div></div>' +
-              '<div class="acc-body">' + rows + '</div>' +
-            '</div>';
+            return '<div style="padding:7px 10px;background:rgba(11,17,23,0.7);border-top:1px solid var(--border);font-weight:800;font-size:12px">' +
+              '<span class="dot" style="display:inline-block;margin-right:6px;background:' + esc(sq.color) + '"></span>' + esc(sq.name) +
+            '</div>' +
+            '<div style="overflow-x:auto"><table class="stats-table"><thead><tr><th>ПІБ</th><th class="num">Міс</th><th class="num">Всього</th>' + thTypes + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
           }).join('');
+        }
+      }
 
-      openModal(
-        '<div class="modal-header">' +
-          '<div><div class="modal-title">' + esc(dt.shortName) + ' — ' + fmtUA(ui.selectedDate) + '</div>' +
-          '<div class="text-xs text-muted">Обрано: ' + sel.length + ' / ' + maxC + '</div></div>' +
-          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
-        '</div>' +
-        '<div class="modal-body">' + body +
-          '<button type="button" class="btn btn-primary btn-full" onclick="saveAssignDutyModal(\'' + dtId + '\')">Зберегти наряд</button>' +
-        '</div>'
-      );
-    }
+      var statsAccordion =
+        '<div class="card-flush">' +
+          '<div class="acc-header ' + (ui.showDutiesTable ? 'open' : '') + '" onclick="ui.showDutiesTable=!ui.showDutiesTable;render()">' +
+            '<div class="row"><span class="chevron">▶</span><span class="fw-800 text-sm">📊 Облік нарядів (' + MONTHS_NOM[ui.calMonth] + ')</span></div>' +
+            '<span class="text-xs text-muted">' + (ui.showDutiesTable ? 'Згорнути' : 'Показати') + '</span>' +
+          '</div>' +
+          (ui.showDutiesTable ? '<div class="acc-body">' + tableBody + '</div>' : '') +
+        '</div>';
 
-    function toggleDutyModalPerson(dtId, pid) {
-      var dt = getDutyTypeById(dtId);
-      var maxC = dt ? (Number(dt.maxCount) || 1) : 1;
-      var idx = ui.dutyModalSelection.indexOf(pid);
-      if (idx !== -1) ui.dutyModalSelection.splice(idx, 1);
-      else if (ui.dutyModalSelection.length < maxC) ui.dutyModalSelection.push(pid);
-      renderAssignDutyModal(dtId);
-    }
-
-    function saveAssignDutyModal(dtId) {
-      state.duties = state.duties.filter(function(d) {
-        return !(d.date === ui.selectedDate && d.dutyTypeId === dtId);
-      });
-      ui.dutyModalSelection.forEach(function(pid) {
-        state.duties.push({ id: genId('d'), date: ui.selectedDate, dutyTypeId: dtId, personId: pid, note: '' });
-      });
-      saveState(true);
-      closeModal();
-      showToast('Наряд збережено');
-      render();
-    }
-
-    function copyDutyForDate(iso) {
-      var lines = [state.groupNumber + ', ' + fmtUA(iso)];
-      state.dutyTypes.forEach(function(dt, idx) {
-        if (idx > 0) lines.push('');
-        lines.push(dt.shortName + ':');
-        var list = getDutiesForDateAndType(iso, dt.id).map(function(d) { return getPersonById(d.personId); }).filter(Boolean);
-        if (!list.length) lines.push('-');
-        else list.forEach(function(p) { lines.push('- ' + p.rank + ' ' + p.fullName); });
-      });
-      copyText(lines.join('\n'), 'Наряд скопійовано');
+      return calendarCard + dayCard + statsAccordion;
     }
 
     // =========================================================================
-    // 8. ВКЛАДКА 2: ЗАДАЧІ (БЕЙДЖ + АДРЕСНА ВИДИМІСТЬ + 4 СТАТУСИ)
+    // 9. ВКЛАДКА 2: ЗАДАЧІ (БЕЙДЖ + РОЛЬОВА ВИДИМІСТЬ)
     // =========================================================================
     function renderTasksTab() {
       var canCreate = canCreateTasks();
       var canStatus = canUpdateTaskStatus();
-      var canSeeAll = isAdmin() || Boolean(getPerm().tasksViewAll);
-
-      var createForm = '';
-      if (canCreate) {
-        var opts = TASK_RECIPIENTS.map(function(r, idx) {
-          return '<option value="' + idx + '">' + esc(r.label) + '</option>';
-        }).join('');
-        createForm =
-          '<div class="card stack">' +
-            '<div class="section-title">Поставити задачу</div>' +
-            '<div class="field"><label class="field-label" for="task-rec">Кому</label><select id="task-rec" class="select">' + opts + '</select></div>' +
-            '<div class="field"><label class="field-label" for="task-title">Заголовок / Суть задачі</label><input id="task-title" class="input" type="text" placeholder="Коротко про задачу..." /></div>' +
-            '<div class="field"><label class="field-label" for="task-desc">Деталі (необов\'язково)</label><textarea id="task-desc" class="textarea" placeholder="Додаткові вказівки..."></textarea></div>' +
-            '<div class="field"><label class="field-label" for="task-author">Хто поставив</label><input id="task-author" class="input" type="text" value="' + esc(getRoleMeta(currentRole).label) + '" /></div>' +
-            '<button type="button" class="btn btn-primary btn-full" onclick="createNewTask()">+ Поставити задачу</button>' +
-          '</div>';
-      }
-
       var visible = state.tasks.filter(function(t) { return isTaskVisibleForRole(t, currentRole); });
+      var activeCnt = visible.filter(function(t) { return t.status !== 'done'; }).length;
+      var doneCnt = visible.filter(function(t) { return t.status === 'done'; }).length;
 
-      var recPills = '';
-      if (canSeeAll) {
-        var recOpts = [{ key: 'all', label: 'Усі' }, { key: 'kg', label: 'КГ' }, { key: 'kv1', label: 'КВ 1' }, { key: 'kv2', label: 'КВ 2' }, { key: 'kv3', label: 'КВ 3' }];
-        recPills = '<div class="pills-scroll">' + recOpts.map(function(o) {
-          return '<button type="button" class="pill ' + (ui.tasksFilterRecipient === o.key ? 'active' : '') + '" onclick="ui.tasksFilterRecipient=\'' + o.key + '\';render()">' + esc(o.label) + '</button>';
-        }).join('') + '</div>';
-      }
-
-      var statusFilters = [
-        { key: 'all', label: 'Усі (' + visible.length + ')' },
-        { key: 'active', label: 'Активні' },
-        { key: 'new', label: 'Нова' },
-        { key: 'in_progress', label: 'В роботі' },
-        { key: 'done', label: 'Виконано' },
-        { key: 'failed', label: 'Не виконано' }
-      ];
-      var statusPills = '<div class="pills-scroll">' + statusFilters.map(function(sf) {
-        return '<button type="button" class="pill ' + (ui.tasksFilterStatus === sf.key ? 'active' : '') + '" onclick="ui.tasksFilterStatus=\'' + sf.key + '\';render()">' + esc(sf.label) + '</button>';
-      }).join('') + '</div>';
+      var topBar =
+        '<div class="row-between">' +
+          '<div class="pills-scroll">' +
+            '<button type="button" class="pill ' + (ui.tasksFilter === 'active' ? 'active' : '') + '" onclick="ui.tasksFilter=\'active\';render()">Активні (' + activeCnt + ')</button>' +
+            '<button type="button" class="pill ' + (ui.tasksFilter === 'done' ? 'active' : '') + '" onclick="ui.tasksFilter=\'done\';render()">Виконані (' + doneCnt + ')</button>' +
+            '<button type="button" class="pill ' + (ui.tasksFilter === 'all' ? 'active' : '') + '" onclick="ui.tasksFilter=\'all\';render()">Усі (' + visible.length + ')</button>' +
+          '</div>' +
+          (canCreate ? '<button type="button" class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="openCreateTaskModal()">+ Задача</button>' : '') +
+        '</div>';
 
       var filtered = visible.filter(function(t) {
-        if (canSeeAll && ui.tasksFilterRecipient !== 'all' && t.targetRole !== ui.tasksFilterRecipient) return false;
-        if (ui.tasksFilterStatus === 'active') return t.status !== 'done';
-        if (ui.tasksFilterStatus !== 'all' && t.status !== ui.tasksFilterStatus) return false;
+        if (ui.tasksFilter === 'active') return t.status !== 'done';
+        if (ui.tasksFilter === 'done') return t.status === 'done';
         return true;
       });
 
       var cards = filtered.length ? filtered.map(function(t) {
         var stObj = TASK_STATUSES.find(function(x) { return x.key === t.status; }) || TASK_STATUSES[0];
-        var stBtns = canStatus ? '<div class="status-group-4">' + TASK_STATUSES.map(function(s) {
+        var prioBadge = t.priority === 'high' ? '<span class="badge badge-err">🔥 Терміново</span>' : '';
+        var stBtns = canStatus ? '<div class="status-group-3">' + TASK_STATUSES.map(function(s) {
           var cls = 'status-btn' + (t.status === s.key ? (' st-' + s.key) : '');
-          return '<button type="button" class="' + cls + '" onclick="setTaskStatus(\'' + t.id + '\',\'' + s.key + '\')">' + esc(s.label) + '</button>';
+          return '<button type="button" class="' + cls + '" data-task-st="' + s.key + '" data-task-id="' + esc(t.id) + '">' + esc(s.label) + '</button>';
         }).join('') + '</div>' : '';
 
         return '<div class="task-card">' +
           '<div class="row-between">' +
-            '<span class="badge badge-warn">' + esc(t.target) + '</span>' +
+            '<div class="row wrap" style="gap:5px"><span class="badge badge-warn">' + esc(t.target) + '</span>' + prioBadge + '</div>' +
             '<div class="row" style="gap:6px"><span class="badge ' + stObj.badgeClass + '">' + esc(stObj.label) + '</span>' +
-              (canCreate ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')">✕</button>' : '') +
+              (canCreate ? '<button type="button" class="btn-icon btn-icon-sm danger" data-del-task="' + esc(t.id) + '">✕</button>' : '') +
             '</div>' +
           '</div>' +
           '<div style="font-size:15px;font-weight:800;color:#fff">' + esc(t.title) + '</div>' +
           (t.description ? '<div class="text-sm" style="color:#cbd5e1;white-space:pre-wrap">' + esc(t.description) + '</div>' : '') +
-          '<div class="row-between text-xs text-muted"><span>' + (t.createdBy ? ('Від: ' + esc(t.createdBy)) : '') + '</span><span>' + esc(t.createdAt) + '</span></div>' +
+          '<div class="row-between text-xs text-muted">' +
+            '<span>' + (t.createdBy ? ('Від: ' + esc(t.createdBy)) : '') + (t.dueDate ? (' • До: ' + fmtUA(t.dueDate)) : '') + '</span>' +
+            '<span>' + esc(t.createdAt) + '</span>' +
+          '</div>' +
           stBtns +
         '</div>';
       }).join('') : '<div class="card empty-state">Задач за обраним фільтром немає.</div>';
 
-      return createForm + recPills + statusPills + cards;
+      return topBar + '<div class="stack" id="tasks-list-wrap">' + cards + '</div>';
     }
 
-    function createNewTask() {
+    function openCreateTaskModal() {
+      if (!canCreateTasks()) return;
+      var opts = TASK_RECIPIENTS.map(function(r, idx) {
+        return '<option value="' + idx + '">' + esc(r.label) + '</option>';
+      }).join('');
+      openModal(
+        '<div class="modal-header"><div class="modal-title">Нова задача</div><button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
+        '<div class="modal-body">' +
+          '<div class="field"><label class="field-label">Кому</label><select id="task-rec" class="select">' + opts + '</select></div>' +
+          '<div class="field"><label class="field-label">Заголовок / Суть задачі</label><input id="task-title" class="input" type="text" placeholder="Коротко про задачу..." /></div>' +
+          '<div class="field"><label class="field-label">Опис (необов\'язково)</label><textarea id="task-desc" class="textarea" placeholder="Деталі виконання..."></textarea></div>' +
+          '<div class="grid-2">' +
+            '<div class="field"><label class="field-label">Пріоритет</label><select id="task-prio" class="select"><option value="normal">Звичайний</option><option value="high">Терміновий</option><option value="low">Низький</option></select></div>' +
+            '<div class="field"><label class="field-label">Термін (до дати)</label><input id="task-due" class="input" type="date" /></div>' +
+          '</div>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="saveNewTaskFromModal()">+ Поставити задачу</button>' +
+        '</div>'
+      );
+    }
+
+    function saveNewTaskFromModal() {
       if (!canCreateTasks()) return;
       var recIdx = Number(document.getElementById('task-rec').value) || 0;
       var title = (document.getElementById('task-title').value || '').trim();
       var desc = (document.getElementById('task-desc').value || '').trim();
-      var author = (document.getElementById('task-author').value || '').trim();
+      var prio = document.getElementById('task-prio').value || 'normal';
+      var due = document.getElementById('task-due').value || '';
       if (!title) { showToast('Введіть суть задачі', true); return; }
+
       var rec = TASK_RECIPIENTS[recIdx] || TASK_RECIPIENTS[0];
       var nowStr = fmtTimeNow();
       state.tasks.unshift({
@@ -1747,157 +2069,441 @@
         target: rec.label,
         targetRole: rec.targetRole,
         targetSquadId: rec.targetSquadId,
-        priority: 'normal',
-        status: 'new',
-        createdBy: author,
+        priority: prio,
+        dueDate: due,
+        status: 'in_progress',
+        createdBy: getRoleMeta(currentRole).label,
         createdAt: nowStr,
         updatedAt: nowStr
       });
       saveState(true);
+      closeModal();
       showToast('Задачу поставлено');
       render();
     }
 
-    function setTaskStatus(taskId, status) {
-      if (!canUpdateTaskStatus()) return;
-      var t = state.tasks.find(function(x) { return x.id === taskId; });
-      if (!t) return;
-      t.status = status;
-      t.updatedAt = fmtTimeNow();
-      saveState(true);
-      render();
+    // =========================================================================
+    // 10. ВКЛАДКА 3: РОЗХІД (ШВИДКИЙ РЕДАКТОР ПО КАТЕГОРІЯХ + ЛЮДИ + ПЕРІОДИ)
+    // =========================================================================
+    function getRozkhidScopePeople() {
+      var mode = getRozkhidMode();
+      if (mode === 'squad' && getMySquadId()) {
+        return state.personnel.filter(function(p) { return p.squadId === getMySquadId(); });
+      }
+      return state.personnel.slice();
     }
 
-    function deleteTask(taskId) {
-      if (!canCreateTasks()) return;
-      state.tasks = state.tasks.filter(function(x) { return x.id !== taskId; });
-      saveState(true);
-      showToast('Задачу видалено');
-      render();
-    }
+    function computeRozkhidData(dateIso) {
+      var people = getRozkhidScopePeople();
+      var total = people.length;
+      var peopleByCat = {};
+      ROZKHID_CATEGORIES.forEach(function(c) { peopleByCat[c.key] = []; });
 
-    // =========================================================================
-    // 9. ВКЛАДКА 3: РОЗХІД (ПІДСУМОК ПО СТАТУСАХ + ПО ВІДДІЛЕННЯХ + КОПІЯ)
-    // =========================================================================
-    function buildRozkhidReportText() {
-      var total = state.personnel.length;
-      var byStatus = {};
-      PRESENCE_STATUSES.forEach(function(st) { byStatus[st.key] = []; });
-      state.personnel.forEach(function(p) {
-        var k = normalizePresenceStatus(p.presenceStatus);
-        if (!byStatus[k]) byStatus[k] = [];
-        byStatus[k].push(p);
+      var dutyIdsOnDate = {};
+      getDutiesForDate(dateIso).forEach(function(d) { dutyIdsOnDate[d.personId] = true; });
+
+      people.forEach(function(p) {
+        var manualDay = state.rozkhidManual && state.rozkhidManual[dateIso];
+        var manualVal = manualDay ? manualDay[p.id] : null;
+        if (manualVal) {
+          var norm = normalizeReasonKey(manualVal);
+          if (norm !== 'in_service' && peopleByCat[norm]) peopleByCat[norm].push(p);
+          return;
+        }
+        if (dutyIdsOnDate[p.id]) {
+          peopleByCat.onDuty.push(p);
+          return;
+        }
+        var eff = getPersonEffectiveReasonOnDate(p, dateIso);
+        if (eff !== 'in_service' && peopleByCat[eff]) {
+          peopleByCat[eff].push(p);
+        }
       });
 
-      var inService = byStatus.in_service.length;
-      var absent = total - inService;
+      var numOverrides = (state.rozkhidNumeric && state.rozkhidNumeric[dateIso]) ? state.rozkhidNumeric[dateIso] : {};
+      var counts = {};
+      var isOverridden = {};
+      ROZKHID_CATEGORIES.forEach(function(c) {
+        var ov = numOverrides[c.key];
+        if (ov !== null && ov !== undefined && ov !== '' && !isNaN(Number(ov))) {
+          counts[c.key] = Math.max(0, Number(ov));
+          isOverridden[c.key] = true;
+        } else {
+          counts[c.key] = peopleByCat[c.key].length;
+          isOverridden[c.key] = false;
+        }
+      });
+
+      var onDutyCount = counts.onDuty || 0;
+      var absentCount = 0;
+      ABSENCE_CATEGORIES.forEach(function(c) { absentCount += (counts[c.key] || 0); });
+      var availableCount = Math.max(0, total - onDutyCount - absentCount);
+
+      return {
+        people: people,
+        total: total,
+        available: availableCount,
+        onDuty: onDutyCount,
+        absent: absentCount,
+        counts: counts,
+        isOverridden: isOverridden,
+        peopleByCat: peopleByCat
+      };
+    }
+
+    function stepRozkhidNumeric(catKey, delta) {
+      if (!canEditRozkhid()) return;
+      var dateIso = ui.rozkhidDate;
+      var data = computeRozkhidData(dateIso);
+      var current = data.counts[catKey] || 0;
+      var nextVal = Math.max(0, current + delta);
+      if (!state.rozkhidNumeric[dateIso]) state.rozkhidNumeric[dateIso] = {};
+      state.rozkhidNumeric[dateIso][catKey] = nextVal;
+      saveState(true);
+      render();
+    }
+
+    function resetRozkhidNumeric(catKey) {
+      if (!canEditRozkhid()) return;
+      var dateIso = ui.rozkhidDate;
+      if (state.rozkhidNumeric[dateIso]) {
+        delete state.rozkhidNumeric[dateIso][catKey];
+        if (!Object.keys(state.rozkhidNumeric[dateIso]).length) delete state.rozkhidNumeric[dateIso];
+      }
+      saveState(true);
+      render();
+    }
+
+    function clearRozkhidForDate(dateIso) {
+      if (!canEditRozkhid()) return;
+      state.rozkhidCleared[dateIso] = true;
+      delete state.rozkhidManual[dateIso];
+      delete state.rozkhidNumeric[dateIso];
+      saveState(true);
+      showToast('🧹 Розхід на ' + fmtUA(dateIso) + ' очищено');
+      render();
+    }
+
+    function setManualPersonRozkhid(dateIso, personId, reasonKey) {
+      if (!canEditRozkhid()) return;
+      if (!state.rozkhidManual[dateIso]) state.rozkhidManual[dateIso] = {};
+      state.rozkhidManual[dateIso][personId] = reasonKey;
+      // Якщо раніше була ручна цифра для цієї категорії — скидаємо її, щоб підтягнулась точна кількість
+      if (state.rozkhidNumeric[dateIso] && state.rozkhidNumeric[dateIso][reasonKey] !== undefined) {
+        delete state.rozkhidNumeric[dateIso][reasonKey];
+      }
+      saveState(true);
+      render();
+    }
+
+    function openRozkhidCategoryPeopleModal(catKey) {
+      if (!canEditRozkhid()) return;
+      ui.rozkhidPicker = { catKey: catKey, search: '', squad: 'all' };
+      renderRozkhidCategoryPeopleModal();
+    }
+
+    function renderRozkhidCategoryPeopleModal() {
+      var catKey = ui.rozkhidPicker.catKey;
+      var cat = getRozkhidCatMeta(catKey);
+      var dateIso = ui.rozkhidDate;
+      var data = computeRozkhidData(dateIso);
+      var inCatMap = {};
+      (data.peopleByCat[catKey] || []).forEach(function(p) { inCatMap[p.id] = true; });
+
+      var q = String(ui.rozkhidPicker.search || '').trim().toLowerCase();
+      var sqFilter = ui.rozkhidPicker.squad || 'all';
+
+      var scopePeople = data.people.filter(function(p) {
+        if (sqFilter !== 'all' && p.squadId !== sqFilter) return false;
+        if (q && p.fullName.toLowerCase().indexOf(q) === -1 && p.rank.toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      }).sort(function(a, b) {
+        var aIn = inCatMap[a.id] ? 0 : 1, bIn = inCatMap[b.id] ? 0 : 1;
+        if (aIn !== bIn) return aIn - bIn;
+        return a.fullName.localeCompare(b.fullName, 'uk');
+      });
+
+      var sqPills =
+        '<button type="button" class="pill ' + (sqFilter === 'all' ? 'active' : '') + '" data-rpick-sq="all">Усі</button>' +
+        getOrderedSquads().map(function(sq) {
+          var shortLbl = sq.isCmdGroup ? 'КГ' : sq.name.replace(' відділення', '');
+          return '<button type="button" class="pill ' + (sqFilter === sq.id ? 'active' : '') + '" data-rpick-sq="' + esc(sq.id) + '">' +
+            '<span class="dot" style="background:' + esc(sq.color) + '"></span>' + esc(shortLbl) + '</button>';
+        }).join('');
+
+      var rows = scopePeople.length ? scopePeople.map(function(p) {
+        var checked = Boolean(inCatMap[p.id]);
+        var sq = getSquadById(p.squadId);
+        return '<label class="checkbox-row">' +
+          '<div class="min0">' +
+            '<div class="row" style="gap:6px"><span class="dot" style="background:' + esc(sq ? sq.color : '#64748b') + '"></span><span class="fw-bold text-sm">' + esc(p.fullName) + '</span></div>' +
+            '<div class="text-xs text-muted">' + esc(p.rank) + '</div>' +
+          '</div>' +
+          '<input type="checkbox" ' + (checked ? 'checked' : '') + ' data-rpick-pid="' + esc(p.id) + '" />' +
+        '</label>';
+      }).join('') : '<div class="empty-state">Немає бійців</div>';
+
+      openModal(
+        '<div class="modal-header">' +
+          '<div><div class="modal-title">' + cat.icon + ' ' + esc(cat.label) + ' • ' + fmtUA(dateIso) + '</div>' +
+          '<div class="text-xs text-muted">Відмітьте бійців у цій категорії</div></div>' +
+          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body" id="rozkhid-picker-body">' +
+          '<input id="rozkhid-picker-search" class="input input-sm" type="search" placeholder="Пошук бійця..." value="' + esc(ui.rozkhidPicker.search) + '" />' +
+          '<div class="pills-scroll">' + sqPills + '</div>' +
+          '<div class="card-flush">' + rows + '</div>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="closeModal()">Готово</button>' +
+        '</div>'
+      );
+
+      var bodyEl = document.getElementById('rozkhid-picker-body');
+      var searchEl = document.getElementById('rozkhid-picker-search');
+      if (searchEl) {
+        searchEl.oninput = function() {
+          ui.rozkhidPicker.search = this.value;
+          renderRozkhidCategoryPeopleModal();
+          var again = document.getElementById('rozkhid-picker-search');
+          if (again) { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+        };
+      }
+      if (bodyEl) {
+        bodyEl.onclick = function(ev) {
+          var sqBtn = ev.target.closest('[data-rpick-sq]');
+          if (sqBtn) {
+            ui.rozkhidPicker.squad = sqBtn.getAttribute('data-rpick-sq');
+            renderRozkhidCategoryPeopleModal();
+          }
+        };
+        bodyEl.onchange = function(ev) {
+          var cb = ev.target.closest('[data-rpick-pid]');
+          if (!cb) return;
+          var pid = cb.getAttribute('data-rpick-pid');
+          if (!state.rozkhidManual[dateIso]) state.rozkhidManual[dateIso] = {};
+          if (cb.checked) state.rozkhidManual[dateIso][pid] = catKey;
+          else state.rozkhidManual[dateIso][pid] = 'in_service';
+          if (state.rozkhidNumeric[dateIso] && state.rozkhidNumeric[dateIso][catKey] !== undefined) {
+            delete state.rozkhidNumeric[dateIso][catKey];
+          }
+          saveState(true);
+          render();
+        };
+      }
+    }
+
+    function openAddScheduledAbsenceModal() {
+      if (!canEditRozkhid()) return;
+      var peopleOpts = state.personnel.slice().sort(function(a, b) {
+        return a.fullName.localeCompare(b.fullName, 'uk');
+      }).map(function(p) {
+        return '<option value="' + esc(p.id) + '">' + esc(p.fullName) + ' (' + esc(p.rank) + ')</option>';
+      }).join('');
+      var reasonOpts = ABSENCE_CATEGORIES.map(function(c) {
+        return '<option value="' + c.key + '">' + c.icon + ' ' + esc(c.label) + '</option>';
+      }).join('');
+
+      openModal(
+        '<div class="modal-header"><div class="modal-title">📅 Запланована відсутність</div><button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
+        '<div class="modal-body">' +
+          '<div class="field"><label class="field-label">Військовослужбовець</label><select id="abs-person" class="select">' + peopleOpts + '</select></div>' +
+          '<div class="field"><label class="field-label">Причина</label><select id="abs-reason" class="select">' + reasonOpts + '</select></div>' +
+          '<div class="grid-2">' +
+            '<div class="field"><label class="field-label">З дати</label><input id="abs-start" class="input" type="date" value="' + ui.rozkhidDate + '" /></div>' +
+            '<div class="field"><label class="field-label">По дату</label><input id="abs-end" class="input" type="date" value="' + addDaysISO(ui.rozkhidDate, 3) + '" /></div>' +
+          '</div>' +
+          '<div class="field"><label class="field-label">Примітка (необов\'язково)</label><input id="abs-note" class="input" type="text" placeholder="Наприклад: рапорт №..." /></div>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="saveScheduledAbsenceModal()">Зберегти період</button>' +
+        '</div>'
+      );
+    }
+
+    function saveScheduledAbsenceModal() {
+      var pid = document.getElementById('abs-person').value;
+      var reason = document.getElementById('abs-reason').value;
+      var start = document.getElementById('abs-start').value;
+      var end = document.getElementById('abs-end').value;
+      var note = (document.getElementById('abs-note').value || '').trim();
+      if (!pid || !start || !end) { showToast('Заповніть усі поля', true); return; }
+      if (end < start) { showToast('Кінцева дата менша за початкову', true); return; }
+      state.scheduledAbsences.push({ id: genId('abs'), personId: pid, reason: reason, startDate: start, endDate: end, note: note });
+      saveState(true);
+      closeModal();
+      showToast('Період відсутності додано');
+      render();
+    }
+
+    function buildRozkhidReportText(dateIso) {
+      var d = computeRozkhidData(dateIso);
       var lines = [
-        'Розхід ' + state.groupNumber + ' • ' + fmtUA(todayISO()),
-        'За списком: ' + total,
-        'В строю: ' + inService,
-        'Відсутні: ' + absent
+        'Розхід ' + state.groupNumber + ' групи на ' + fmtUA(dateIso),
+        'За списком: ' + d.total,
+        'В наявності: ' + d.available
       ];
 
-      PRESENCE_STATUSES.forEach(function(st) {
-        if (st.key === 'in_service') return;
-        var arr = byStatus[st.key];
-        if (!arr.length) return;
-        var names = arr.map(function(p) { return p.fullName; }).join(', ');
-        lines.push('— ' + st.label + ': ' + arr.length + ' (' + names + ')');
+      var dutyNames = (d.peopleByCat.onDuty || []).map(function(p) { return p.fullName; });
+      lines.push('В наряді: ' + d.onDuty + (dutyNames.length ? (' (' + dutyNames.join(', ') + ')') : ''));
+      lines.push('Відсутні: ' + d.absent);
+
+      ABSENCE_CATEGORIES.forEach(function(cat) {
+        var cnt = d.counts[cat.key] || 0;
+        if (cnt <= 0) return;
+        var names = (d.peopleByCat[cat.key] || []).map(function(p) { return p.fullName; });
+        lines.push('— ' + cat.label + ': ' + cnt + (names.length ? (' (' + names.join(', ') + ')') : ''));
       });
 
-      lines.push('');
-      lines.push('По відділеннях:');
-      getOrderedSquads().forEach(function(sq) {
-        var list = getPeopleBySquad(sq.id);
-        var ok = list.filter(function(p) { return normalizePresenceStatus(p.presenceStatus) === 'in_service'; }).length;
-        lines.push('• ' + sq.name + ': ' + ok + '/' + list.length + ' в строю');
-      });
       return lines.join('\n');
     }
 
-    function renderRozkhidTab() {
-      var total = state.personnel.length;
-      var counts = {};
-      PRESENCE_STATUSES.forEach(function(st) { counts[st.key] = 0; });
-      state.personnel.forEach(function(p) {
-        var k = normalizePresenceStatus(p.presenceStatus);
-        counts[k] = (counts[k] || 0) + 1;
-      });
-      var inService = counts.in_service || 0;
-      var absent = total - inService;
-
-      var kpi =
-        '<div class="grid-3">' +
-          '<div class="kpi-box"><div class="kpi-val">' + total + '</div><div class="kpi-lbl">За списком</div></div>' +
-          '<div class="kpi-box"><div class="kpi-val" style="color:var(--emerald)">' + inService + '</div><div class="kpi-lbl">В строю</div></div>' +
-          '<div class="kpi-box"><div class="kpi-val" style="color:var(--amber)">' + absent + '</div><div class="kpi-lbl">Відсутні</div></div>' +
-        '</div>';
-
-      var statusRows = PRESENCE_STATUSES.filter(function(st) { return st.key !== 'in_service'; }).map(function(st) {
-        var people = state.personnel.filter(function(p) { return normalizePresenceStatus(p.presenceStatus) === st.key; });
-        var names = people.map(function(p) { return p.fullName; }).join(', ');
-        return '<div class="stack-sm" style="padding:8px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">' +
-          '<div class="row-between"><span class="fw-bold text-sm">' + esc(st.label) + '</span><span class="badge ' + st.badgeClass + '">' + people.length + '</span></div>' +
-          (names ? '<div class="text-xs text-muted">' + esc(names) + '</div>' : '') +
-        '</div>';
-      }).join('');
-
-      var mode = getRozkhidMode();
-      var squadQuickCards = getOrderedSquads().map(function(sq) {
-        var list = getPeopleBySquad(sq.id);
-        if (!list.length) return '';
-        var ok = list.filter(function(p) { return normalizePresenceStatus(p.presenceStatus) === 'in_service'; }).length;
-        var rows = list.map(function(p) {
-          var stKey = normalizePresenceStatus(p.presenceStatus);
-          var stMeta = getPresenceMeta(stKey);
-          var canEdit = canEditPersonPresence(p);
-          return '<div class="row-between" style="padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg)">' +
-            '<div class="min0">' +
-              '<div class="row" style="gap:5px">' + getLeaderBadgeHtml(p, sq) + '<span class="fw-bold text-sm">' + esc(p.fullName) + '</span></div>' +
-            '</div>' +
-            (canEdit
-              ? '<select class="select" style="width:auto;min-height:34px;padding:4px 8px;font-size:12px" onchange="setPersonPresence(\'' + p.id + '\',this.value)">' +
-                  PRESENCE_STATUSES.map(function(s) {
-                    return '<option value="' + s.key + '" ' + (stKey === s.key ? 'selected' : '') + '>' + esc(s.short) + '</option>';
-                  }).join('') +
-                '</select>'
-              : '<span class="badge ' + stMeta.badgeClass + '">' + esc(stMeta.short) + '</span>') +
-          '</div>';
-        }).join('');
-
-        return '<div class="card-flush">' +
-          '<div class="acc-header" style="cursor:default">' +
-            '<div class="row"><span class="dot" style="background:' + esc(sq.color) + '"></span><span class="fw-800 text-sm">' + esc(sq.name) + '</span></div>' +
-            '<span class="badge badge-ok">' + ok + '/' + list.length + ' в строю</span>' +
-          '</div>' +
-          '<div class="acc-body">' + rows + '</div>' +
-        '</div>';
-      }).join('');
-
-      var previewCard =
-        '<div class="card stack">' +
-          '<div class="row-between"><div class="section-title">Текстовий звіт (Telegram / Viber)</div><button type="button" class="btn btn-xs btn-primary" onclick="copyText(buildRozkhidReportText(),\'Розхід скопійовано\')">📋 Скопіювати розхід</button></div>' +
-          '<pre class="preview-pre">' + esc(buildRozkhidReportText()) + '</pre>' +
-        '</div>';
-
-      return kpi +
-        (mode === 'view' ? '<div class="info-banner">Режим перегляду розходу.</div>' : '') +
-        '<div class="card stack-sm"><div class="section-title">Відсутні по категоріях</div>' + statusRows + '</div>' +
-        previewCard +
-        squadQuickCards;
+    function shareRozkhidReport(dateIso) {
+      var text = buildRozkhidReportText(dateIso);
+      if (navigator.share) {
+        navigator.share({ title: 'Розхід ' + state.groupNumber + ' групи', text: text }).catch(function() {
+          copyText(text, 'Розхід скопійовано');
+        });
+      } else {
+        copyText(text, 'Розхід скопійовано');
+      }
     }
 
-    function setPersonPresence(personId, statusKey) {
-      var p = getPersonById(personId);
-      if (!p || !canEditPersonPresence(p)) return;
-      p.presenceStatus = normalizePresenceStatus(statusKey);
-      saveState(true);
-      render();
+    function renderRozkhidTab() {
+      var dateIso = ui.rozkhidDate;
+      var today = todayISO();
+      var tomorrow = addDaysISO(today, 1);
+      var editable = canEditRozkhid();
+      var d = computeRozkhidData(dateIso);
+
+      var topControls =
+        '<div class="card stack">' +
+          '<div class="row wrap" style="gap:6px">' +
+            '<button type="button" class="pill ' + (dateIso === today ? 'active' : '') + '" onclick="ui.rozkhidDate=\'' + today + '\';render()">Сьогодні</button>' +
+            '<button type="button" class="pill ' + (dateIso === tomorrow ? 'active' : '') + '" onclick="ui.rozkhidDate=\'' + tomorrow + '\';render()">Завтра</button>' +
+            '<input class="input input-sm" style="width:auto;flex:1;min-width:135px" type="date" value="' + dateIso + '" onchange="ui.rozkhidDate=this.value||todayISO();render()" />' +
+          '</div>' +
+          '<div class="row-between wrap" style="gap:8px">' +
+            '<div class="row" style="gap:6px">' +
+              '<span class="text-xs text-muted fw-bold">Група №</span>' +
+              '<input class="input input-sm" style="width:78px;text-align:center;font-weight:800" type="text" value="' + esc(state.groupNumber) + '" ' + (editable ? 'onchange="state.groupNumber=this.value.trim()||\'223\';saveState(true);render()"' : 'disabled') + ' />' +
+            '</div>' +
+            (editable ? '<button type="button" class="btn btn-xs btn-danger" onclick="clearRozkhidForDate(\'' + dateIso + '\')">🧹 Очистити розхід</button>' : '') +
+          '</div>' +
+        '</div>';
+
+      var kpi =
+        '<div class="grid-4">' +
+          '<div class="kpi-box"><div class="kpi-val">' + d.total + '</div><div class="kpi-lbl">За списком</div></div>' +
+          '<div class="kpi-box"><div class="kpi-val" style="color:var(--emerald)">' + d.available + '</div><div class="kpi-lbl">В наявності</div></div>' +
+          '<div class="kpi-box"><div class="kpi-val" style="color:var(--blue)">' + d.onDuty + '</div><div class="kpi-lbl">В наряді</div></div>' +
+          '<div class="kpi-box"><div class="kpi-val" style="color:var(--amber)">' + d.absent + '</div><div class="kpi-lbl">Відсутні</div></div>' +
+        '</div>';
+
+      // Головний швидкий редактор по категоріях
+      var catRows = ROZKHID_CATEGORIES.map(function(cat) {
+        var cnt = d.counts[cat.key] || 0;
+        var over = Boolean(d.isOverridden[cat.key]);
+        var chips = (d.peopleByCat[cat.key] || []).map(function(p) {
+          return '<span class="name-chip">' + esc(p.fullName) + '</span>';
+        }).join('');
+
+        var controls = editable
+          ? '<div class="row" style="gap:5px;flex-shrink:0">' +
+              (over ? '<button type="button" class="btn-icon btn-icon-sm" title="Скинути до автопідрахунку" data-r-reset="' + cat.key + '">↺</button>' : '') +
+              '<div class="stepper">' +
+                '<button type="button" class="step-btn" data-r-step="' + cat.key + '" data-r-delta="-1">−</button>' +
+                '<span class="step-val ' + (over ? 'manual' : '') + '">' + cnt + '</span>' +
+                '<button type="button" class="step-btn" data-r-step="' + cat.key + '" data-r-delta="1">+</button>' +
+              '</div>' +
+              (!cat.isDuty ? '<button type="button" class="btn btn-xs btn-secondary" data-r-people="' + cat.key + '">👥 Люди</button>' : '') +
+            '</div>'
+          : '<span class="badge ' + cat.badgeClass + '" style="font-size:13px;padding:4px 9px">' + cnt + '</span>';
+
+        return '<div class="cat-row ' + (over ? 'overridden' : '') + '">' +
+          '<div class="row-between">' +
+            '<div class="row min0" style="gap:6px"><span>' + cat.icon + '</span><span class="fw-bold text-sm">' + esc(cat.label) + '</span></div>' +
+            controls +
+          '</div>' +
+          (chips ? '<div class="row wrap" style="gap:4px">' + chips + '</div>' : '') +
+        '</div>';
+      }).join('');
+
+      var categoriesCard =
+        '<div class="card stack-sm" id="rozkhid-cat-card">' +
+          '<div class="row-between">' +
+            '<div class="section-title">Швидке редагування розходу</div>' +
+            (state.rozkhidCleared[dateIso] ? '<span class="badge badge-warn">Очищено вручну</span>' : '') +
+          '</div>' +
+          catRows +
+        '</div>';
+
+      // Заплановані відсутності (періоди)
+      var absItems = state.scheduledAbsences.length ? state.scheduledAbsences.map(function(abs) {
+        var p = getPersonById(abs.personId);
+        var cat = getRozkhidCatMeta(abs.reason);
+        return '<div class="row-between" style="padding:8px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">' +
+          '<div class="min0">' +
+            '<div class="fw-bold text-sm">' + esc(p ? p.fullName : 'Невідомий') + ' <span class="badge ' + cat.badgeClass + '">' + cat.icon + ' ' + esc(cat.short) + '</span></div>' +
+            '<div class="text-xs text-muted">' + fmtUA(abs.startDate) + ' — ' + fmtUA(abs.endDate) + (abs.note ? (' • ' + esc(abs.note)) : '') + '</div>' +
+          '</div>' +
+          (editable ? '<button type="button" class="btn-icon btn-icon-sm danger" data-del-abs="' + esc(abs.id) + '">✕</button>' : '') +
+        '</div>';
+      }).join('') : '<div class="text-xs text-muted">Немає запланованих періодів відсутності.</div>';
+
+      var scheduledCard =
+        '<div class="card stack-sm" id="rozkhid-abs-card">' +
+          '<div class="row-between">' +
+            '<div class="section-title">📅 Заплановані відсутності</div>' +
+            (editable ? '<button type="button" class="btn btn-xs btn-secondary" onclick="openAddScheduledAbsenceModal()">+ Період</button>' : '') +
+          '</div>' +
+          absItems +
+        '</div>';
+
+      // Прев'ю текстового звіту + копіювання / поширення
+      var previewCard =
+        '<div class="card stack">' +
+          '<div class="section-title">Готовий звіт (Telegram / Viber)</div>' +
+          '<pre class="preview-pre">' + esc(buildRozkhidReportText(dateIso)) + '</pre>' +
+          '<div class="grid-2">' +
+            '<button type="button" class="btn btn-primary" onclick="copyText(buildRozkhidReportText(ui.rozkhidDate),\'Розхід скопійовано\')">📋 Скопіювати розхід</button>' +
+            '<button type="button" class="btn btn-info" onclick="shareRozkhidReport(ui.rozkhidDate)">📤 Поділитися</button>' +
+          '</div>' +
+        '</div>';
+
+      // Згортуваний поіменний список на дату
+      var rosterHtml = '';
+      if (ui.showRozkhidRoster) {
+        rosterHtml = d.people.slice().sort(function(a, b) {
+          return a.fullName.localeCompare(b.fullName, 'uk');
+        }).map(function(p) {
+          var manualDay = state.rozkhidManual && state.rozkhidManual[dateIso];
+          var cur = (manualDay && manualDay[p.id]) ? normalizeReasonKey(manualDay[p.id]) : (isPersonOnDutyOnDate(p.id, dateIso) ? 'onDuty' : getPersonEffectiveReasonOnDate(p, dateIso));
+          var opts = '<option value="in_service" ' + (cur === 'in_service' ? 'selected' : '') + '>В наявності</option>' +
+            ROZKHID_CATEGORIES.map(function(c) {
+              return '<option value="' + c.key + '" ' + (cur === c.key ? 'selected' : '') + '>' + c.icon + ' ' + esc(c.short) + '</option>';
+            }).join('');
+          return '<div class="row-between" style="padding:7px 10px;border-bottom:1px solid var(--border);background:var(--bg)">' +
+            '<span class="fw-bold text-sm min0">' + esc(p.fullName) + '</span>' +
+            (editable
+              ? '<select class="select select-sm" style="width:auto" data-roster-pid="' + esc(p.id) + '">' + opts + '</select>'
+              : '<span class="badge badge-muted">' + esc(cur === 'in_service' ? 'В наявності' : getRozkhidCatMeta(cur).short) + '</span>') +
+          '</div>';
+        }).join('');
+      }
+
+      var rosterAcc =
+        '<div class="card-flush" id="rozkhid-roster-acc">' +
+          '<div class="acc-header ' + (ui.showRozkhidRoster ? 'open' : '') + '" onclick="ui.showRozkhidRoster=!ui.showRozkhidRoster;render()">' +
+            '<div class="row"><span class="chevron">▶</span><span class="fw-800 text-sm">👤 Поіменний список на ' + fmtUA(dateIso) + '</span></div>' +
+            '<span class="text-xs text-muted">' + d.people.length + ' ос.</span>' +
+          '</div>' +
+          (ui.showRozkhidRoster ? '<div class="acc-body">' + rosterHtml + '</div>' : '') +
+        '</div>';
+
+      return topControls + kpi +
+        (!editable ? '<div class="info-banner">Режим перегляду розходу.</div>' : '') +
+        categoriesCard + previewCard + scheduledCard + rosterAcc;
     }
 
     // =========================================================================
-    // 10. ВКЛАДКА 4: СКЛАД (СПИСОК ПО ВІДДІЛЕННЯХ + ПОШУК + РЕДАГУВАННЯ)
+    // 11. ВКЛАДКА 4: СКЛАД (ОСОБОВИЙ СКЛАД)
     // =========================================================================
     function renderPersonnelTab() {
       var sMode = getSkladMode();
@@ -1929,29 +2535,30 @@
 
           var expandHtml = '';
           if (expanded) {
-            var presBtns = PRESENCE_STATUSES.map(function(ps) {
-              var active = p.presenceStatus === ps.key;
-              var cls = 'presence-btn' + (active ? (ps.key === 'in_service' ? ' active-ok' : ' active-warn') : '');
-              return '<button type="button" class="' + cls + '" ' + (canPres ? ('onclick="setPersonPresence(\'' + p.id + '\',\'' + ps.key + '\')"') : 'disabled style="opacity:0.55"') + '>' + esc(ps.label) + '</button>';
+            var stOpts = PRESENCE_STATUSES.map(function(ps) {
+              return '<option value="' + ps.key + '" ' + (p.presenceStatus === ps.key ? 'selected' : '') + '>' + esc(ps.label) + '</option>';
             }).join('');
-
             expandHtml =
               '<div class="soldier-expand stack">' +
-                '<div class="text-xs text-muted">Статус присутності:</div>' +
-                '<div class="presence-grid">' + presBtns + '</div>' +
+                '<div class="row-between">' +
+                  '<span class="text-xs text-muted">Постійний статус:</span>' +
+                  (canPres
+                    ? '<select class="select select-sm" style="width:auto" data-pers-st="' + esc(p.id) + '">' + stOpts + '</select>'
+                    : '<span class="badge ' + stMeta.badgeClass + '">' + esc(stMeta.label) + '</span>') +
+                '</div>' +
                 (canFullEdit ? (
                   '<div class="row wrap">' +
-                    '<button type="button" class="btn btn-xs btn-secondary" onclick="openPersonModal(\'' + p.id + '\')">✏️ Редагувати</button>' +
-                    '<button type="button" class="btn btn-xs btn-danger" onclick="confirmDeletePerson(\'' + p.id + '\')">🗑️ Видалити</button>' +
+                    '<button type="button" class="btn btn-xs btn-secondary" data-edit-pers="' + esc(p.id) + '">✏️ Редагувати</button>' +
+                    '<button type="button" class="btn btn-xs btn-danger" data-del-pers="' + esc(p.id) + '">🗑️ Видалити</button>' +
                   '</div>'
                 ) : '') +
               '</div>';
           }
 
           return '<div class="soldier-item">' +
-            '<div class="soldier-row" onclick="ui.expandedSoldiers[\'' + p.id + '\']=!ui.expandedSoldiers[\'' + p.id + '\'];render()">' +
+            '<div class="soldier-row" data-exp-pers="' + esc(p.id) + '">' +
               '<div class="min0">' +
-                '<div class="row" style="gap:6px">' + getLeaderBadgeHtml(p, sq) + '<span class="soldier-name">' + esc(p.fullName) + '</span></div>' +
+                '<div class="row" style="gap:6px">' + getLeaderBadgeHtml(p, sq) + '<span class="fw-bold text-sm">' + esc(p.fullName) + '</span></div>' +
                 '<div class="text-xs text-muted">' + esc(p.rank) + '</div>' +
               '</div>' +
               '<div class="row" style="gap:6px;flex-shrink:0"><span class="badge ' + stMeta.badgeClass + '">' + esc(stMeta.short) + '</span><span class="chevron" style="' + (expanded ? 'transform:rotate(90deg);color:#fff' : '') + '">▶</span></div>' +
@@ -1961,7 +2568,7 @@
         }).join('') : '<div class="empty-state" style="padding:12px">Порожньо</div>');
 
         return '<div class="card-flush">' +
-          '<div class="acc-header ' + (!collapsed ? 'open' : '') + '" onclick="ui.collapsedSquads[\'' + sq.id + '\']=!ui.collapsedSquads[\'' + sq.id + '\'];render()">' +
+          '<div class="acc-header ' + (!collapsed ? 'open' : '') + '" data-col-sq="' + esc(sq.id) + '">' +
             '<div class="row"><span class="chevron">▶</span><span class="dot" style="background:' + esc(sq.color) + '"></span><span class="fw-800">' + esc(sq.name) + '</span></div>' +
             '<span class="text-xs text-muted">' + list.length + ' ос.</span>' +
           '</div>' +
@@ -1969,7 +2576,7 @@
         '</div>';
       }).join('');
 
-      return topControls + groups;
+      return topControls + '<div class="stack" id="personnel-list-wrap">' + groups + '</div>';
     }
 
     function openPersonModal(personId) {
@@ -1977,7 +2584,7 @@
       var p = personId ? getPersonById(personId) : null;
       var sqOpts = getOrderedSquads().map(function(sq) {
         var sel = (p ? p.squadId : 'sq_1') === sq.id ? 'selected' : '';
-        return '<option value="' + sq.id + '" ' + sel + '>' + esc(sq.name) + '</option>';
+        return '<option value="' + esc(sq.id) + '" ' + sel + '>' + esc(sq.name) + '</option>';
       }).join('');
 
       openModal(
@@ -1987,7 +2594,7 @@
           '<div class="field"><label class="field-label">Звання</label><input id="per-rank" class="input" type="text" value="' + esc(p ? p.rank : 'солдат') + '" placeholder="солдат, молодший сержант..." /></div>' +
           '<div class="field"><label class="field-label">Відділення / Група</label><select id="per-sq" class="select">' + sqOpts + '</select></div>' +
           '<label class="toggle-pill"><input id="per-leader" type="checkbox" ' + (p && p.isLeader ? 'checked' : '') + ' /><span>Командир відділення / групи (★)</span></label>' +
-          '<button type="button" class="btn btn-primary btn-full" onclick="savePersonModal(\'' + (p ? p.id : '') + '\')">Зберегти</button>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="savePersonModal(\'' + (p ? esc(p.id) : '') + '\')">Зберегти</button>' +
         '</div>'
       );
     }
@@ -2020,7 +2627,7 @@
           '<div class="text-sm">Видалити <b>' + esc(p.fullName) + '</b> зі складу?</div>' +
           '<div class="grid-2">' +
             '<button type="button" class="btn btn-secondary" onclick="closeModal()">Скасувати</button>' +
-            '<button type="button" class="btn btn-danger" onclick="deletePerson(\'' + pid + '\')">Видалити</button>' +
+            '<button type="button" class="btn btn-danger" onclick="deletePerson(\'' + esc(pid) + '\')">Видалити</button>' +
           '</div>' +
         '</div>'
       );
@@ -2035,7 +2642,7 @@
     }
 
     // =========================================================================
-    // 11. ВКЛАДКА 5: НАЛАШТУВАННЯ (АДМІН vs КГ / КВ 1–3)
+    // 12. ВКЛАДКА 5: НАЛАШТУВАННЯ (АДМІН vs КГ / КВ 1–3)
     // =========================================================================
     function renderSettingsTab() {
       var admin = isAdmin();
@@ -2052,10 +2659,10 @@
       var fbCard =
         '<div class="card stack">' +
           '<div class="section-title">☁️ Синхронізація Firebase</div>' +
+          '<div class="field"><label class="field-label" for="set-fb-url">Посилання на Firebase Realtime Database</label>' +
+          '<input id="set-fb-url" class="input" type="url" value="' + esc(fbUrl) + '" placeholder="https://your-db-default-rtdb.europe-west1.firebasedatabase.app" /></div>' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="fbConnectFromSettings()">Перевірити та підключити</button>' +
           (admin ? (
-            '<div class="field"><label class="field-label" for="set-fb-url">Посилання на Firebase Realtime Database</label>' +
-            '<input id="set-fb-url" class="input" type="url" value="' + esc(fbUrl) + '" placeholder="https://your-db-default-rtdb.europe-west1.firebasedatabase.app" /></div>' +
-            '<button type="button" class="btn btn-primary btn-full" onclick="fbConnectFromSettings()">Перевірити та підключити</button>' +
             '<div class="grid-2">' +
               '<button type="button" class="btn btn-sm btn-warn" onclick="fbPushAll(false)">☁️ Завантажити мої дані в хмару</button>' +
               '<button type="button" class="btn btn-sm btn-info" onclick="fbPullAll(true,false)">⬇️ Завантажити з хмари</button>' +
@@ -2074,27 +2681,17 @@
         '<div class="card stack">' +
           '<div class="section-title">💾 Резервна копія та експорт</div>' +
           '<div class="grid-2">' +
-            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportBackupJSON()">⬇️ Зберегти бекап (JSON)</button>' +
-            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportPersonnelCSV()">📊 Експорт складу (CSV)</button>' +
+            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportBackupJSON()">💾 Зберегти бекап (JSON)</button>' +
+            '<button type="button" class="btn btn-sm btn-secondary" onclick="exportDutiesCSV()">📊 Експорт нарядів (CSV)</button>' +
           '</div>' +
           (admin ? '<button type="button" class="btn btn-sm btn-info btn-full" onclick="document.getElementById(\'import-json-input\').click()">⬆️ Відновити з бекапу (JSON)</button>' : '') +
         '</div>';
 
-      // Для КГ та КВ 1–3 показуємо лише чисті налаштування
       if (!admin) return versionCard + fbCard + backupCard;
-
-      var groupCard =
-        '<div class="card stack">' +
-          '<div class="section-title">🏷️ Номер групи / взводу</div>' +
-          '<div class="row">' +
-            '<input id="set-group-num" class="input min0" type="text" value="' + esc(state.groupNumber) + '" />' +
-            '<button type="button" class="btn btn-primary" onclick="saveGroupNumber()">Зберегти</button>' +
-          '</div>' +
-        '</div>';
 
       var pinsCard =
         '<div class="card stack">' +
-          '<div class="section-title">🔐 PIN-коди доступу (4 цифри)</div>' +
+          '<div class="section-title">🔑 PIN-коди доступу (4 цифри)</div>' +
           '<div class="grid-2">' +
             '<div class="field"><label class="field-label">🛡️ Адмін</label><input id="pin-admin" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.admin) + '" /></div>' +
             '<div class="field"><label class="field-label">⭐ КГ</label><input id="pin-kg" class="input" maxlength="4" inputmode="numeric" value="' + esc(state.pins.kg) + '" /></div>' +
@@ -2117,16 +2714,16 @@
           '</div>' +
           '<div class="grid-2">' +
             '<div class="field"><label class="field-label">Розхід</label>' +
-              '<select class="select" onchange="setRolePerm(\'' + rk + '\',\'rozkhidMode\',this.value)">' +
+              '<select class="select select-sm" onchange="setRolePerm(\'' + rk + '\',\'rozkhidMode\',this.value)">' +
                 '<option value="view" ' + (pm.rozkhidMode === 'view' ? 'selected' : '') + '>Перегляд</option>' +
-                '<option value="own" ' + (pm.rozkhidMode === 'own' ? 'selected' : '') + '>Своє відд.</option>' +
+                '<option value="squad" ' + (pm.rozkhidMode === 'squad' ? 'selected' : '') + '>Своє відд.</option>' +
                 '<option value="all" ' + (pm.rozkhidMode === 'all' ? 'selected' : '') + '>Увесь взвод</option>' +
               '</select>' +
             '</div>' +
             '<div class="field"><label class="field-label">Склад</label>' +
-              '<select class="select" onchange="setRolePerm(\'' + rk + '\',\'skladMode\',this.value)">' +
+              '<select class="select select-sm" onchange="setRolePerm(\'' + rk + '\',\'skladMode\',this.value)">' +
                 '<option value="view" ' + (pm.skladMode === 'view' ? 'selected' : '') + '>Перегляд</option>' +
-                '<option value="own_status" ' + (pm.skladMode === 'own_status' ? 'selected' : '') + '>Статуси свого</option>' +
+                '<option value="squad_status" ' + (pm.skladMode === 'squad_status' ? 'selected' : '') + '>Статуси свого</option>' +
                 '<option value="all_edit" ' + (pm.skladMode === 'all_edit' ? 'selected' : '') + '>Повне ред.</option>' +
               '</select>' +
             '</div>' +
@@ -2134,18 +2731,15 @@
         '</div>';
       }).join('');
 
-      var permsCard = '<div class="card stack"><div class="section-title">⚖️ Права доступу ролей</div>' + permBlocks + '</div>';
+      var permsCard = '<div class="card stack"><div class="section-title">🛡️ Права доступу ролей</div>' + permBlocks + '</div>';
 
-      return versionCard + groupCard + fbCard + pinsCard + permsCard + backupCard;
-    }
+      var dangerCard =
+        '<div class="card stack">' +
+          '<div class="section-title" style="color:#fca5a5">Небезпечна зона</div>' +
+          '<button type="button" class="btn btn-sm btn-danger btn-full" onclick="confirmClearLocalData()">🗑️ Очистити локальні дані</button>' +
+        '</div>';
 
-    function saveGroupNumber() {
-      if (!isAdmin()) return;
-      var val = (document.getElementById('set-group-num').value || '').trim();
-      if (!val) return;
-      state.groupNumber = val;
-      saveState(true);
-      showToast('Номер групи збережено');
+      return versionCard + fbCard + backupCard + pinsCard + permsCard + dangerCard;
     }
 
     function savePinsSettings() {
@@ -2172,8 +2766,30 @@
       showToast('Права оновлено');
     }
 
+    function confirmClearLocalData() {
+      if (!isAdmin()) return;
+      openModal(
+        '<div class="modal-header"><div class="modal-title">Очистити локальні дані?</div><button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
+        '<div class="modal-body">' +
+          '<div class="text-sm">Усі локальні списки, наряди та задачі на цьому пристрої буде скинуто. Дані у Firebase залишаться до ручного завантаження.</div>' +
+          '<div class="grid-2">' +
+            '<button type="button" class="btn btn-secondary" onclick="closeModal()">Скасувати</button>' +
+            '<button type="button" class="btn btn-danger" onclick="executeClearLocalData()">Очистити</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function executeClearLocalData() {
+      state = createDefaultState();
+      safeLSRemove(STORAGE_KEY);
+      closeModal();
+      showToast('Локальні дані очищено');
+      render();
+    }
+
     // =========================================================================
-    // 12. УНІВЕРСАЛЬНИЙ БЕКАП (JSON / CSV)
+    // 13. РЕЗЕРВНЕ КОПІЮВАННЯ (JSON) ТА ЕКСПОРТ НАРЯДІВ (CSV)
     // =========================================================================
     function exportBackupJSON() {
       try {
@@ -2211,12 +2827,14 @@
       ev.target.value = '';
     }
 
-    function exportPersonnelCSV() {
-      var rows = [['Відділення', 'Звання', 'ПІБ', 'Командир', 'Статус']];
-      getOrderedSquads().forEach(function(sq) {
-        getPeopleBySquad(sq.id).forEach(function(p) {
-          rows.push([sq.name, p.rank, p.fullName, p.isLeader ? 'Так' : 'Ні', getPresenceMeta(p.presenceStatus).label]);
-        });
+    function exportDutiesCSV() {
+      var rows = [['Дата', 'Вид наряду', 'Відділення', 'Звання', 'ПІБ']];
+      var sorted = state.duties.slice().sort(function(a, b) { return a.date.localeCompare(b.date); });
+      sorted.forEach(function(d) {
+        var dt = getDutyTypeById(d.dutyTypeId);
+        var p = getPersonById(d.personId);
+        var sq = p ? getSquadById(p.squadId) : null;
+        rows.push([fmtUA(d.date), dt ? dt.shortName : '', sq ? sq.name : '', p ? p.rank : '', p ? p.fullName : '']);
       });
       var csv = '\uFEFF' + rows.map(function(r) {
         return r.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';');
@@ -2225,19 +2843,23 @@
         var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'sklad_' + state.groupNumber + '_' + todayISO() + '.csv';
+        a.download = 'naryady_' + state.groupNumber + '_' + todayISO() + '.csv';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        showToast('CSV експортовано');
+        showToast('CSV нарядів експортовано');
       } catch (e) {
         showToast('Помилка експорту CSV', true);
       }
     }
 
     // =========================================================================
-    // 13. МОДАЛКИ, БЕЙДЖ ЗАДАЧ, ГОЛОВНИЙ РЕНДЕР ТА ЗАПУСК
+    // 14. ДЕЛЕГУВАННЯ ПОДІЙ, МОДАЛКИ, РЕНДЕР ТА ЗАПУСК
     // =========================================================================
+    function isModalOpen() {
+      var root = document.getElementById('modal-root');
+      return Boolean(root && root.classList.contains('open'));
+    }
     function openModal(html) {
       var box = document.getElementById('modal-box');
       var root = document.getElementById('modal-root');
@@ -2271,6 +2893,127 @@
       }
     }
 
+    function bindMainDelegatedEvents() {
+      var main = document.getElementById('main-content');
+      if (!main || main.dataset.bound === '1') return;
+      main.dataset.bound = '1';
+
+      main.addEventListener('click', function(ev) {
+        // Календар нарядів
+        var calBtn = ev.target.closest('[data-cal-date]');
+        if (calBtn) {
+          ui.selectedDate = calBtn.getAttribute('data-cal-date');
+          render();
+          return;
+        }
+        // Наряди: + Призначити / Видалити запис
+        var assignBtn = ev.target.closest('[data-assign-dt]');
+        if (assignBtn) {
+          openDutyPickerModal(assignBtn.getAttribute('data-assign-dt'));
+          return;
+        }
+        var remDutyBtn = ev.target.closest('[data-remove-duty]');
+        if (remDutyBtn) {
+          removeDuty(remDutyBtn.getAttribute('data-remove-duty'));
+          return;
+        }
+        // Задачі: статус / видалення
+        var taskStBtn = ev.target.closest('[data-task-st]');
+        if (taskStBtn) {
+          if (!canUpdateTaskStatus()) return;
+          var tid = taskStBtn.getAttribute('data-task-id');
+          var t = state.tasks.find(function(x) { return x.id === tid; });
+          if (t) {
+            t.status = taskStBtn.getAttribute('data-task-st');
+            t.updatedAt = fmtTimeNow();
+            saveState(true);
+            render();
+          }
+          return;
+        }
+        var delTaskBtn = ev.target.closest('[data-del-task]');
+        if (delTaskBtn) {
+          if (!canCreateTasks()) return;
+          var dtid = delTaskBtn.getAttribute('data-del-task');
+          state.tasks = state.tasks.filter(function(x) { return x.id !== dtid; });
+          saveState(true);
+          showToast('Задачу видалено');
+          render();
+          return;
+        }
+        // Розхід: степери, скидання, мульти-вибір людей, видалення періоду
+        var stepBtn = ev.target.closest('[data-r-step]');
+        if (stepBtn) {
+          stepRozkhidNumeric(stepBtn.getAttribute('data-r-step'), Number(stepBtn.getAttribute('data-r-delta')) || 0);
+          return;
+        }
+        var resetBtn = ev.target.closest('[data-r-reset]');
+        if (resetBtn) {
+          resetRozkhidNumeric(resetBtn.getAttribute('data-r-reset'));
+          return;
+        }
+        var peopleBtn = ev.target.closest('[data-r-people]');
+        if (peopleBtn) {
+          openRozkhidCategoryPeopleModal(peopleBtn.getAttribute('data-r-people'));
+          return;
+        }
+        var delAbsBtn = ev.target.closest('[data-del-abs]');
+        if (delAbsBtn) {
+          if (!canEditRozkhid()) return;
+          var aid = delAbsBtn.getAttribute('data-del-abs');
+          state.scheduledAbsences = state.scheduledAbsences.filter(function(a) { return a.id !== aid; });
+          saveState(true);
+          showToast('Період видалено');
+          render();
+          return;
+        }
+        // Склад: згортання, розкриття бійця, редагування, видалення
+        var colSq = ev.target.closest('[data-col-sq]');
+        if (colSq) {
+          var sid = colSq.getAttribute('data-col-sq');
+          ui.collapsedSquads[sid] = !ui.collapsedSquads[sid];
+          render();
+          return;
+        }
+        var expP = ev.target.closest('[data-exp-pers]');
+        if (expP) {
+          var pid = expP.getAttribute('data-exp-pers');
+          ui.expandedSoldiers[pid] = !ui.expandedSoldiers[pid];
+          render();
+          return;
+        }
+        var editP = ev.target.closest('[data-edit-pers]');
+        if (editP) {
+          openPersonModal(editP.getAttribute('data-edit-pers'));
+          return;
+        }
+        var delP = ev.target.closest('[data-del-pers]');
+        if (delP) {
+          confirmDeletePerson(delP.getAttribute('data-del-pers'));
+          return;
+        }
+      });
+
+      main.addEventListener('change', function(ev) {
+        // Поіменний розхід на дату
+        var rosterSel = ev.target.closest('[data-roster-pid]');
+        if (rosterSel) {
+          setManualPersonRozkhid(ui.rozkhidDate, rosterSel.getAttribute('data-roster-pid'), rosterSel.value);
+          return;
+        }
+        // Постійний статус бійця у Складі
+        var persSel = ev.target.closest('[data-pers-st]');
+        if (persSel) {
+          var p = getPersonById(persSel.getAttribute('data-pers-st'));
+          if (p && canEditPersonPresence(p)) {
+            p.presenceStatus = normalizePresenceStatus(persSel.value);
+            saveState(true);
+            render();
+          }
+        }
+      });
+    }
+
     function render() {
       if (!currentRole) return;
       updateSyncPillUI();
@@ -2290,6 +3033,7 @@
     }
 
     (function bootstrap() {
+      bindMainDelegatedEvents();
       try {
         var params = new URLSearchParams(window.location.search);
         var fbParam = params.get('fb') || params.get('db');
