@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.3.1</title>
+  <title>Помічник взводу v3.3.2</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -599,7 +599,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.3.1';
+    var APP_VERSION = 'v3.3.2';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -1776,7 +1776,10 @@
         '<div class="card stack">' +
           '<div class="row-between">' +
             '<div class="fw-800">Наряд на ' + fmtUA(ui.selectedDate) + '</div>' +
-            '<button type="button" class="btn btn-sm btn-info" onclick="copyDutyForDate(\'' + ui.selectedDate + '\')">📋 Скопіювати</button>' +
+            '<div class="row" style="gap:6px">' +
+              '<button type="button" class="btn btn-sm btn-secondary" onclick="openDutyPreviewModal(\'' + ui.selectedDate + '\')">👁️ Перегляд</button>' +
+              '<button type="button" class="btn btn-sm btn-info" onclick="copyDutyForDate(\'' + ui.selectedDate + '\')">📋 Скопіювати</button>' +
+            '</div>' +
           '</div>' +
           (!editable ? '<div class="info-banner">Режим перегляду нарядів (редагування дозволяється Адміном).</div>' : '') +
           dutyBlocks +
@@ -1931,7 +1934,7 @@
       render();
     }
 
-    function copyDutyForDate(iso) {
+    function buildDutyText(iso) {
       var day = state.duties[iso] || {};
       var lines = [state.groupNumber + ', ' + fmtUA(iso)];
       state.dutyTypes.forEach(function(dt, idx) {
@@ -1941,7 +1944,27 @@
         if (!list.length) lines.push('-');
         else list.forEach(function(s) { lines.push('-' + s.rank + ' ' + s.name); });
       });
-      copyText(lines.join('\n'), 'Наряд скопійовано');
+      return lines.join('\n');
+    }
+
+    function openDutyPreviewModal(iso) {
+      var txt = buildDutyText(iso);
+      openModal(
+        '<div class="modal-header">' +
+          '<div class="modal-title">Наряд на ' + fmtUA(iso) + '</div>' +
+          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<pre class="preview-pre">' + esc(txt) + '</pre>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+          '<button type="button" class="btn btn-primary btn-full" onclick="copyDutyForDate(\'' + iso + '\');closeModal()">📋 Скопіювати наряд</button>' +
+        '</div>'
+      );
+    }
+
+    function copyDutyForDate(iso) {
+      copyText(buildDutyText(iso), 'Наряд скопійовано');
     }
 
     // =========================================================================
