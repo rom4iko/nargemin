@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.3.2</title>
+  <title>Помічник взводу v3.3.3</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -599,16 +599,11 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.3.2';
+    var APP_VERSION = 'v3.3.3';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
     var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role_v321';
-    var LEGACY_KEYS = [
-      'pomichnyk_vzvodu_v32', 'pomichnyk_vzvodu_v31', 'pomichnyk_vzvodu_v30',
-      'pomichnyk_vzvodu_v3', 'pomichnyk_vzvodu_v27', 'pomichnyk_vzvodu_data',
-      'pomichnyk_vzvodu_v2', 'pomichnyk_vzvodu_v1', 'platoon_helper_state'
-    ];
 
     var ROLES_META = {
       admin: { key: 'admin', label: 'Адмін', short: '🛡️ Адмін', squadId: null, cssClass: '' },
@@ -933,12 +928,6 @@
 
     function loadLocalState() {
       var rawStr = safeLSGet(STORAGE_KEY);
-      if (!rawStr) {
-        for (var i = 0; i < LEGACY_KEYS.length; i++) {
-          var candidate = safeLSGet(LEGACY_KEYS[i]);
-          if (candidate) { rawStr = candidate; break; }
-        }
-      }
       if (!rawStr) return createDefaultState();
       try {
         return normalizeState(JSON.parse(rawStr));
@@ -1331,33 +1320,6 @@
         setFbDiag('ok', 'Завантажено в хмару (HTTP ' + res.status + ') • ' + fbLastSyncText);
         if (!silent) showToast('Дані успішно завантажено в хмару');
         return res;
-      });
-    }
-
-    function fbTestWrite() {
-      var input = document.getElementById('set-fb-url');
-      var candidate = normalizeFirebaseBaseUrl(input ? input.value : fbUrl);
-      if (!candidate) { showToast('Введіть посилання на базу Firebase', true); return; }
-      fbUrl = candidate;
-      safeLSSet(FB_URL_STORAGE_KEY, fbUrl);
-      if (input) input.value = fbUrl;
-      setFbDiag('info', 'Виконується тест запису (PUT /test_ping.json)...');
-      fbFetchJSON(fbUrl + '/test_ping.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ping: Date.now(), app: APP_VERSION })
-      }).then(function(res) {
-        if (!res.ok) {
-          fbStatus = 'offline';
-          updateSyncPillUI();
-          setFbDiag('err', 'Тест запису провалено — ' + res.message + '. Перевірте Rules у Firebase (".write": true та Publish).');
-          showToast('Тест запису: ' + res.message, true);
-        } else {
-          fbStatus = 'online';
-          updateSyncPillUI();
-          setFbDiag('ok', 'Тест запису пройдено! (HTTP ' + res.status + '). Права запису відкриті.');
-          showToast('Тест запису пройдено (HTTP 200)');
-        }
       });
     }
 
@@ -2637,10 +2599,7 @@
               '<button type="button" class="btn btn-sm btn-warn" onclick="fbPushAll(false)">☁️ Завантажити в хмару</button>' +
               '<button type="button" class="btn btn-sm btn-info" onclick="fbPullAll(true,false)">⬇️ Завантажити з хмари</button>' +
             '</div>' +
-            '<div class="grid-2">' +
-              '<button type="button" class="btn btn-sm btn-secondary" onclick="fbTestWrite()">🧪 Тест запису</button>' +
-              '<button type="button" class="btn btn-sm btn-secondary" onclick="copyShareLinkForKV()">🔗 Посилання для КВ</button>' +
-            '</div>'
+            '<button type="button" class="btn btn-sm btn-secondary btn-full" onclick="copyShareLinkForKV()">🔗 Посилання для КВ</button>'
           ) : (
             '<button type="button" class="btn btn-sm btn-info btn-full" onclick="fbPullAll(true,false)">⬇️ Оновити дані з хмари</button>'
           )) +
