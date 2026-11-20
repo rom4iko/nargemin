@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#0b1015" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Помічник взводу v3.0.1</title>
+  <title>Помічник взводу v3.0.3</title>
   <style>
     /* =========================================================================
-       ТЕМНА ТАКТИЧНА ТЕМА ТА БАЗОВІ СТИЛІ (БЕЗ ЗОВНІШНІХ ЗАЛЕЖНОСТЕЙ)
+       ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI, БЕЗ ЗОВНІШНІХ CDN)
        ========================================================================= */
     :root {
       --bg: #0b1015;
@@ -21,7 +21,6 @@
       --text: #e7eef5;
       --muted: #8b9bb0;
       --olive: #4b7a3d;
-      --olive-hover: #3e6632;
       --accent: #4ade80;
       --blue: #38bdf8;
       --amber: #f59e0b;
@@ -34,13 +33,10 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
+      margin: 0; padding: 0;
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 15px;
-      line-height: 1.4;
+      font-size: 15px; line-height: 1.4;
       overscroll-behavior-y: none;
       -webkit-font-smoothing: antialiased;
     }
@@ -49,58 +45,45 @@
     button { cursor: pointer; border: none; background: none; padding: 0; }
     input[type="date"] { color-scheme: dark; }
 
+    /* Банер аварійної діагностики (щоб ніколи не було мовчазного білого екрану) */
+    #fatal-error-box {
+      display: none; position: fixed; inset: 12px; z-index: 9999;
+      background: #2b1115; border: 2px solid #ef4444; border-radius: 14px;
+      padding: 16px; color: #fecaca; overflow: auto;
+    }
+
     /* Екран входу за PIN-кодом */
     .pin-screen {
-      min-height: 100vh;
-      max-width: 440px;
-      margin: 0 auto;
+      min-height: 100vh; max-width: 440px; margin: 0 auto;
       padding: calc(28px + var(--safe-top)) 20px calc(24px + var(--safe-bottom));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
     }
     .pin-logo {
       width: 60px; height: 60px; border-radius: 18px;
-      background: rgba(75, 122, 61, 0.22);
-      border: 1.5px solid rgba(74, 222, 128, 0.45);
-      color: var(--accent);
-      display: flex; align-items: center; justify-content: center;
+      background: rgba(75, 122, 61, 0.22); border: 1.5px solid rgba(74, 222, 128, 0.45);
+      color: var(--accent); display: flex; align-items: center; justify-content: center;
     }
-    .pin-dots { display: flex; gap: 16px; justify-content: center; margin: 6px 0; }
+    .pin-dots { display: flex; gap: 16px; justify-content: center; margin: 4px 0; }
     .pin-dot {
       width: 16px; height: 16px; border-radius: 50%;
-      border: 2px solid var(--border-strong);
-      background: transparent;
-      transition: all 0.14s ease;
+      border: 2px solid var(--border-strong); background: transparent; transition: all 0.14s ease;
     }
     .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
     .pin-dot.err { background: var(--danger); border-color: var(--danger); }
-    .numpad {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-      width: 100%; max-width: 280px;
-    }
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 280px; }
     .num-key {
-      height: 62px; border-radius: 16px;
-      background: var(--card); border: 1px solid var(--border);
+      height: 60px; border-radius: 16px; background: var(--card); border: 1px solid var(--border);
       color: #fff; font-size: 22px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.1s, transform 0.08s;
+      display: flex; align-items: center; justify-content: center; transition: background 0.1s, transform 0.08s;
     }
     .num-key:active { background: var(--card-hover); transform: scale(0.95); }
     .num-key.fn { font-size: 14px; font-weight: 700; color: var(--muted); background: var(--bg-elev); }
 
-    /* Головний контейнер, шапка та навігація */
+    /* Головна оболонка */
     .app {
-      max-width: 600px;
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: calc(82px + var(--safe-bottom));
+      max-width: 600px; margin: 0 auto; min-height: 100vh;
+      display: flex; flex-direction: column; padding-bottom: calc(82px + var(--safe-bottom));
     }
-
     .header {
       position: sticky; top: 0; z-index: 30;
       padding: calc(8px + var(--safe-top)) 12px 8px;
@@ -109,7 +92,6 @@
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
     }
-
     .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .brand-icon {
       width: 34px; height: 34px; border-radius: 10px;
@@ -117,15 +99,12 @@
       color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .brand-title { font-size: 14.5px; font-weight: 800; color: #fff; line-height: 1.15; white-space: nowrap; }
-    .header-meta { display: flex; align-items: center; gap: 5px; margin-top: 2px; flex-wrap: wrap; }
+    .header-meta { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
     .role-pill {
       font-size: 10.5px; font-weight: 800; padding: 1px 7px; border-radius: 999px;
-      background: rgba(234, 179, 8, 0.16); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.35);
-      white-space: nowrap;
+      background: rgba(234, 179, 8, 0.16); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.35); white-space: nowrap;
     }
-    .role-pill.kv {
-      background: rgba(56, 189, 248, 0.16); color: #7dd3fc; border-color: rgba(56, 189, 248, 0.35);
-    }
+    .role-pill.kv { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; border-color: rgba(56, 189, 248, 0.35); }
     .sync-pill {
       font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 999px;
       background: var(--card); border: 1px solid var(--border); color: var(--text);
@@ -141,8 +120,7 @@
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
       background: rgba(19, 27, 36, 0.96);
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      border-top: 1px solid var(--border);
-      padding-bottom: var(--safe-bottom);
+      border-top: 1px solid var(--border); padding-bottom: var(--safe-bottom);
     }
     .nav-inner { max-width: 600px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; }
     .nav-btn {
@@ -151,7 +129,7 @@
     }
     .nav-btn.active { color: var(--accent); }
 
-    /* Картки, сітки, типографіка */
+    /* Картки та утиліти */
     .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
     .card-flush { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .stack { display: flex; flex-direction: column; gap: 10px; }
@@ -174,15 +152,15 @@
       background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3);
     }
 
-    /* Кнопки та інпути (44px+ touch targets) */
+    /* Кнопки та поля вводу (touch-friendly 44px+) */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       min-height: 44px; padding: 9px 14px; border-radius: 11px;
       font-weight: 700; font-size: 13.5px; text-align: center; transition: transform 0.1s;
     }
     .btn:active { transform: scale(0.98); }
-    .btn-sm { min-height: 36px; padding: 6px 11px; font-size: 12px; border-radius: 9px; }
-    .btn-xs { min-height: 30px; padding: 4px 9px; font-size: 11.5px; border-radius: 8px; }
+    .btn-sm { min-height: 38px; padding: 6px 11px; font-size: 12px; border-radius: 9px; }
+    .btn-xs { min-height: 32px; padding: 4px 9px; font-size: 11.5px; border-radius: 8px; }
     .btn-full { width: 100%; }
     .btn-primary { background: var(--olive); color: #fff; }
     .btn-secondary { background: var(--bg-elev); color: var(--text); border: 1px solid var(--border); }
@@ -191,9 +169,9 @@
     .btn-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
 
     .btn-icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: var(--bg-elev); border: 1px solid var(--border);
-      color: var(--text); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px;
+      width: 42px; height: 42px; border-radius: 10px; background: var(--bg-elev);
+      border: 1px solid var(--border); color: var(--text);
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px;
     }
     .btn-icon-sm { width: 34px; height: 34px; border-radius: 9px; font-size: 13px; }
     .btn-icon.danger { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
@@ -208,7 +186,7 @@
     .textarea { min-height: 82px; resize: vertical; }
     .chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
 
-    /* Вкладки, фільтри, бейджі */
+    /* Фільтри, вкладки, бейджі */
     .seg-control {
       display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
       background: var(--card); border: 1px solid var(--border); padding: 4px; border-radius: 12px;
@@ -237,7 +215,7 @@
     .badge-warn { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
     .badge-err { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
 
-    /* Календар і панель дати */
+    /* Календар */
     .date-bar {
       display: flex; align-items: center; justify-content: space-between; gap: 6px;
       background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 6px;
@@ -258,7 +236,7 @@
     .cal-dots { display: flex; gap: 2px; height: 6px; align-items: center; }
     .cal-dot { width: 5px; height: 5px; border-radius: 50%; }
 
-    /* Акордеони, картки бійців, статуси присутності */
+    /* Акордеони, склад, статуси присутності */
     .acc-header {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
       min-height: 48px; padding: 10px 12px; background: rgba(11, 16, 21, 0.55); cursor: pointer; user-select: none;
@@ -271,7 +249,7 @@
 
     .presence-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
     .presence-btn {
-      min-height: 36px; padding: 6px 8px; border-radius: 9px; font-size: 12px; font-weight: 700;
+      min-height: 38px; padding: 6px 8px; border-radius: 9px; font-size: 12px; font-weight: 700;
       background: var(--card); border: 1px solid var(--border); color: var(--muted); text-align: center;
     }
     .presence-btn.active-ok { background: rgba(74, 222, 128, 0.2); border-color: var(--accent); color: #86efac; }
@@ -332,7 +310,15 @@
     }
     .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); flex-shrink: 0; }
 
-    /* Модалки, Toast, палітра */
+    /* Діагностика Firebase */
+    .diag-box {
+      padding: 9px 11px; border-radius: 10px; font-size: 12px; line-height: 1.4; word-break: break-word;
+    }
+    .diag-ok { background: rgba(74, 222, 128, 0.14); border: 1px solid rgba(74, 222, 128, 0.4); color: #bbf7d0; }
+    .diag-err { background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.45); color: #fecaca; }
+    .diag-info { background: rgba(56, 189, 248, 0.14); border: 1px solid rgba(56, 189, 248, 0.4); color: #bae6fd; }
+
+    /* Модальні вікна, Toast, кольори */
     .modal-backdrop {
       position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.78);
       display: none; align-items: flex-end; justify-content: center;
@@ -369,6 +355,9 @@
   </style>
 </head>
 <body>
+  <!-- Видимий блок критичних помилок (захист від білого екрану) -->
+  <div id="fatal-error-box"></div>
+
   <!-- Екран входу за PIN-кодом -->
   <div id="pin-screen" class="pin-screen hidden"></div>
 
@@ -436,7 +425,7 @@
     </nav>
   </div>
 
-  <!-- Модальне вікно, Toast, прихований імпорт JSON -->
+  <!-- Модальне вікно, сповіщення, імпорт файлу -->
   <div id="modal-root" class="modal-backdrop" onclick="if(event.target.id==='modal-root') closeModal()">
     <div id="modal-box" class="modal-box"></div>
   </div>
@@ -444,43 +433,61 @@
   <input type="file" id="import-json-input" accept=".json,application/json" style="display:none" onchange="handleImportJSON(event)" />
 
   <script>
-    // === НАЛАШТУВАННЯ FIREBASE (вставте сюди посилання на вашу Realtime Database) ===
-    const DEFAULT_FIREBASE_URL = ""; // Наприклад: "https://vzvodu-default-rtdb.europe-west1.firebasedatabase.app"
+    // =========================================================================
+    // 0. ГЛОБАЛЬНИЙ ЗАХИСТ ВІД БІЛОГО ЕКРАНУ (RUNTIME ERROR HANDLER)
+    // =========================================================================
+    function showFatalError(msg) {
+      var box = document.getElementById('fatal-error-box');
+      if (!box) return;
+      box.style.display = 'block';
+      box.innerHTML =
+        '<div style="font-size:16px;font-weight:800;margin-bottom:8px">Помилка запуску Помічника взводу</div>' +
+        '<div style="font-size:13px;font-family:monospace;white-space:pre-wrap;margin-bottom:14px">' + String(msg || 'Невідома помилка') + '</div>' +
+        '<button type="button" onclick="location.reload()" style="padding:10px 14px;border-radius:10px;background:#ef4444;color:#fff;font-weight:700">Перезавантажити сторінку</button>';
+    }
+    window.onerror = function(message, source, lineno, colno) {
+      showFatalError(message + (lineno ? (' (рядок ' + lineno + ':' + colno + ')') : ''));
+      return false;
+    };
+    window.onunhandledrejection = function(ev) {
+      var r = ev && ev.reason ? (ev.reason.message || String(ev.reason)) : 'Unhandled promise rejection';
+      showFatalError(r);
+    };
 
     // =========================================================================
-    // 1. КОНСТАНТИ, ДОВІДНИКИ ТА СХЕМА ДАНИХ
+    // 1. КОНСТАНТИ ТА ДОВІДНИКИ
     // =========================================================================
-    const APP_VERSION = 'v3.0.1';
-    const APP_UPDATED = '20.11.2026';
-    const STORAGE_KEY = 'pomichnyk_vzvodu_v30';
-    const FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
-    const SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role';
-    const LEGACY_KEYS = [
-      'pomichnyk_vzvodu_v27', 'pomichnyk_vzvodu_data', 'pomichnyk_vzvodu_v3',
+    var APP_VERSION = 'v3.0.3';
+    var APP_UPDATED = '20.11.2026';
+    var STORAGE_KEY = 'pomichnyk_vzvodu_v30';
+    var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
+    var SESSION_ROLE_KEY = 'pomichnyk_vzvodu_role';
+    var LEGACY_KEYS = [
+      'pomichnyk_vzvodu_v27', 'pomichnyk_vzvodu_v3', 'pomichnyk_vzvodu_data',
       'pomichnyk_vzvodu_v2', 'pomichnyk_vzvodu_v1', 'platoon_helper_state', 'platoon_duty_tracker_v1'
     ];
 
-    const MONTHS_UK = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
-    const MONTHS_GEN = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
-    const WEEKDAYS_UK = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
-    const PALETTE = ['#eab308','#3b82f6','#10b981','#f97316','#ef4444','#38bdf8','#a855f7','#ec4899'];
-    const QUICK_RANKS = ['солдат', 'ст. солдат', 'мол. сержант', 'сержант'];
+    var MONTHS_UK = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+    var MONTHS_GEN = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+    var WEEKDAYS_UK = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+    var PALETTE = ['#eab308','#3b82f6','#10b981','#f97316','#ef4444','#38bdf8','#a855f7','#ec4899'];
+    var QUICK_RANKS = ['солдат', 'ст. солдат', 'мол. сержант', 'сержант'];
 
-    const DEFAULT_SQUADS = [
+    var DEFAULT_SQUADS = [
       { id: 'cmd', name: 'Командир групи', color: '#eab308', isCmdGroup: true },
       { id: 'sq1', name: '1-ше відділення', color: '#3b82f6', isCmdGroup: false },
       { id: 'sq2', name: '2-ге відділення', color: '#10b981', isCmdGroup: false },
       { id: 'sq3', name: '3-тє відділення', color: '#f97316', isCmdGroup: false }
     ];
 
-    const DEFAULT_DUTY_TYPES = [
+    var DEFAULT_DUTY_TYPES = [
       { id: 'chk', shortName: 'ЧК', name: 'Черговий курсу', maxCount: 1, color: '#ef4444' },
       { id: 'dn', shortName: 'Дн', name: 'Днювальні курсу', maxCount: 3, color: '#38bdf8' }
     ];
 
-    const DEFAULT_PINS = { admin: '1111', sq1: '1001', sq2: '2002', sq3: '3003' };
+    var DEFAULT_PINS = { admin: '1111', sq1: '1001', sq2: '2002', sq3: '3003' };
 
-    const ROZKHID_CATS = [
+    var ROZKHID_CATS = [
       { key: 'priyom_shpytal', label: 'Прийом шпиталь', hint: 'Прийом у шпиталі', schedulable: true, kvEditable: true },
       { key: 'priyom_lazaret', label: 'Прийом лазарет', hint: 'Прийом у лазареті', schedulable: true, kvEditable: true },
       { key: 'sh', label: 'Ш', hint: 'Шпиталь', schedulable: true, kvEditable: true },
@@ -494,7 +501,7 @@
       { key: 'starodobovyi', label: 'Стародобовий', hint: 'Вчорашній наряд (авто)', schedulable: false, kvEditable: false }
     ];
 
-    const PRESENCE_STATUSES = [
+    var PRESENCE_STATUSES = [
       { key: 'in_service', shortLabel: 'В строю', fullLabel: 'В строю', isOk: true },
       { key: 'sh', shortLabel: 'Ш', fullLabel: 'Ш (Шпиталь)', isOk: false },
       { key: 'l', shortLabel: 'Л', fullLabel: 'Л (Лазарет)', isOk: false },
@@ -504,26 +511,187 @@
       { key: 'pk', shortLabel: 'Пк', fullLabel: 'Пк (Поза казармою)', isOk: false },
       { key: 'hv', shortLabel: 'Хв', fullLabel: 'Хв (Хворий)', isOk: false }
     ];
-    const PERM_ABSENT_KEYS = new Set(['sh', 'l', 'vd', 'vp', 'g', 'pk', 'hv']);
+    var PERM_ABSENT_KEYS = { sh: true, l: true, vd: true, vp: true, g: true, pk: true, hv: true };
 
-    // Стан застосунку
-    const nowInit = new Date();
-    let state = createFreshState();
-    let sessionRole = null; // 'admin' | 'sq1' | 'sq2' | 'sq3' | null
-    let pinEntry = '';
-    let pinRemember = true;
-    let pinError = false;
+    // =========================================================================
+    // 2. БАЗОВІ УТИЛІТИ ДАТ, ТЕКСТУ, РОЛЕЙ ТА СХОВИЩА
+    // =========================================================================
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function toISO(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+    function todayISO() { return toISO(new Date()); }
+    function monthPrefix(y, m) { return y + '-' + pad2(m + 1); }
 
-    // Стан синхронізації Firebase
-    let syncStatus = 'local'; // 'local' | 'syncing' | 'online' | 'offline'
-    let fbEventSource = null;
-    let fbPollTimer = null;
-    let fbPullDebounce = null;
-    let fbPushDebounce = null;
-    let lastSyncAt = null;
-    let lastSyncError = '';
+    function addDaysISO(iso, delta) {
+      var p = String(iso || todayISO()).split('-').map(Number);
+      var dt = new Date(p[0], (p[1] || 1) - 1, (p[2] || 1) + delta);
+      return toISO(dt);
+    }
 
-    let ui = {
+    function formatDotDate(iso) {
+      if (!iso) return '';
+      var p = String(iso).split('-');
+      return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : iso;
+    }
+
+    function formatDayMonth(iso) {
+      if (!iso) return '';
+      var p = String(iso).split('-');
+      return p.length === 3 ? (p[2] + '.' + p[1]) : iso;
+    }
+
+    function formatHumanDate(iso) {
+      if (!iso) return '';
+      var p = String(iso).split('-').map(Number);
+      return p.length === 3 ? (p[2] + ' ' + MONTHS_GEN[(p[1] || 1) - 1] + ' ' + p[0]) : iso;
+    }
+
+    function formatDateTimeNow() {
+      var d = new Date();
+      return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    }
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function genId(prefix) {
+      return (prefix || 'id') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+    }
+
+    function capitalizePIB(val) {
+      return String(val || '').replace(/(^|\s|-)([a-zа-яіїєґ])/gi, function(m, sep, ch) {
+        return sep + ch.toUpperCase();
+      });
+    }
+
+    function cloneDefaults(arr) {
+      return arr.map(function(item) { return Object.assign({}, item); });
+    }
+
+    function createFreshState() {
+      return {
+        groupNumber: '223',
+        squads: cloneDefaults(DEFAULT_SQUADS),
+        dutyTypes: cloneDefaults(DEFAULT_DUTY_TYPES),
+        pins: Object.assign({}, DEFAULT_PINS),
+        personnel: [],
+        duties: [],
+        tasks: [],
+        scheduledAbsences: [],
+        rozkhidManual: {},
+        rozkhidNumeric: {},
+        rozkhidCleared: {},
+        lastBackupAt: '',
+        updatedAt: 0
+      };
+    }
+
+    function normalizeState(raw) {
+      var base = createFreshState();
+      if (!raw || typeof raw !== 'object') return base;
+      base.groupNumber = String(raw.groupNumber || '223').trim() || '223';
+      base.squads = (Array.isArray(raw.squads) && raw.squads.length) ? raw.squads : cloneDefaults(DEFAULT_SQUADS);
+      base.dutyTypes = (Array.isArray(raw.dutyTypes) && raw.dutyTypes.length) ? raw.dutyTypes.map(function(dt) {
+        return {
+          id: String(dt.id || genId('dt')),
+          shortName: String(dt.shortName || dt.name || 'Н'),
+          name: String(dt.name || dt.shortName || 'Наряд'),
+          maxCount: Math.max(1, Number(dt.maxCount) || 1),
+          color: String(dt.color || '#38bdf8')
+        };
+      }) : cloneDefaults(DEFAULT_DUTY_TYPES);
+      base.pins = (raw.pins && typeof raw.pins === 'object') ? Object.assign({}, DEFAULT_PINS, raw.pins) : Object.assign({}, DEFAULT_PINS);
+      base.personnel = Array.isArray(raw.personnel) ? raw.personnel.filter(function(p) { return p && p.id && p.fullName; }).map(function(p) {
+        return {
+          id: String(p.id),
+          fullName: String(p.fullName),
+          rank: String(p.rank || ''),
+          squadId: String(p.squadId || 'sq1'),
+          isLeader: Boolean(p.isLeader),
+          presenceStatus: String(p.presenceStatus || 'in_service')
+        };
+      }) : [];
+      base.duties = Array.isArray(raw.duties) ? raw.duties.filter(function(d) { return d && d.date && d.soldierId; }).map(function(d) {
+        return {
+          id: String(d.id || genId('d')),
+          date: String(d.date),
+          soldierId: String(d.soldierId),
+          dutyTypeId: String(d.dutyTypeId || (base.dutyTypes[0] ? base.dutyTypes[0].id : 'chk'))
+        };
+      }) : [];
+      base.tasks = Array.isArray(raw.tasks) ? raw.tasks.filter(function(t) { return t && t.text; }).map(function(t) {
+        return {
+          id: String(t.id || genId('task')),
+          recipientType: t.recipientType === 'all_leaders' ? 'all_leaders' : 'squad',
+          squadId: String(t.squadId || ''),
+          text: String(t.text),
+          author: String(t.author || ''),
+          status: (t.status === 'done' || t.status === 'failed') ? t.status : 'received',
+          remark: String(t.remark || ''),
+          createdAt: String(t.createdAt || '')
+        };
+      }) : [];
+      base.scheduledAbsences = Array.isArray(raw.scheduledAbsences) ? raw.scheduledAbsences.filter(function(a) { return a && a.soldierId && a.startDate; }).map(function(a) {
+        return {
+          id: String(a.id || genId('sched')),
+          soldierId: String(a.soldierId),
+          category: String(a.category || 'priyom_shpytal'),
+          startDate: String(a.startDate),
+          endDate: String(a.endDate || ''),
+          note: String(a.note || '')
+        };
+      }) : [];
+      base.rozkhidManual = (raw.rozkhidManual && typeof raw.rozkhidManual === 'object') ? raw.rozkhidManual : {};
+      base.rozkhidNumeric = (raw.rozkhidNumeric && typeof raw.rozkhidNumeric === 'object') ? raw.rozkhidNumeric : {};
+      base.rozkhidCleared = (raw.rozkhidCleared && typeof raw.rozkhidCleared === 'object') ? raw.rozkhidCleared : {};
+      base.lastBackupAt = String(raw.lastBackupAt || '');
+      base.updatedAt = Number(raw.updatedAt || 0);
+      return base;
+    }
+
+    function saveLocalState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function loadLocalState() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          state = normalizeState(JSON.parse(raw));
+          return;
+        }
+        // Безпечна міграція зі старих версій
+        for (var i = 0; i < LEGACY_KEYS.length; i++) {
+          var legacy = localStorage.getItem(LEGACY_KEYS[i]);
+          if (legacy) {
+            state = normalizeState(JSON.parse(legacy));
+            saveLocalState();
+            return;
+          }
+        }
+      } catch (e) {}
+      state = createFreshState();
+    }
+
+    // =========================================================================
+    // 3. ГЛОБАЛЬНИЙ СТАН ТА ФУНКЦІЇ ПОШУКУ / СОРТУВАННЯ
+    // =========================================================================
+    var nowInit = new Date();
+    var state = createFreshState();
+    var sessionRole = null; // 'admin' | 'sq1' | 'sq2' | 'sq3' | null
+    var pinEntry = '';
+    var pinRemember = true;
+    var pinError = false;
+
+    var syncStatus = 'local'; // 'local' | 'syncing' | 'online' | 'offline'
+    var fbPollTimer = null;
+    var fbPushDebounce = null;
+    var lastSyncAt = '';
+    var lastSyncDiag = null; // { type: 'ok' | 'err' | 'info', text: string }
+
+    var ui = {
       activeTab: 'duties',
       dutiesSubTab: 'schedule',
       year: nowInit.getFullYear(),
@@ -546,378 +714,145 @@
       openSoldiers: {}
     };
 
-    let assignModal = { date: '', dutyTypeId: '', selectedIds: [] };
-    let tempColor = '#3b82f6';
+    var assignModal = { date: '', dutyTypeId: '', selectedIds: [] };
+    var tempColor = '#3b82f6';
 
-    // =========================================================================
-    // 2. УТИЛІТИ ДАТ, ТЕКСТУ, РОЛЕЙ ТА СОРТУВАННЯ
-    // =========================================================================
-    function genId(p) { return p + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
-    function toISO(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-    function todayISO() { return toISO(new Date()); }
-    function addDaysISO(iso, delta) {
-      const p = String(iso).split('-').map(Number);
-      return toISO(new Date(p[0], p[1] - 1, p[2] + delta));
-    }
-    function formatHumanDate(iso) {
-      if (!iso) return '—';
-      const p = String(iso).split('-').map(Number);
-      return p[2] + ' ' + MONTHS_GEN[p[1] - 1] + ' ' + p[0];
-    }
-    function formatDotDate(iso) {
-      if (!iso) return '—';
-      const p = String(iso).split('-');
-      return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : iso;
-    }
-    function formatDayMonth(iso) {
-      if (!iso) return '—';
-      const p = String(iso).split('-');
-      return p.length === 3 ? (p[2] + '.' + p[1]) : iso;
-    }
-    function monthPrefix(y, m) { return y + '-' + String(m + 1).padStart(2, '0'); }
-    function formatDateTimeNow() {
-      const d = new Date();
-      return formatDotDate(toISO(d)) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    }
-    function esc(str) {
-      if (str === null || str === undefined) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-    function capitalizePIB(str) {
-      return String(str || '').replace(/(^|[\s-])([а-яіїєґa-z])/gi, function(m, sep, ch) { return sep + ch.toUpperCase(); });
-    }
-    function isCmdGroup(sq) {
-      return Boolean(sq && (sq.isCmdGroup || sq.isGroupCmd || sq.id === 'cmd' || sq.id === 'sq_group_cmd'));
-    }
-    function getOrderedSquads() {
-      const list = Array.isArray(state.squads) ? state.squads : [];
-      return list.filter(isCmdGroup).concat(list.filter(function(s) { return !isCmdGroup(s); }));
-    }
-    function getSquadById(id) {
-      return state.squads.find(function(s) { return s.id === id; }) || { id: id, name: 'Без відділення', color: '#64748b', isCmdGroup: false };
-    }
-    function getSoldierById(id) { return state.personnel.find(function(p) { return p.id === id; }); }
-    function getDutyTypeById(id) {
-      return state.dutyTypes.find(function(dt) { return dt.id === id; }) || { id: id, shortName: 'Наряд', name: 'Наряд', maxCount: 1, color: '#64748b' };
-    }
-    function getRozkhidCat(key) { return ROZKHID_CATS.find(function(c) { return c.key === key; }) || { key: key, label: key, hint: '' }; }
-    function getPresenceMeta(key) { return PRESENCE_STATUSES.find(function(p) { return p.key === key; }) || PRESENCE_STATUSES[0]; }
-    function sortSquadPersonnel(list) {
-      return list.slice().sort(function(a, b) {
-        if (a.isLeader && !b.isLeader) return -1;
-        if (!a.isLeader && b.isLeader) return 1;
-        return String(a.fullName || '').localeCompare(String(b.fullName || ''), 'uk');
-      });
-    }
-    function getSoldierDutyStats(soldierId, y, m) {
-      const pref = monthPrefix(y, m);
-      let monthCount = 0, totalCount = 0, lastDate = '';
-      for (let i = 0; i < state.duties.length; i++) {
-        const d = state.duties[i];
-        if (d.soldierId === soldierId) {
-          totalCount++;
-          if (d.date && d.date.indexOf(pref) === 0) monthCount++;
-          if (d.date && (!lastDate || d.date > lastDate)) lastDate = d.date;
-        }
-      }
-      return { monthCount: monthCount, totalCount: totalCount, lastDate: lastDate };
-    }
-    function getUpcomingAbsencesForSoldier(soldierId) {
-      const td = todayISO();
-      return state.scheduledAbsences
-        .filter(function(a) { return a.soldierId === soldierId && (a.endDate || a.startDate) >= td; })
-        .sort(function(a, b) { return a.startDate.localeCompare(b.startDate); });
-    }
-    function formatSquadRecipient(sq) {
-      const m = String(sq.name || '').match(/^(\d+)/);
-      return m ? ('Командиру ' + m[1] + '-го відділення') : ('Командиру (' + sq.name + ')');
-    }
-    function formatSquadShortTab(sq) {
-      const m = String(sq.name || '').match(/^(\d+-\S+)/);
-      return m ? (m[1] + ' відд.') : sq.name;
-    }
-
-    // Рольові права доступу (RBAC)
     function isAdmin() { return sessionRole === 'admin'; }
     function mySquadId() { return isAdmin() ? null : sessionRole; }
-    function canEditSoldier(soldier) { return isAdmin() || Boolean(soldier && soldier.squadId === sessionRole); }
     function getRoleLabel(role) {
       if (role === 'admin') return '★ Адмін';
       if (role === 'sq1') return 'КВ 1-го відд.';
       if (role === 'sq2') return 'КВ 2-го відд.';
       if (role === 'sq3') return 'КВ 3-го відд.';
-      const sq = getSquadById(role);
-      return sq ? ('КВ: ' + formatSquadShortTab(sq)) : 'Гість';
+      return 'Гість';
+    }
+    function canEditSoldier(s) {
+      if (!s) return false;
+      return isAdmin() || s.squadId === mySquadId();
     }
 
-    // =========================================================================
-    // 3. ЛОКАЛЬНЕ ЗБЕРЕЖЕННЯ ТА МІГРАЦІЯ (v2.3 – v2.7 -> v3.0)
-    // =========================================================================
-    function createFreshState() {
-      return {
-        groupNumber: '223',
-        squads: JSON.parse(JSON.stringify(DEFAULT_SQUADS)),
-        personnel: [],
-        dutyTypes: JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES)),
-        duties: [],
-        tasks: [],
-        scheduledAbsences: [],
-        rozkhidManual: {},
-        rozkhidNumeric: {},
-        rozkhidCleared: {},
-        pins: Object.assign({}, DEFAULT_PINS),
-        lastBackupAt: null,
-        updatedAt: Date.now()
-      };
+    function isCmdGroup(sq) {
+      return Boolean(sq && (sq.isCmdGroup || sq.id === 'cmd' || /командир\s+групи/i.test(sq.name || '')));
     }
 
-    function mapLegacyStatus(val) {
-      if (!val) return 'in_service';
-      if (val === '__present__') return '__present__';
-      const map = {
-        active: 'in_service', in_service: 'in_service', 'Вн': 'in_service', 'В строю': 'in_service',
-        'Прийом шпиталь': 'priyom_shpytal', priyom_shpytal: 'priyom_shpytal',
-        'Прийом лазарет': 'priyom_lazaret', priyom_lazaret: 'priyom_lazaret',
-        'Ш': 'sh', sh: 'sh', 'Л': 'l', l: 'l', medical: 'l',
-        'Вд': 'vd', vd: 'vd', trip: 'vd', 'Вп': 'vp', vp: 'vp', leave: 'vp',
-        'Н': 'n', n: 'n', 'Г': 'g', g: 'g', 'Пк': 'pk', pk: 'pk', 'Хв': 'hv', hv: 'hv',
-        'Стародобовий': 'starodobovyi', starodobovyi: 'starodobovyi'
-      };
-      return map[String(val).trim()] || 'in_service';
-    }
-
-    function normalizeState(parsed) {
-      if (!parsed || typeof parsed !== 'object') return createFreshState();
-
-      let rawSquads = Array.isArray(parsed.squads) && parsed.squads.length
-        ? parsed.squads.slice()
-        : JSON.parse(JSON.stringify(DEFAULT_SQUADS));
-      if (!rawSquads.some(isCmdGroup)) {
-        rawSquads.unshift({ id: 'cmd', name: 'Командир групи', color: '#eab308', isCmdGroup: true });
-      }
-      const squads = rawSquads.map(function(sq, idx) {
-        return {
-          id: sq.id || genId('sq'),
-          name: String(sq.name || ('Відділення ' + idx)),
-          color: sq.color || PALETTE[idx % PALETTE.length],
-          isCmdGroup: isCmdGroup(sq)
-        };
+    function getOrderedSquads() {
+      var order = { cmd: 0, sq1: 1, sq2: 2, sq3: 3 };
+      return state.squads.slice().sort(function(a, b) {
+        var oa = isCmdGroup(a) ? 0 : (order[a.id] !== undefined ? order[a.id] : 10);
+        var ob = isCmdGroup(b) ? 0 : (order[b.id] !== undefined ? order[b.id] : 10);
+        if (oa !== ob) return oa - ob;
+        return String(a.name || '').localeCompare(String(b.name || ''), 'uk');
       });
+    }
 
-      const rawPeople = Array.isArray(parsed.personnel) ? parsed.personnel
-        : (Array.isArray(parsed.soldiers) ? parsed.soldiers : []);
-      const defSqId = (squads.find(function(s) { return !s.isCmdGroup; }) || squads[0]).id;
-      const personnel = rawPeople.map(function(p) {
-        const st = mapLegacyStatus(p.presenceStatus || p.status);
-        return {
-          id: p.id || genId('p'),
-          fullName: capitalizePIB(String(p.fullName || p.name || '').trim()),
-          rank: String(p.rank || '').trim(),
-          squadId: p.squadId || defSqId,
-          isLeader: Boolean(p.isLeader || p.isCommander),
-          presenceStatus: PERM_ABSENT_KEYS.has(st) ? st : 'in_service'
-        };
-      }).filter(function(p) { return p.fullName.length > 0; });
+    function getSquadById(id) {
+      return state.squads.find(function(sq) { return sq.id === id; }) || { id: id || '', name: 'Без відділення', color: '#8b9bb0', isCmdGroup: false };
+    }
 
-      const rawTypes = Array.isArray(parsed.dutyTypes) && parsed.dutyTypes.length
-        ? parsed.dutyTypes : JSON.parse(JSON.stringify(DEFAULT_DUTY_TYPES));
-      const dutyTypes = rawTypes.map(function(dt, idx) {
-        const shortN = String(dt.shortName || dt.name || 'Наряд').trim();
-        const fullN = String(dt.shortName ? (dt.name || '') : (dt.desc || '')).trim();
-        const isDn = shortN.toLowerCase() === 'дн' || fullN.toLowerCase().indexOf('днювальн') !== -1;
-        return {
-          id: dt.id || genId('dt'),
-          shortName: shortN,
-          name: fullN || shortN,
-          maxCount: Math.min(10, Math.max(1, Number(dt.maxCount || dt.maxPeople) || (isDn ? 3 : 1))),
-          color: dt.color || PALETTE[(idx + 4) % PALETTE.length]
-        };
+    function getSoldierById(id) {
+      return state.personnel.find(function(p) { return p.id === id; }) || null;
+    }
+
+    function getDutyTypeById(id) {
+      return state.dutyTypes.find(function(dt) { return dt.id === id; }) || { id: id || '', shortName: 'Н', name: 'Наряд', maxCount: 1, color: '#38bdf8' };
+    }
+
+    function getRozkhidCat(key) {
+      return ROZKHID_CATS.find(function(c) { return c.key === key; }) || { key: key, label: key, hint: '', schedulable: true, kvEditable: true };
+    }
+
+    function getPresenceMeta(key) {
+      return PRESENCE_STATUSES.find(function(p) { return p.key === key; }) || PRESENCE_STATUSES[0];
+    }
+
+    function sortSquadPersonnel(list) {
+      return list.slice().sort(function(a, b) {
+        if (Boolean(a.isLeader) !== Boolean(b.isLeader)) return a.isLeader ? -1 : 1;
+        return String(a.fullName || '').localeCompare(String(b.fullName || ''), 'uk');
       });
-
-      const duties = Array.isArray(parsed.duties) ? parsed.duties.map(function(d) {
-        return {
-          id: d.id || genId('d'),
-          date: String(d.date || ''),
-          soldierId: String(d.soldierId || ''),
-          dutyTypeId: String(d.dutyTypeId || (dutyTypes[0] ? dutyTypes[0].id : 'chk'))
-        };
-      }).filter(function(d) { return d.date && d.soldierId; }) : [];
-
-      const tasks = Array.isArray(parsed.tasks) ? parsed.tasks.map(function(t) {
-        const isAll = t.recipientType === 'all_leaders' || t.targetType === 'all_commanders';
-        return {
-          id: t.id || genId('task'),
-          recipientType: isAll ? 'all_leaders' : 'squad',
-          squadId: isAll ? '' : String(t.squadId || t.targetSquadId || defSqId),
-          text: String(t.text || ''),
-          author: String(t.author || t.issuer || ''),
-          status: (t.status === 'done' || t.status === 'failed') ? t.status : 'received',
-          remark: String(t.remark !== undefined ? t.remark : (t.note || '')),
-          createdAt: String(t.createdAt || formatDateTimeNow())
-        };
-      }).filter(function(t) { return t.text.length > 0; }) : [];
-
-      const scheduledAbsences = Array.isArray(parsed.scheduledAbsences) ? parsed.scheduledAbsences.map(function(a) {
-        return {
-          id: a.id || genId('sched'),
-          soldierId: String(a.soldierId || ''),
-          category: mapLegacyStatus(a.category),
-          startDate: String(a.startDate || ''),
-          endDate: String(a.endDate || ''),
-          note: String(a.note || '')
-        };
-      }).filter(function(a) { return a.soldierId && a.startDate && a.category !== 'in_service' && a.category !== '__present__'; }) : [];
-
-      // Розхід (підтримка нового формату v3.0 та міграція з v2.7 rozkhidByDate)
-      const rozkhidManual = (parsed.rozkhidManual && typeof parsed.rozkhidManual === 'object') ? JSON.parse(JSON.stringify(parsed.rozkhidManual)) : {};
-      const rozkhidNumeric = (parsed.rozkhidNumeric && typeof parsed.rozkhidNumeric === 'object') ? JSON.parse(JSON.stringify(parsed.rozkhidNumeric)) : {};
-      const rozkhidCleared = (parsed.rozkhidCleared && typeof parsed.rozkhidCleared === 'object') ? JSON.parse(JSON.stringify(parsed.rozkhidCleared)) : {};
-
-      const rawLegacyRoz = parsed.rozkhidByDate || parsed.rozkhid;
-      if (rawLegacyRoz && typeof rawLegacyRoz === 'object') {
-        Object.keys(rawLegacyRoz).forEach(function(dk) {
-          const item = rawLegacyRoz[dk];
-          if (!item || typeof item !== 'object') return;
-          if (item.cleared) rozkhidCleared[dk] = true;
-          const rm = item.manual || item.overrides || {};
-          Object.keys(rm).forEach(function(sid) {
-            if (!rozkhidManual[dk]) rozkhidManual[dk] = {};
-            const mk = mapLegacyStatus(rm[sid]);
-            rozkhidManual[dk][sid] = mk === 'in_service' ? '__present__' : mk;
-          });
-          const ro = item.offsets || item.extra || {};
-          Object.keys(ro).forEach(function(k) {
-            const mk = mapLegacyStatus(k);
-            const num = Math.max(0, Number(ro[k]) || 0);
-            if (mk !== 'in_service' && mk !== '__present__' && num > 0) {
-              if (!rozkhidNumeric[dk]) rozkhidNumeric[dk] = {};
-              rozkhidNumeric[dk][mk] = num;
-            }
-          });
-        });
-      }
-
-      const pins = Object.assign({}, DEFAULT_PINS, (parsed.pins && typeof parsed.pins === 'object') ? parsed.pins : {});
-
-      return {
-        groupNumber: (typeof parsed.groupNumber === 'string' && parsed.groupNumber.trim()) ? parsed.groupNumber.trim() : '223',
-        squads: squads,
-        personnel: personnel,
-        dutyTypes: dutyTypes,
-        duties: duties,
-        tasks: tasks,
-        scheduledAbsences: scheduledAbsences,
-        rozkhidManual: rozkhidManual,
-        rozkhidNumeric: rozkhidNumeric,
-        rozkhidCleared: rozkhidCleared,
-        pins: pins,
-        lastBackupAt: parsed.lastBackupAt || null,
-        updatedAt: Number(parsed.updatedAt) || Date.now()
-      };
     }
 
-    function loadLocalState() {
-      try {
-        let raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          for (let i = 0; i < LEGACY_KEYS.length; i++) {
-            const f = localStorage.getItem(LEGACY_KEYS[i]);
-            if (f) { raw = f; break; }
-          }
-        }
-        state = raw ? normalizeState(JSON.parse(raw)) : createFreshState();
-        state.squads.forEach(function(sq) {
-          if (ui.openPersonnelSquads[sq.id] === undefined) ui.openPersonnelSquads[sq.id] = true;
-        });
-        saveLocalState();
-      } catch (e) {
-        state = createFreshState();
-        saveLocalState();
-      }
+    function formatSquadRecipient(sq) {
+      if (!sq) return 'Командиру відділення';
+      if (sq.id === 'sq1' || /^1/.test(sq.name)) return 'Командиру 1-го відділення';
+      if (sq.id === 'sq2' || /^2/.test(sq.name)) return 'Командиру 2-го відділення';
+      if (sq.id === 'sq3' || /^3/.test(sq.name)) return 'Командиру 3-го відділення';
+      return 'Командиру (' + sq.name + ')';
     }
 
-    function saveLocalState() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-      catch (e) { showToast('Помилка збереження у пам\'ять браузера', 'error'); }
+    function formatSquadShortTab(sq) {
+      if (!sq) return '';
+      if (isCmdGroup(sq)) return 'КГ';
+      if (sq.id === 'sq1' || /^1/.test(sq.name)) return '1 відд.';
+      if (sq.id === 'sq2' || /^2/.test(sq.name)) return '2 відд.';
+      if (sq.id === 'sq3' || /^3/.test(sq.name)) return '3 відд.';
+      return sq.name;
+    }
+
+    function getSoldierDutyStats(soldierId, year, month) {
+      var pref = monthPrefix(year, month);
+      var monthCount = 0, totalCount = 0, lastDate = '';
+      state.duties.forEach(function(d) {
+        if (d.soldierId !== soldierId) return;
+        totalCount++;
+        if (d.date && d.date.indexOf(pref) === 0) monthCount++;
+        if (d.date && (!lastDate || d.date > lastDate)) lastDate = d.date;
+      });
+      return { monthCount: monthCount, totalCount: totalCount, lastDate: lastDate };
+    }
+
+    function getUpcomingAbsencesForSoldier(soldierId) {
+      var td = todayISO();
+      return state.scheduledAbsences
+        .filter(function(a) { return a.soldierId === soldierId && (a.endDate || a.startDate) >= td; })
+        .sort(function(a, b) { return a.startDate.localeCompare(b.startDate); });
     }
 
     // =========================================================================
-    // 4. FIREBASE REALTIME DATABASE REST API + AUTO-POLLING (v3.0.1)
+    // 4. FIREBASE REALTIME DATABASE SYNC (НАДІЙНИЙ REST API + ДІАГНОСТИКА)
     // =========================================================================
-    function cleanFbUrl(url) {
-      let s = String(url || '').trim();
+    function normalizeFbUrl(raw) {
+      var s = String(raw || '').trim();
       if (!s) return '';
-      // Видаляємо можливий дубль або markdown-хвіст, якщо посилання скопійовано криво
+      // Витягуємо перше коректне посилання Firebase (захист від дублів, Https://, ](, .json, пробілів)
+      var match = s.match(/https?:\/\/[a-z0-9\-._]+\.(?:firebasedatabase\.app|firebaseio\.com)/i);
+      if (match && match[0]) {
+        return match[0].replace(/^https?:\/\//i, 'https://').replace(/\/+$/, '');
+      }
       if (s.indexOf('](') !== -1) s = s.split('](')[0];
-      s = s.replace(/\s+/g, '');
-      // Нижній регістр для протоколу (Https:// -> https://)
-      s = s.replace(/^https?:\/\//i, function(m) { return m.toLowerCase(); });
-      // Прибираємо випадковий суфікс /platoon_data.json або .json та кінцеві слеші
-      s = s.replace(/\/platoon_data\.json$/i, '');
-      s = s.replace(/\.json$/i, '');
-      s = s.replace(/\/+$/, '');
+      s = s.replace(/\s+/g, '').replace(/^https?:\/\//i, 'https://');
+      s = s.replace(/\/(platoon_data|test_ping)\.json$/i, '').replace(/\.json$/i, '').replace(/\/+$/, '');
       return s;
     }
 
-    function getPlatoonEndpoint(baseUrl) {
-      const clean = cleanFbUrl(baseUrl || getFirebaseUrl());
-      return clean ? (clean + '/platoon_data.json') : '';
-    }
-
-    // Рекурсивне очищення ключів від заборонених у Firebase символів (. $ # [ ] /) та undefined -> null
-    function sanitizeForFirebase(val) {
-      if (val === undefined) return null;
-      if (val === null || typeof val !== 'object') return val;
-      if (Array.isArray(val)) {
-        return val.map(function(item) { return sanitizeForFirebase(item); });
-      }
-      const out = {};
-      Object.keys(val).forEach(function(k) {
-        const safeKey = String(k).replace(/[.#$\[\]\/]/g, '_') || '_';
-        out[safeKey] = sanitizeForFirebase(val[k]);
-      });
-      return out;
-    }
-
-    function parseFirebaseError(res) {
-      return res.text().then(function(txt) {
-        let msg = '';
-        try {
-          const parsed = JSON.parse(txt);
-          if (parsed && parsed.error) msg = String(parsed.error);
-        } catch (e) {
-          msg = txt ? txt.slice(0, 140) : '';
-        }
-        return 'Помилка ' + res.status + (msg ? ': ' + msg : '');
-      }).catch(function() {
-        return 'Помилка ' + res.status;
-      });
-    }
-
-    function initFirebaseUrlFromQuery() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const qDb = cleanFbUrl(params.get('fb') || params.get('db'));
-        if (qDb && qDb.indexOf('https://') === 0) {
-          localStorage.setItem(FB_URL_STORAGE_KEY, qDb);
-        }
-      } catch (e) {}
-    }
-
     function getFirebaseUrl() {
-      try {
-        const saved = cleanFbUrl(localStorage.getItem(FB_URL_STORAGE_KEY));
-        if (saved) return saved;
-      } catch (e) {}
-      return cleanFbUrl(DEFAULT_FIREBASE_URL);
+      try { return normalizeFbUrl(localStorage.getItem(FB_URL_STORAGE_KEY)); } catch (e) { return ''; }
     }
 
     function setFirebaseUrl(url) {
-      const clean = cleanFbUrl(url);
+      var clean = normalizeFbUrl(url);
       try {
         if (clean) localStorage.setItem(FB_URL_STORAGE_KEY, clean);
         else localStorage.removeItem(FB_URL_STORAGE_KEY);
       } catch (e) {}
+      return clean;
+    }
+
+    function initFirebaseUrlFromQuery() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var q = normalizeFbUrl(params.get('fb') || params.get('db'));
+        if (q && q.indexOf('https://') === 0) setFirebaseUrl(q);
+      } catch (e) {}
+    }
+
+    function getPlatoonEndpoint(url) {
+      var base = normalizeFbUrl(url || getFirebaseUrl());
+      return base ? (base + '/platoon_data.json') : '';
+    }
+
+    function setDiag(type, text) {
+      lastSyncDiag = text ? { type: type, text: text } : null;
     }
 
     function setSyncStatus(st) {
@@ -926,7 +861,7 @@
     }
 
     function updateSyncPillUI() {
-      const el = document.getElementById('header-sync-pill');
+      var el = document.getElementById('header-sync-pill');
       if (!el) return;
       el.className = 'sync-pill ' + (syncStatus === 'online' ? 'online' : (syncStatus === 'offline' ? 'offline' : (syncStatus === 'syncing' ? 'syncing' : '')));
       if (syncStatus === 'online') el.textContent = '🟢 Онлайн';
@@ -935,13 +870,48 @@
       else el.textContent = '⚪ Локально';
     }
 
-    function isUserActivelyEditing() {
-      const modalOpen = document.getElementById('modal-root').classList.contains('open');
-      if (modalOpen) return true;
-      const ae = document.activeElement;
-      if (!ae) return false;
-      const tag = ae.tagName;
-      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+    // Глибоке очищення ключів та значень під суворі правила Firebase
+    function sanitizeForFirebase(val) {
+      if (val === undefined) return null;
+      if (typeof val === 'number' && isNaN(val)) return null;
+      if (val === null || typeof val !== 'object') return val;
+      if (Array.isArray(val)) return val.map(sanitizeForFirebase);
+      var out = {};
+      Object.keys(val).forEach(function(k) {
+        var safeKey = String(k).replace(/[.#$\[\]\/]/g, '_');
+        if (!safeKey) safeKey = '_empty';
+        out[safeKey] = sanitizeForFirebase(val[k]);
+      });
+      return out;
+    }
+
+    function parseFirebaseError(res) {
+      return res.text().then(function(txt) {
+        var msg = '';
+        try {
+          var parsed = JSON.parse(txt);
+          if (parsed && parsed.error) msg = String(parsed.error);
+        } catch (e) {
+          msg = txt ? txt.slice(0, 140) : '';
+        }
+        var hint = (res.status === 401 || res.status === 403) ? ' — відкрийте Rules у Firebase і натисніть Publish' : '';
+        return 'HTTP ' + res.status + (msg ? ': ' + msg : '') + hint;
+      }).catch(function() { return 'HTTP ' + res.status; });
+    }
+
+    function objMapToArray(obj) {
+      if (!obj || typeof obj !== 'object') return [];
+      if (Array.isArray(obj)) return obj.filter(Boolean);
+      return Object.keys(obj).map(function(k) {
+        var v = obj[k];
+        return (v && typeof v === 'object') ? Object.assign({ id: k }, v) : null;
+      }).filter(Boolean);
+    }
+
+    function arrayToObjMap(arr) {
+      var out = {};
+      (arr || []).forEach(function(item) { if (item && item.id) out[item.id] = item; });
+      return out;
     }
 
     function buildCloudPayload() {
@@ -966,58 +936,24 @@
       });
     }
 
-    // Відкладений авто-запис у хмару при змінах (debounced PUT)
-    function scheduleCloudPush() {
-      if (!getFirebaseUrl()) { setSyncStatus('local'); return; }
-      clearTimeout(fbPushDebounce);
-      fbPushDebounce = setTimeout(function() { fbPushAll(true); }, 600);
-    }
-
-    function fbWrite() {
-      scheduleCloudPush();
-      return Promise.resolve(true);
-    }
-
-    function fbSyncMeta() {
-      scheduleCloudPush();
-      return Promise.resolve(true);
-    }
-
-    function objMapToArray(obj) {
-      if (!obj || typeof obj !== 'object') return [];
-      return Object.keys(obj).map(function(k) {
-        const v = obj[k];
-        if (!v || typeof v !== 'object') return null;
-        return Object.assign({ id: k }, v);
-      }).filter(Boolean);
-    }
-
-    function arrayToObjMap(arr) {
-      const out = {};
-      (arr || []).forEach(function(item) { if (item && item.id) out[item.id] = item; });
-      return out;
-    }
-
     function applyRemoteSnapshot(remote, forceApply) {
       if (!remote || typeof remote !== 'object') return false;
-      const hasData = remote.meta || remote.personnel || remote.duties || remote.tasks || remote.pins || remote.rozkhidManual;
+      var hasData = remote.meta || remote.personnel || remote.duties || remote.tasks || remote.pins || remote.rozkhidManual;
       if (!hasData) return false;
 
-      const remoteTs = Number(remote.updatedAt || (remote.meta && remote.meta.updatedAt) || 0);
-      if (!forceApply && remoteTs && state.updatedAt && remoteTs <= state.updatedAt) {
-        return false;
-      }
+      var remoteTs = Number(remote.updatedAt || (remote.meta && remote.meta.updatedAt) || 0);
+      if (!forceApply && remoteTs && state.updatedAt && remoteTs <= state.updatedAt) return false;
 
-      const meta = remote.meta || {};
-      const next = {
+      var meta = remote.meta || {};
+      var next = {
         groupNumber: meta.groupNumber || state.groupNumber || '223',
-        squads: Array.isArray(meta.squads) && meta.squads.length ? meta.squads : state.squads,
-        dutyTypes: Array.isArray(meta.dutyTypes) && meta.dutyTypes.length ? meta.dutyTypes : state.dutyTypes,
+        squads: (Array.isArray(meta.squads) && meta.squads.length) ? meta.squads : state.squads,
+        dutyTypes: (Array.isArray(meta.dutyTypes) && meta.dutyTypes.length) ? meta.dutyTypes : state.dutyTypes,
         pins: remote.pins ? Object.assign({}, DEFAULT_PINS, remote.pins) : state.pins,
-        personnel: remote.personnel ? objMapToArray(remote.personnel) : [],
-        duties: remote.duties ? objMapToArray(remote.duties) : [],
-        tasks: remote.tasks ? objMapToArray(remote.tasks).sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); }) : [],
-        scheduledAbsences: remote.scheduledAbsences ? objMapToArray(remote.scheduledAbsences) : [],
+        personnel: objMapToArray(remote.personnel),
+        duties: objMapToArray(remote.duties),
+        tasks: objMapToArray(remote.tasks).sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); }),
+        scheduledAbsences: objMapToArray(remote.scheduledAbsences),
         rozkhidManual: (remote.rozkhidManual && typeof remote.rozkhidManual === 'object') ? remote.rozkhidManual : {},
         rozkhidNumeric: (remote.rozkhidNumeric && typeof remote.rozkhidNumeric === 'object') ? remote.rozkhidNumeric : {},
         rozkhidCleared: (remote.rozkhidCleared && typeof remote.rozkhidCleared === 'object') ? remote.rozkhidCleared : {},
@@ -1029,272 +965,158 @@
       return true;
     }
 
+    function isUserActivelyEditing() {
+      var modal = document.getElementById('modal-root');
+      if (modal && modal.classList.contains('open')) return true;
+      var ae = document.activeElement;
+      if (!ae) return false;
+      return ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT';
+    }
+
+    function scheduleCloudPush() {
+      state.updatedAt = Date.now();
+      saveLocalState();
+      if (!getFirebaseUrl()) { setSyncStatus('local'); return; }
+      clearTimeout(fbPushDebounce);
+      fbPushDebounce = setTimeout(function() { fbPushAll(true); }, 800);
+    }
+
     function fbPullAll(silent, forceApply) {
-      const endpoint = getPlatoonEndpoint();
-      if (!endpoint) { setSyncStatus('local'); return Promise.resolve({ ok: false, error: 'Не вказано URL Firebase' }); }
+      var endpoint = getPlatoonEndpoint();
+      if (!endpoint) { setSyncStatus('local'); return Promise.resolve({ ok: false, error: 'Не вказано посилання Firebase' }); }
       if (!silent) setSyncStatus('syncing');
       return fetch(endpoint)
         .then(function(res) {
-          if (!res.ok) return parseFirebaseError(res).then(function(errMsg) { throw new Error(errMsg); });
-          return res.json();
+          if (!res.ok) return parseFirebaseError(res).then(function(e) { throw new Error(e); });
+          return res.json().then(function(data) { return { status: res.status, data: data }; });
         })
-        .then(function(data) {
+        .then(function(result) {
           lastSyncAt = formatDateTimeNow();
-          lastSyncError = '';
           setSyncStatus('online');
-          const updated = applyRemoteSnapshot(data, Boolean(forceApply));
+          if (!silent) setDiag('ok', '✅ Отримано з хмари (HTTP ' + result.status + ')');
+          var updated = applyRemoteSnapshot(result.data, Boolean(forceApply));
           if (updated && sessionRole && !isUserActivelyEditing()) render();
-          return { ok: true, data: data };
+          return { ok: true, status: result.status, data: result.data };
         })
         .catch(function(err) {
-          lastSyncError = (err && err.message) ? err.message : 'Помилка мережі';
+          var msg = (err && err.message) ? err.message : 'Помилка мережі (Failed to fetch)';
           setSyncStatus('offline');
-          if (!silent && sessionRole && ui.activeTab === 'settings') render();
-          return { ok: false, error: lastSyncError };
+          if (!silent) {
+            setDiag('err', '❌ Помилка читання: ' + msg);
+            if (sessionRole && ui.activeTab === 'settings') render();
+          }
+          return { ok: false, error: msg };
         });
     }
 
     function fbPushAll(silent) {
-      const endpoint = getPlatoonEndpoint();
+      var endpoint = getPlatoonEndpoint();
       if (!endpoint) {
-        if (!silent) showToast('Спочатку вкажіть посилання на базу Firebase', 'error');
-        return Promise.resolve({ ok: false, error: 'Не вказано URL Firebase' });
+        var msg = 'Спочатку вставте посилання Firebase';
+        if (!silent) { setDiag('err', '❌ ' + msg); showToast(msg, 'error'); }
+        return Promise.resolve({ ok: false, error: msg });
       }
       if (!silent) setSyncStatus('syncing');
-      const payload = buildCloudPayload();
+      var payload = buildCloudPayload();
       return fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
         .then(function(res) {
-          if (!res.ok) return parseFirebaseError(res).then(function(errMsg) { throw new Error(errMsg); });
-          return res.json();
+          if (!res.ok) return parseFirebaseError(res).then(function(e) { throw new Error(e); });
+          return res.json().then(function() { return res.status; });
         })
-        .then(function() {
+        .then(function(status) {
           lastSyncAt = formatDateTimeNow();
-          lastSyncError = '';
           setSyncStatus('online');
+          setDiag('ok', '✅ Завантажено в хмару (HTTP ' + status + ')');
           if (!silent && sessionRole && ui.activeTab === 'settings') render();
-          return { ok: true };
+          return { ok: true, status: status };
         })
         .catch(function(err) {
-          lastSyncError = (err && err.message) ? err.message : 'Помилка мережі при записі';
+          var msg = (err && err.message) ? err.message : 'Помилка мережі при записі (Failed to fetch)';
           setSyncStatus('offline');
+          setDiag('err', '❌ Помилка запису (' + msg + ')');
           if (sessionRole && ui.activeTab === 'settings') render();
-          return { ok: false, error: lastSyncError };
+          return { ok: false, error: msg };
         });
     }
 
-    function fbFetchPinsQuick() {
-      const endpoint = getPlatoonEndpoint();
+    function fbTestWrite() {
+      var base = getFirebaseUrl();
+      if (!base) {
+        var msg = 'Спочатку вставте та підключіть посилання Firebase';
+        setDiag('err', '❌ ' + msg);
+        showToast(msg, 'error');
+        render();
+        return;
+      }
+      setSyncStatus('syncing');
+      setDiag('info', '⏳ Тестування запису у /test_ping.json...');
+      render();
+      fetch(base + '/test_ping.json', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: true, ts: Date.now() })
+      })
+        .then(function(res) {
+          if (!res.ok) return parseFirebaseError(res).then(function(e) { throw new Error(e); });
+          return res.json().then(function() { return res.status; });
+        })
+        .then(function(status) {
+          lastSyncAt = formatDateTimeNow();
+          setSyncStatus('online');
+          setDiag('ok', '✅ Тест запису пройдено (HTTP ' + status + ') — запис у базу відкритий!');
+          showToast('Тест запису пройдено (HTTP ' + status + ')');
+          render();
+        })
+        .catch(function(err) {
+          var msg = (err && err.message) ? err.message : 'Помилка мережі (Failed to fetch)';
+          setSyncStatus('offline');
+          setDiag('err', '❌ Помилка тесту запису (' + msg + ')');
+          showToast('Тест запису: ' + msg, 'error');
+          render();
+        });
+    }
+
+    function fbPreloadBeforeLogin() {
+      var endpoint = getPlatoonEndpoint();
       if (!endpoint) return Promise.resolve();
-      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(function() { ctrl.abort(); }, 2500) : null;
-      return fetch(endpoint, ctrl ? { signal: ctrl.signal } : {})
+      return fetch(endpoint)
         .then(function(r) { return r.ok ? r.json() : null; })
         .then(function(data) {
-          if (timer) clearTimeout(timer);
-          if (data && data.pins && typeof data.pins === 'object') {
-            state.pins = Object.assign({}, DEFAULT_PINS, data.pins);
-            saveLocalState();
-          }
+          if (data && typeof data === 'object') applyRemoteSnapshot(data, true);
         })
-        .catch(function() { if (timer) clearTimeout(timer); });
+        .catch(function() {});
     }
 
     function startLiveSync() {
       stopLiveSync();
-      const endpoint = getPlatoonEndpoint();
-      if (!endpoint) { setSyncStatus('local'); return; }
-
-      fbPullAll(false, false);
-
-      // Автоматичний фоновий поллінг кожні 15 секунд при активній вкладці
+      if (!getFirebaseUrl()) { setSyncStatus('local'); return; }
+      fbPullAll(true, false);
       fbPollTimer = setInterval(function() {
         if (document.visibilityState === 'visible') fbPullAll(true, false);
       }, 15000);
     }
 
     function stopLiveSync() {
-      if (fbEventSource) { try { fbEventSource.close(); } catch (e) {} fbEventSource = null; }
       if (fbPollTimer) { clearInterval(fbPollTimer); fbPollTimer = null; }
-      clearTimeout(fbPullDebounce);
       clearTimeout(fbPushDebounce);
     }
 
     function manualSyncFromHeader() {
-      if (!getFirebaseUrl()) {
-        showToast('Локальний режим. Підключіть Firebase у Налаштуваннях');
-        return;
-      }
+      if (!getFirebaseUrl()) { showToast('Локальний режим. Підключіть Firebase у Налаштуваннях'); return; }
       fbPullAll(false, true).then(function(res) {
-        showToast(res.ok ? 'Дані оновлено з хмари' : (res.error || 'Немає зв\'язку з Firebase'), res.ok ? 'success' : 'error');
-      });
-    }
-
-    function fbSyncMeta() {
-      return fbWrite('/meta', 'PUT', {
-        groupNumber: state.groupNumber,
-        squads: state.squads,
-        dutyTypes: state.dutyTypes,
-        updatedAt: Date.now()
-      });
-    }
-
-    function objMapToArray(obj) {
-      if (!obj || typeof obj !== 'object') return [];
-      return Object.keys(obj).map(function(k) {
-        const v = obj[k];
-        if (!v || typeof v !== 'object') return null;
-        return Object.assign({ id: k }, v);
-      }).filter(Boolean);
-    }
-
-    function arrayToObjMap(arr) {
-      const out = {};
-      (arr || []).forEach(function(item) { if (item && item.id) out[item.id] = item; });
-      return out;
-    }
-
-    function applyRemoteSnapshot(remote) {
-      if (!remote || typeof remote !== 'object') return false;
-      const hasData = remote.meta || remote.personnel || remote.duties || remote.tasks || remote.pins || remote.rozkhidManual;
-      if (!hasData) return false;
-
-      const meta = remote.meta || {};
-      const next = {
-        groupNumber: meta.groupNumber || state.groupNumber || '223',
-        squads: Array.isArray(meta.squads) && meta.squads.length ? meta.squads : state.squads,
-        dutyTypes: Array.isArray(meta.dutyTypes) && meta.dutyTypes.length ? meta.dutyTypes : state.dutyTypes,
-        pins: remote.pins ? Object.assign({}, DEFAULT_PINS, remote.pins) : state.pins,
-        personnel: remote.personnel ? objMapToArray(remote.personnel) : [],
-        duties: remote.duties ? objMapToArray(remote.duties) : [],
-        tasks: remote.tasks ? objMapToArray(remote.tasks).sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); }) : [],
-        scheduledAbsences: remote.scheduledAbsences ? objMapToArray(remote.scheduledAbsences) : [],
-        rozkhidManual: (remote.rozkhidManual && typeof remote.rozkhidManual === 'object') ? remote.rozkhidManual : {},
-        rozkhidNumeric: (remote.rozkhidNumeric && typeof remote.rozkhidNumeric === 'object') ? remote.rozkhidNumeric : {},
-        rozkhidCleared: (remote.rozkhidCleared && typeof remote.rozkhidCleared === 'object') ? remote.rozkhidCleared : {},
-        lastBackupAt: state.lastBackupAt
-      };
-      state = normalizeState(next);
-      saveLocalState();
-      return true;
-    }
-
-    function fbPullAll(silent) {
-      const base = getFirebaseUrl();
-      if (!base) { setSyncStatus('local'); return Promise.resolve(false); }
-      if (!silent) setSyncStatus('syncing');
-      return fetch(base + '/.json')
-        .then(function(res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function(data) {
-          lastSyncAt = formatDateTimeNow();
-          setSyncStatus('online');
-          const updated = applyRemoteSnapshot(data);
-          if (updated && sessionRole && !isUserActivelyEditing()) render();
-          return true;
-        })
-        .catch(function() {
-          setSyncStatus('offline');
-          return false;
-        });
-    }
-
-    function fbPushAll() {
-      const base = getFirebaseUrl();
-      if (!base) { showToast('Спочатку вкажіть посилання на базу Firebase', 'error'); return Promise.resolve(false); }
-      const payload = {
-        meta: {
-          groupNumber: state.groupNumber,
-          squads: state.squads,
-          dutyTypes: state.dutyTypes,
-          updatedAt: Date.now()
-        },
-        pins: state.pins,
-        personnel: arrayToObjMap(state.personnel),
-        duties: arrayToObjMap(state.duties),
-        tasks: arrayToObjMap(state.tasks),
-        scheduledAbsences: arrayToObjMap(state.scheduledAbsences),
-        rozkhidManual: state.rozkhidManual,
-        rozkhidNumeric: state.rozkhidNumeric,
-        rozkhidCleared: state.rozkhidCleared
-      };
-      return fbWrite('', 'PUT', payload);
-    }
-
-    function fbFetchPinsQuick() {
-      const base = getFirebaseUrl();
-      if (!base) return Promise.resolve();
-      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(function() { ctrl.abort(); }, 2500) : null;
-      return fetch(base + '/pins.json', ctrl ? { signal: ctrl.signal } : {})
-        .then(function(r) { return r.ok ? r.json() : null; })
-        .then(function(pins) {
-          if (timer) clearTimeout(timer);
-          if (pins && typeof pins === 'object') {
-            state.pins = Object.assign({}, DEFAULT_PINS, pins);
-            saveLocalState();
-          }
-        })
-        .catch(function() { if (timer) clearTimeout(timer); });
-    }
-
-    function startLiveSync() {
-      stopLiveSync();
-      const base = getFirebaseUrl();
-      if (!base) { setSyncStatus('local'); return; }
-
-      fbPullAll(false);
-
-      // SSE потік змін Firebase (EventSource)
-      if (typeof EventSource !== 'undefined') {
-        try {
-          fbEventSource = new EventSource(base + '/.json');
-          const onRemoteEvent = function() {
-            clearTimeout(fbPullDebounce);
-            fbPullDebounce = setTimeout(function() { fbPullAll(true); }, 350);
-          };
-          fbEventSource.addEventListener('put', onRemoteEvent);
-          fbEventSource.addEventListener('patch', onRemoteEvent);
-          fbEventSource.onerror = function() {
-            if (navigator.onLine === false) setSyncStatus('offline');
-          };
-        } catch (e) {}
-      }
-
-      // Резервний легкий поллінг кожні 15 секунд при активній вкладці
-      fbPollTimer = setInterval(function() {
-        if (document.visibilityState === 'visible') fbPullAll(true);
-      }, 15000);
-    }
-
-    function stopLiveSync() {
-      if (fbEventSource) { try { fbEventSource.close(); } catch (e) {} fbEventSource = null; }
-      if (fbPollTimer) { clearInterval(fbPollTimer); fbPollTimer = null; }
-      clearTimeout(fbPullDebounce);
-    }
-
-    function manualSyncFromHeader() {
-      if (!getFirebaseUrl()) {
-        showToast('Локальний режим. Підключіть Firebase у Налаштуваннях');
-        return;
-      }
-      fbPullAll(false).then(function(ok) {
-        showToast(ok ? 'Дані оновлено з хмари' : 'Немає зв\'язку з Firebase', ok ? 'success' : 'error');
+        showToast(res.ok ? 'Дані оновлено з хмари' : (res.error || 'Помилка оновлення'), res.ok ? 'success' : 'error');
       });
     }
 
     // =========================================================================
-    // 5. ЕКРАН ВХОДУ ЗА PIN-КОДОМ ТА СЕССІЯ
+    // 5. ЕКРАН ВХОДУ ЗА PIN-КОДОМ ТА СЕСІЯ
     // =========================================================================
     function getSavedSessionRole() {
-      try {
-        return localStorage.getItem(SESSION_ROLE_KEY) || sessionStorage.getItem(SESSION_ROLE_KEY) || null;
-      } catch (e) { return null; }
+      try { return localStorage.getItem(SESSION_ROLE_KEY) || sessionStorage.getItem(SESSION_ROLE_KEY) || null; } catch (e) { return null; }
     }
 
     function saveSessionRole(role, remember) {
@@ -1324,7 +1146,6 @@
       document.getElementById('pin-screen').classList.add('hidden');
       document.getElementById('app-shell').classList.remove('hidden');
 
-      // Для КВ розгортаємо лише його відділення у Складі
       if (!isAdmin()) {
         ui.openPersonnelSquads = {};
         ui.openPersonnelSquads[role] = true;
@@ -1334,7 +1155,7 @@
         state.squads.forEach(function(sq) { ui.openPersonnelSquads[sq.id] = true; });
       }
 
-      const rolePill = document.getElementById('header-role-pill');
+      var rolePill = document.getElementById('header-role-pill');
       if (rolePill) {
         rolePill.textContent = getRoleLabel(role);
         rolePill.className = 'role-pill' + (isAdmin() ? '' : ' kv');
@@ -1345,10 +1166,11 @@
     }
 
     function renderPinScreen() {
-      const root = document.getElementById('pin-screen');
-      const hasFb = Boolean(getFirebaseUrl());
-      let dots = '';
-      for (let i = 0; i < 4; i++) {
+      var root = document.getElementById('pin-screen');
+      if (!root) return;
+      var hasFb = Boolean(getFirebaseUrl());
+      var dots = '';
+      for (var i = 0; i < 4; i++) {
         dots += '<div class="pin-dot' + (i < pinEntry.length ? ' filled' : '') + (pinError ? ' err' : '') + '"></div>';
       }
       root.innerHTML =
@@ -1374,41 +1196,28 @@
         '</div>';
     }
 
-    function pinPress(digit) {
+    function pinPress(d) {
       if (pinEntry.length >= 4) return;
       pinError = false;
-      pinEntry += digit;
+      pinEntry += d;
       renderPinScreen();
-      if (pinEntry.length === 4) {
-        setTimeout(verifyPin, 120);
-      }
+      if (pinEntry.length === 4) setTimeout(verifyPin, 120);
     }
-
-    function pinBackspace() {
-      pinError = false;
-      pinEntry = pinEntry.slice(0, -1);
-      renderPinScreen();
-    }
-
-    function pinClear() {
-      pinError = false;
-      pinEntry = '';
-      renderPinScreen();
-    }
+    function pinBackspace() { pinError = false; pinEntry = pinEntry.slice(0, -1); renderPinScreen(); }
+    function pinClear() { pinError = false; pinEntry = ''; renderPinScreen(); }
 
     function verifyPin() {
-      const pins = state.pins || DEFAULT_PINS;
-      let matchedRole = null;
-      const roles = ['admin', 'sq1', 'sq2', 'sq3'];
-      for (let i = 0; i < roles.length; i++) {
-        if (String(pins[roles[i]]) === pinEntry) { matchedRole = roles[i]; break; }
+      var pins = state.pins || DEFAULT_PINS;
+      var roles = ['admin', 'sq1', 'sq2', 'sq3'];
+      var matched = null;
+      for (var i = 0; i < roles.length; i++) {
+        if (String(pins[roles[i]]) === pinEntry) { matched = roles[i]; break; }
       }
-      if (matchedRole) {
-        saveSessionRole(matchedRole, pinRemember);
-        pinEntry = '';
-        pinError = false;
-        enterAppWithRole(matchedRole);
-        showToast('Вхід виконано: ' + getRoleLabel(matchedRole));
+      if (matched) {
+        saveSessionRole(matched, pinRemember);
+        pinEntry = ''; pinError = false;
+        enterAppWithRole(matched);
+        showToast('Вхід виконано: ' + getRoleLabel(matched));
       } else {
         pinError = true;
         renderPinScreen();
@@ -1418,18 +1227,17 @@
     }
 
     // =========================================================================
-    // 6. СПОВІЩЕННЯ, МОДАЛКИ, КОПІЮВАННЯ
+    // 6. СПОВІЩЕННЯ, МОДАЛЬНІ ВІКНА, КОПІЮВАННЯ
     // =========================================================================
     function showToast(msg, type) {
-      const root = document.getElementById('toast-root');
+      var root = document.getElementById('toast-root');
       if (!root) return;
-      const el = document.createElement('div');
+      var el = document.createElement('div');
       el.className = 'toast' + (type === 'error' ? ' error' : '');
       el.textContent = msg;
       root.appendChild(el);
       setTimeout(function() {
-        el.style.opacity = '0';
-        el.style.transition = 'opacity 0.2s';
+        el.style.opacity = '0'; el.style.transition = 'opacity 0.2s';
         setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 220);
       }, 2400);
     }
@@ -1438,7 +1246,6 @@
       document.getElementById('modal-box').innerHTML = html;
       document.getElementById('modal-root').classList.add('open');
     }
-
     function closeModal() { document.getElementById('modal-root').classList.remove('open'); }
 
     function showConfirm(title, message, btnText, onConfirm, isDanger) {
@@ -1454,19 +1261,18 @@
 
     function copyText(text, successMsg) {
       try {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.top = '-9999px';
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed'; ta.style.top = '-9999px';
         document.body.appendChild(ta);
         ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
-        const ok = document.execCommand('copy');
+        var ok = document.execCommand('copy');
         document.body.removeChild(ta);
         if (ok) { showToast(successMsg || 'Скопійовано'); return; }
       } catch (e) {}
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function() { showToast(successMsg || 'Скопійовано'); })
+        navigator.clipboard.writeText(text)
+          .then(function() { showToast(successMsg || 'Скопійовано'); })
           .catch(function() { showToast('Не вдалося скопіювати', 'error'); });
       } else {
         showToast('Не вдалося скопіювати', 'error');
@@ -1474,7 +1280,7 @@
     }
 
     // =========================================================================
-    // 7. ВКЛАДКА 1: НАРЯДИ (ГРАФІК + ОБЛІК; ДЛЯ КВ — ЛИШЕ ПЕРЕГЛЯД)
+    // 7. ВКЛАДКА 1: НАРЯДИ (ГРАФІК + ОБЛІК)
     // =========================================================================
     function switchTab(tab) { ui.activeTab = tab; render(); window.scrollTo(0, 0); }
     function setDutiesSubTab(sub) { ui.dutiesSubTab = sub; render(); }
@@ -1485,13 +1291,13 @@
       ui.month += delta;
       if (ui.month < 0) { ui.month = 11; ui.year--; }
       else if (ui.month > 11) { ui.month = 0; ui.year++; }
-      const n = new Date();
+      var n = new Date();
       ui.selectedDate = (ui.year === n.getFullYear() && ui.month === n.getMonth()) ? toISO(n) : (monthPrefix(ui.year, ui.month) + '-01');
       render();
     }
 
     function goTodayCalendar() {
-      const n = new Date();
+      var n = new Date();
       ui.year = n.getFullYear(); ui.month = n.getMonth(); ui.selectedDate = toISO(n);
       render();
     }
@@ -1505,64 +1311,64 @@
     }
 
     function renderDutiesTab() {
-      const seg = '<div class="seg-control">' +
+      var seg = '<div class="seg-control">' +
         '<button class="seg-btn ' + (ui.dutiesSubTab === 'schedule' ? 'active' : '') + '" onclick="setDutiesSubTab(\'schedule\')">Графік</button>' +
         '<button class="seg-btn ' + (ui.dutiesSubTab === 'stats' ? 'active' : '') + '" onclick="setDutiesSubTab(\'stats\')">Облік</button></div>';
-      const roNote = !isAdmin() ? '<div class="info-banner">Режим перегляду для командира відділення. Призначення нарядів доступне лише Командиру групи.</div>' : '';
+      var roNote = !isAdmin() ? '<div class="info-banner">Режим перегляду для командира відділення. Призначення нарядів доступне лише Командиру групи.</div>' : '';
       return seg + roNote + (ui.dutiesSubTab === 'schedule' ? renderScheduleView() : renderStatsView());
     }
 
     function renderScheduleView() {
-      const y = ui.year, m = ui.month, pref = monthPrefix(y, m), td = todayISO();
-      const firstDay = new Date(y, m, 1), daysInMonth = new Date(y, m + 1, 0).getDate();
-      let offset = firstDay.getDay() - 1; if (offset < 0) offset = 6;
+      var y = ui.year, m = ui.month, pref = monthPrefix(y, m), td = todayISO();
+      var firstDay = new Date(y, m, 1), daysInMonth = new Date(y, m + 1, 0).getDate();
+      var offset = firstDay.getDay() - 1; if (offset < 0) offset = 6;
 
-      const filterPills = '<div class="pills-scroll">' +
+      var filterPills = '<div class="pills-scroll">' +
         [{ id: 'all', name: 'Усі', color: '#4ade80' }].concat(getOrderedSquads()).map(function(sq) {
           return '<button class="pill ' + (ui.scheduleSquadFilter === sq.id ? 'active' : '') + '" onclick="setScheduleSquadFilter(\'' + sq.id + '\')">' +
             '<span class="dot" style="background:' + sq.color + '"></span><span>' + esc(sq.name) + '</span></button>';
         }).join('') + '</div>';
 
-      const byDate = {};
+      var byDate = {};
       state.duties.forEach(function(d) {
         if (!d.date || d.date.indexOf(pref) !== 0) return;
-        const s = getSoldierById(d.soldierId);
+        var s = getSoldierById(d.soldierId);
         if (!s || (ui.scheduleSquadFilter !== 'all' && s.squadId !== ui.scheduleSquadFilter)) return;
         if (!byDate[d.date]) byDate[d.date] = [];
         byDate[d.date].push(d);
       });
 
-      let cells = '';
-      for (let i = 0; i < offset; i++) cells += '<div></div>';
-      for (let day = 1; day <= daysInMonth; day++) {
-        const iso = pref + '-' + String(day).padStart(2, '0');
-        const list = byDate[iso] || [];
-        const dots = list.slice(0, 4).map(function(d) {
+      var cells = '';
+      for (var i = 0; i < offset; i++) cells += '<div></div>';
+      for (var day = 1; day <= daysInMonth; day++) {
+        var iso = pref + '-' + pad2(day);
+        var list = byDate[iso] || [];
+        var dots = list.slice(0, 4).map(function(d) {
           return '<span class="cal-dot" style="background:' + getDutyTypeById(d.dutyTypeId).color + '"></span>';
         }).join('');
         cells += '<button class="cal-cell' + (iso === ui.selectedDate ? ' selected' : '') + (iso === td ? ' today' : '') + '" onclick="selectCalDate(\'' + iso + '\')">' +
           '<span class="cal-num">' + day + '</span><div class="cal-dots">' + dots + '</div></button>';
       }
 
-      const dayDuties = state.duties.filter(function(d) {
+      var dayDuties = state.duties.filter(function(d) {
         if (d.date !== ui.selectedDate) return false;
-        const s = getSoldierById(d.soldierId);
+        var s = getSoldierById(d.soldierId);
         return s && (ui.scheduleSquadFilter === 'all' || s.squadId === ui.scheduleSquadFilter);
       });
 
-      const grouped = [], seen = new Set();
+      var grouped = [], seen = {};
       state.dutyTypes.forEach(function(dt) {
-        const items = dayDuties.filter(function(d) { return d.dutyTypeId === dt.id; });
-        if (items.length) { grouped.push({ dt: dt, items: items }); seen.add(dt.id); }
+        var items = dayDuties.filter(function(d) { return d.dutyTypeId === dt.id; });
+        if (items.length) { grouped.push({ dt: dt, items: items }); seen[dt.id] = true; }
       });
       dayDuties.forEach(function(d) {
-        if (!seen.has(d.dutyTypeId)) {
+        if (!seen[d.dutyTypeId]) {
           grouped.push({ dt: getDutyTypeById(d.dutyTypeId), items: dayDuties.filter(function(x) { return x.dutyTypeId === d.dutyTypeId; }) });
-          seen.add(d.dutyTypeId);
+          seen[d.dutyTypeId] = true;
         }
       });
 
-      const dayListHtml = grouped.length === 0
+      var dayListHtml = grouped.length === 0
         ? '<div class="empty-state">На ' + formatHumanDate(ui.selectedDate) + ' нарядів не призначено.</div>'
         : '<div class="stack">' + grouped.map(function(g) {
             return '<div class="stack-sm">' +
@@ -1570,7 +1376,7 @@
               '<span class="section-title" style="color:' + g.dt.color + '">' + esc(g.dt.shortName) + (g.dt.name && g.dt.name !== g.dt.shortName ? ' — ' + esc(g.dt.name) : '') + '</span></div>' +
               '<span class="text-xs text-muted">' + g.items.length + (g.dt.maxCount > 1 ? ' / ' + g.dt.maxCount : '') + ' ос.</span></div>' +
               g.items.map(function(d) {
-                const s = getSoldierById(d.soldierId), sq = getSquadById(s.squadId);
+                var s = getSoldierById(d.soldierId), sq = getSquadById(s.squadId);
                 return '<div class="soldier-row" style="border-radius:10px;border:1px solid var(--border);border-left:4px solid ' + sq.color + '">' +
                   '<div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
                   (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) + '</div>' +
@@ -1592,23 +1398,26 @@
     }
 
     function generateDayDutiesText(isoDate) {
-      const dayDuties = state.duties.filter(function(d) {
+      var dayDuties = state.duties.filter(function(d) {
         if (d.date !== isoDate) return false;
-        const s = getSoldierById(d.soldierId);
+        var s = getSoldierById(d.soldierId);
         return s && (ui.scheduleSquadFilter === 'all' || s.squadId === ui.scheduleSquadFilter);
       });
       if (!dayDuties.length) return '';
-      const grp = (state.groupNumber || '223').trim() || '223';
-      const order = state.dutyTypes.slice();
-      const known = new Set(order.map(function(dt) { return dt.id; }));
-      dayDuties.forEach(function(d) { if (!known.has(d.dutyTypeId)) { order.push(getDutyTypeById(d.dutyTypeId)); known.add(d.dutyTypeId); } });
-      const blocks = [];
+      var grp = (state.groupNumber || '223').trim() || '223';
+      var order = state.dutyTypes.slice();
+      var known = {};
+      order.forEach(function(dt) { known[dt.id] = true; });
+      dayDuties.forEach(function(d) {
+        if (!known[d.dutyTypeId]) { order.push(getDutyTypeById(d.dutyTypeId)); known[d.dutyTypeId] = true; }
+      });
+      var blocks = [];
       order.forEach(function(dt) {
-        const items = dayDuties.filter(function(d) { return d.dutyTypeId === dt.id; });
+        var items = dayDuties.filter(function(d) { return d.dutyTypeId === dt.id; });
         if (!items.length) return;
-        const lines = [dt.shortName + ':'];
+        var lines = [dt.shortName + ':'];
         items.forEach(function(d) {
-          const s = getSoldierById(d.soldierId);
+          var s = getSoldierById(d.soldierId);
           if (s) lines.push('-' + (s.rank ? s.rank + ' ' : '') + s.fullName);
         });
         blocks.push(lines.join('\n'));
@@ -1617,8 +1426,7 @@
     }
 
     function openDayDutiesPreview(isoDate) {
-      const txt = generateDayDutiesText(isoDate);
-      if (!txt) return;
+      var txt = generateDayDutiesText(isoDate); if (!txt) return;
       openModal(
         '<div class="modal-header"><div class="modal-title">Наряд на ' + formatDotDate(isoDate) + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<div class="modal-body"><pre class="preview-pre">' + esc(txt) + '</pre>' +
@@ -1627,7 +1435,7 @@
     }
 
     function copyDayDuties(isoDate) {
-      const txt = generateDayDutiesText(isoDate);
+      var txt = generateDayDutiesText(isoDate);
       if (!txt) { showToast('На цю дату нарядів немає', 'error'); return; }
       copyText(txt, 'Наряд скопійовано');
     }
@@ -1635,10 +1443,8 @@
     function removeDuty(id) {
       if (!isAdmin()) return;
       state.duties = state.duties.filter(function(d) { return d.id !== id; });
-      saveLocalState();
-      fbWrite('/duties/' + id, 'DELETE');
-      render();
-      showToast('Наряд видалено');
+      scheduleCloudPush();
+      render(); showToast('Наряд видалено');
     }
 
     function openAssignDutyModal(isoDate) {
@@ -1651,9 +1457,9 @@
     function selectAssignDutyType(dtId) { assignModal.dutyTypeId = dtId; assignModal.selectedIds = []; renderAssignDutyModal(); }
 
     function toggleAssignSoldier(sid) {
-      const dt = getDutyTypeById(assignModal.dutyTypeId);
-      const maxC = Math.max(1, Number(dt.maxCount) || 1);
-      const idx = assignModal.selectedIds.indexOf(sid);
+      var dt = getDutyTypeById(assignModal.dutyTypeId);
+      var maxC = Math.max(1, Number(dt.maxCount) || 1);
+      var idx = assignModal.selectedIds.indexOf(sid);
       if (idx >= 0) assignModal.selectedIds.splice(idx, 1);
       else if (maxC === 1) assignModal.selectedIds = [sid];
       else if (assignModal.selectedIds.length >= maxC) { showToast('Для «' + dt.shortName + '» максимум ' + maxC + ' ос.', 'error'); return; }
@@ -1664,42 +1470,40 @@
     function confirmAssignDuties() {
       if (!isAdmin()) return;
       if (!assignModal.dutyTypeId || !assignModal.selectedIds.length) { showToast('Оберіть військовослужбовця', 'error'); return; }
-      const patchObj = {};
       assignModal.selectedIds.forEach(function(sid) {
-        const obj = { id: genId('d'), date: assignModal.date, soldierId: sid, dutyTypeId: assignModal.dutyTypeId };
-        state.duties.push(obj);
-        patchObj[obj.id] = obj;
+        state.duties.push({ id: genId('d'), date: assignModal.date, soldierId: sid, dutyTypeId: assignModal.dutyTypeId });
       });
-      const n = assignModal.selectedIds.length;
-      saveLocalState();
-      fbWrite('/duties', 'PATCH', patchObj);
+      var n = assignModal.selectedIds.length;
+      scheduleCloudPush();
       closeModal(); render();
       showToast(n > 1 ? ('Призначено бійців: ' + n) : 'Наряд призначено');
     }
 
     function renderAssignDutyModal() {
-      const p = assignModal.date.split('-').map(Number), y = p[0], m = p[1] - 1;
-      const yest = addDaysISO(assignModal.date, -1);
-      const dt = getDutyTypeById(assignModal.dutyTypeId);
-      const maxC = Math.max(1, Number(dt.maxCount) || 1);
-      const pickedSet = new Set(assignModal.selectedIds);
-      const busyToday = new Set(state.duties.filter(function(d) { return d.date === assignModal.date; }).map(function(d) { return d.soldierId; }));
-      const busyYest = new Set(state.duties.filter(function(d) { return d.date === yest; }).map(function(d) { return d.soldierId; }));
+      var p = assignModal.date.split('-').map(Number), y = p[0], m = p[1] - 1;
+      var yest = addDaysISO(assignModal.date, -1);
+      var dt = getDutyTypeById(assignModal.dutyTypeId);
+      var maxC = Math.max(1, Number(dt.maxCount) || 1);
+      var busyToday = {}, busyYest = {};
+      state.duties.forEach(function(d) {
+        if (d.date === assignModal.date) busyToday[d.soldierId] = true;
+        if (d.date === yest) busyYest[d.soldierId] = true;
+      });
 
-      const groupsHtml = getOrderedSquads().map(function(sq) {
-        const members = sortSquadPersonnel(state.personnel.filter(function(x) { return x.squadId === sq.id; }));
+      var groupsHtml = getOrderedSquads().map(function(sq) {
+        var members = sortSquadPersonnel(state.personnel.filter(function(x) { return x.squadId === sq.id; }));
         if (!members.length) return '';
         return '<div class="stack-sm"><div class="row"><span class="dot" style="background:' + sq.color + '"></span>' +
           '<span class="section-title" style="color:' + sq.color + '">' + esc(sq.name) + '</span></div>' +
           members.map(function(s) {
-            const st = getSoldierDutyStats(s.id, y, m), picked = pickedSet.has(s.id), pm = getPresenceMeta(s.presenceStatus);
+            var st = getSoldierDutyStats(s.id, y, m), picked = assignModal.selectedIds.indexOf(s.id) !== -1, pm = getPresenceMeta(s.presenceStatus);
             return '<button type="button" class="soldier-row" onclick="toggleAssignSoldier(\'' + s.id + '\')" style="width:100%;text-align:left;border-radius:10px;border:1px solid ' + (picked ? '#4ade80' : 'var(--border)') + ';border-left:4px solid ' + sq.color + ';background:' + (picked ? 'rgba(74,222,128,0.12)' : 'var(--bg)') + '">' +
               '<div style="width:22px;height:22px;border-radius:6px;border:2px solid ' + (picked ? '#4ade80' : 'var(--border-strong)') + ';background:' + (picked ? '#4ade80' : 'transparent') + ';color:#0b1015;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (picked ? '✓' : '') + '</div>' +
               '<div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
                 (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) +
                 (!pm.isOk ? '<span class="badge badge-err">' + esc(pm.shortLabel) + '</span>' : '') +
-                (busyToday.has(s.id) ? '<span class="badge badge-warn">Вже сьогодні</span>' : '') +
-                (busyYest.has(s.id) ? '<span class="badge badge-info">Вчора в наряді</span>' : '') +
+                (busyToday[s.id] ? '<span class="badge badge-warn">Вже сьогодні</span>' : '') +
+                (busyYest[s.id] ? '<span class="badge badge-info">Вчора в наряді</span>' : '') +
               '</div>' + (s.rank ? '<div class="text-xs text-muted">' + esc(s.rank) + '</div>' : '') + '</div>' +
               '<div style="text-align:right;flex-shrink:0"><div class="fw-800" style="color:#fff">' + st.monthCount + ' <span class="text-xs text-muted">міс</span></div>' +
               '<div class="text-xs text-muted">' + st.totalCount + ' всього</div></div></button>';
@@ -1723,17 +1527,17 @@
     }
 
     function renderStatsView() {
-      const pref = monthPrefix(ui.year, ui.month);
-      const monthTotal = state.duties.filter(function(d) { return d.date && d.date.indexOf(pref) === 0 && Boolean(getSoldierById(d.soldierId)); }).length;
-      const avg = state.personnel.length ? (monthTotal / state.personnel.length).toFixed(1) : '0.0';
+      var pref = monthPrefix(ui.year, ui.month);
+      var monthTotal = state.duties.filter(function(d) { return d.date && d.date.indexOf(pref) === 0 && Boolean(getSoldierById(d.soldierId)); }).length;
+      var avg = state.personnel.length ? (monthTotal / state.personnel.length).toFixed(1) : '0.0';
 
-      const blocks = getOrderedSquads().map(function(sq) {
-        const members = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
+      var blocks = getOrderedSquads().map(function(sq) {
+        var members = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
         if (!members.length) return '';
         return '<div class="card-flush"><div class="row-between" style="padding:10px 12px;background:rgba(11,16,21,0.55);border-left:4px solid ' + sq.color + '">' +
           '<span class="section-title" style="color:' + sq.color + '">' + esc(sq.name) + '</span><span class="text-xs text-muted">Міс. / Всього</span></div>' +
           members.map(function(s) {
-            const st = getSoldierDutyStats(s.id, ui.year, ui.month);
+            var st = getSoldierDutyStats(s.id, ui.year, ui.month);
             return '<button type="button" class="soldier-row" onclick="openSoldierHistoryModal(\'' + s.id + '\')" style="width:100%;text-align:left;border-bottom:1px solid var(--border)">' +
               '<div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
               (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) + '</div>' +
@@ -1752,9 +1556,9 @@
     }
 
     function openSoldierHistoryModal(sid) {
-      const s = getSoldierById(sid); if (!s) return;
-      const sq = getSquadById(s.squadId), st = getSoldierDutyStats(s.id, ui.year, ui.month);
-      const hist = state.duties.filter(function(d) { return d.soldierId === s.id; }).sort(function(a, b) { return b.date.localeCompare(a.date); });
+      var s = getSoldierById(sid); if (!s) return;
+      var sq = getSquadById(s.squadId), st = getSoldierDutyStats(s.id, ui.year, ui.month);
+      var hist = state.duties.filter(function(d) { return d.soldierId === s.id; }).sort(function(a, b) { return b.date.localeCompare(a.date); });
       openModal(
         '<div class="modal-header"><div><div class="modal-title">' + esc(s.fullName) + '</div><div class="text-xs text-muted">' + esc(sq.name) + (s.rank ? ' • ' + esc(s.rank) : '') + '</div></div>' +
         '<button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
@@ -1763,7 +1567,7 @@
           '<div class="kpi-box"><div class="kpi-val" style="color:var(--accent)">' + st.totalCount + '</div><div class="kpi-lbl">За весь час</div></div></div>' +
         '<div class="section-title text-muted">Історія нарядів (' + hist.length + ')</div>' +
         (hist.length ? '<div class="stack-sm">' + hist.map(function(d) {
-          const dt = getDutyTypeById(d.dutyTypeId);
+          var dt = getDutyTypeById(d.dutyTypeId);
           return '<div class="row-between" style="padding:9px 11px;border-radius:10px;background:var(--bg);border:1px solid var(--border)">' +
             '<span class="text-sm fw-bold">' + formatHumanDate(d.date) + '</span>' +
             '<span class="badge" style="background:' + dt.color + '26;color:' + dt.color + ';border:1px solid ' + dt.color + '55">' + esc(dt.shortName) + '</span></div>';
@@ -1772,18 +1576,17 @@
     }
 
     // =========================================================================
-    // 8. ВКЛАДКА 2: ЗАДАЧІ (АДМІН СТАВИТЬ, КВ ВІДМІЧАЄ ВИКОНАННЯ І ЗАУВАЖЕННЯ)
+    // 8. ВКЛАДКА 2: ЗАДАЧІ
     // =========================================================================
     function setTaskRecipientFilter(val) { ui.taskRecipientFilter = val; render(); }
     function setTaskStatusFilter(val) { ui.taskStatusFilter = val; render(); }
 
     function renderTasksTab() {
-      const nonCmd = getOrderedSquads().filter(function(sq) { return !isCmdGroup(sq); });
-      let formCard = '';
-      let recPills = '';
+      var nonCmd = getOrderedSquads().filter(function(sq) { return !isCmdGroup(sq); });
+      var formCard = '', recPills = '';
 
       if (isAdmin()) {
-        const opts = nonCmd.map(function(sq) { return '<option value="squad:' + sq.id + '">' + esc(formatSquadRecipient(sq)) + '</option>'; }).join('') +
+        var opts = nonCmd.map(function(sq) { return '<option value="squad:' + sq.id + '">' + esc(formatSquadRecipient(sq)) + '</option>'; }).join('') +
           '<option value="all_leaders">Усім командирам відділень</option>';
         formCard =
           '<form class="card stack" onsubmit="submitNewTask(event)">' +
@@ -1801,18 +1604,17 @@
           }).join('') +
           '<button class="pill ' + (ui.taskRecipientFilter === 'all_leaders' ? 'active' : '') + '" onclick="setTaskRecipientFilter(\'all_leaders\')">Усім КВ</button></div>';
       } else {
-        formCard = '<div class="info-banner">Показано задачі для <strong>' + esc(formatSquadRecipient(getSquadById(mySquadId()))) + '</strong> та загальні для всіх КВ. Відмічайте статус виконання нижче.</div>';
+        formCard = '<div class="info-banner">Показано задачі для <strong>' + esc(formatSquadRecipient(getSquadById(mySquadId()))) + '</strong> та загальні для всіх КВ.</div>';
       }
 
-      const stPills = '<div class="pills-scroll">' +
+      var stPills = '<div class="pills-scroll">' +
         [{ id: 'all', l: 'Усі' }, { id: 'received', l: 'Отримав' }, { id: 'done', l: 'Виконано' }, { id: 'failed', l: 'Не виконано' }].map(function(f) {
           return '<button class="pill ' + (ui.taskStatusFilter === f.id ? 'active' : '') + '" onclick="setTaskStatusFilter(\'' + f.id + '\')">' + f.l + '</button>';
         }).join('') + '</div>';
 
-      const filtered = state.tasks.filter(function(t) {
+      var filtered = state.tasks.filter(function(t) {
         if (!isAdmin()) {
-          const mine = t.recipientType === 'all_leaders' || (t.recipientType === 'squad' && t.squadId === mySquadId());
-          if (!mine) return false;
+          if (t.recipientType !== 'all_leaders' && !(t.recipientType === 'squad' && t.squadId === mySquadId())) return false;
         } else {
           if (ui.taskRecipientFilter === 'all_leaders' && t.recipientType !== 'all_leaders') return false;
           if (ui.taskRecipientFilter !== 'all' && ui.taskRecipientFilter !== 'all_leaders' && (t.recipientType !== 'squad' || t.squadId !== ui.taskRecipientFilter)) return false;
@@ -1821,13 +1623,13 @@
         return true;
       });
 
-      const listHtml = filtered.length === 0
+      var listHtml = !filtered.length
         ? '<div class="card empty-state">Задач за обраним фільтром немає.</div>'
         : filtered.map(function(t) {
-            const isAll = t.recipientType === 'all_leaders';
-            const sq = isAll ? { color: '#eab308' } : getSquadById(t.squadId);
-            const recLbl = isAll ? 'Усім командирам відділень' : formatSquadRecipient(sq);
-            const rOpen = Boolean(ui.openTaskRemarks[t.id]), hasRem = Boolean(t.remark && t.remark.trim());
+            var isAll = t.recipientType === 'all_leaders';
+            var sq = isAll ? { color: '#eab308' } : getSquadById(t.squadId);
+            var recLbl = isAll ? 'Усім командирам відділень' : formatSquadRecipient(sq);
+            var rOpen = Boolean(ui.openTaskRemarks[t.id]), hasRem = Boolean(t.remark && t.remark.trim());
             return '<div class="task-card" style="border-left:4px solid ' + sq.color + '">' +
               '<div class="row-between"><div class="stack-sm" style="gap:3px">' +
                 '<span class="badge" style="background:' + sq.color + '24;color:' + sq.color + ';border:1px solid ' + sq.color + '55;align-self:flex-start">' + esc(recLbl) + '</span>' +
@@ -1853,59 +1655,54 @@
     function submitNewTask(e) {
       e.preventDefault();
       if (!isAdmin()) return;
-      const rec = document.getElementById('task-rec').value;
-      const text = document.getElementById('task-text').value.trim();
-      const author = document.getElementById('task-author').value.trim();
+      var rec = document.getElementById('task-rec').value;
+      var text = document.getElementById('task-text').value.trim();
+      var author = document.getElementById('task-author').value.trim();
       if (!text) return;
-      const isAll = rec === 'all_leaders';
-      const task = {
+      var isAll = rec === 'all_leaders';
+      state.tasks.unshift({
         id: genId('task'), recipientType: isAll ? 'all_leaders' : 'squad',
         squadId: isAll ? '' : rec.replace('squad:', ''), text: text, author: author,
         status: 'received', remark: '', createdAt: formatDateTimeNow()
-      };
-      state.tasks.unshift(task);
-      saveLocalState();
-      fbWrite('/tasks/' + task.id, 'PUT', task);
+      });
+      scheduleCloudPush();
       render(); showToast('Задачу поставлено');
     }
 
     function setTaskStatus(id, st) {
-      const t = state.tasks.find(function(x) { return x.id === id; }); if (!t) return;
+      var t = state.tasks.find(function(x) { return x.id === id; }); if (!t) return;
       t.status = st;
       if (st === 'failed') ui.openTaskRemarks[id] = true;
-      saveLocalState();
-      fbWrite('/tasks/' + id, 'PATCH', { status: st });
+      scheduleCloudPush();
       render();
     }
     function toggleTaskRemark(id) { ui.openTaskRemarks[id] = !ui.openTaskRemarks[id]; render(); }
     function saveTaskRemarkBtn(id) {
-      const t = state.tasks.find(function(x) { return x.id === id; });
-      const el = document.getElementById('rem-' + id);
+      var t = state.tasks.find(function(x) { return x.id === id; });
+      var el = document.getElementById('rem-' + id);
       if (!t || !el) return;
       t.remark = el.value;
-      saveLocalState();
-      fbWrite('/tasks/' + id, 'PATCH', { remark: t.remark });
+      scheduleCloudPush();
       showToast('Зауваження збережено'); render();
     }
     function deleteTask(id) {
       if (!isAdmin()) return;
       showConfirm('Видалити задачу?', 'Задача та зауваження будуть видалені.', 'Видалити', function() {
         state.tasks = state.tasks.filter(function(x) { return x.id !== id; });
-        saveLocalState();
-        fbWrite('/tasks/' + id, 'DELETE');
+        scheduleCloudPush();
         render(); showToast('Задачу видалено');
       }, true);
     }
     function copyActiveTasks() {
-      const active = state.tasks.filter(function(t) {
+      var active = state.tasks.filter(function(t) {
         if (t.status === 'done') return false;
         if (!isAdmin()) return t.recipientType === 'all_leaders' || t.squadId === mySquadId();
         return true;
       });
       if (!active.length) { showToast('Немає активних задач', 'error'); return; }
-      const lines = ['Активні задачі (' + (state.groupNumber || '223') + '):'];
+      var lines = ['Активні задачі (' + (state.groupNumber || '223') + '):'];
       active.forEach(function(t, i) {
-        const rec = t.recipientType === 'all_leaders' ? 'Усім командирам відділень' : formatSquadRecipient(getSquadById(t.squadId));
+        var rec = t.recipientType === 'all_leaders' ? 'Усім командирам відділень' : formatSquadRecipient(getSquadById(t.squadId));
         lines.push('\n' + (i + 1) + '. [' + rec + '] — ' + (t.status === 'failed' ? 'Не виконано' : 'Отримав задачу'));
         lines.push(t.text);
         if (t.author) lines.push('Поставив: ' + t.author);
@@ -1915,81 +1712,83 @@
     }
 
     // =========================================================================
-    // 9. ВКЛАДКА 3: РОЗХІД (БЕЗКОНФЛІКТНА СИНХРОНІЗАЦІЯ ПО БІЙЦЯХ + МАЙБУТНІ ДАТИ)
+    // 9. ВКЛАДКА 3: РОЗХІД
     // =========================================================================
     function getSurnameCounts() {
-      const m = {};
+      var m = {};
       state.personnel.forEach(function(p) {
-        const sn = (String(p.fullName || '').trim().split(/\s+/)[0] || '').toLowerCase();
+        var sn = (String(p.fullName || '').trim().split(/\s+/)[0] || '').toLowerCase();
         m[sn] = (m[sn] || 0) + 1;
       });
       return m;
     }
 
     function formatReportSurname(s, counts) {
-      const parts = String(s.fullName || '').trim().split(/\s+/);
-      const sn = parts[0] || '';
+      var parts = String(s.fullName || '').trim().split(/\s+/);
+      var sn = parts[0] || '';
       return (counts[sn.toLowerCase()] > 1 && parts[1]) ? (sn + ' ' + parts[1].charAt(0).toUpperCase() + '.') : sn;
     }
 
     function computeRozkhid(iso) {
-      const yest = addDaysISO(iso, -1);
-      const todayDuty = new Set(state.duties.filter(function(d) { return d.date === iso; }).map(function(d) { return d.soldierId; }));
-      const yestDuty = new Set(state.duties.filter(function(d) { return d.date === yest; }).map(function(d) { return d.soldierId; }));
-      const dayManual = state.rozkhidManual[iso] || {};
-      const dayNumeric = state.rozkhidNumeric[iso] || {};
-      const isCleared = Boolean(state.rozkhidCleared[iso]);
-      const snCounts = getSurnameCounts();
+      var yest = addDaysISO(iso, -1);
+      var todayDuty = {}, yestDuty = {};
+      state.duties.forEach(function(d) {
+        if (d.date === iso) todayDuty[d.soldierId] = true;
+        if (d.date === yest) yestDuty[d.soldierId] = true;
+      });
+      var dayManual = state.rozkhidManual[iso] || {};
+      var dayNumeric = state.rozkhidNumeric[iso] || {};
+      var isCleared = Boolean(state.rozkhidCleared[iso]);
+      var snCounts = getSurnameCounts();
 
-      const schedMap = {};
+      var schedMap = {};
       state.scheduledAbsences.forEach(function(a) {
         if (iso >= a.startDate && iso <= (a.endDate || a.startDate)) schedMap[a.soldierId] = a.category;
       });
 
-      const statusBySoldier = {}, byCat = {};
+      var statusBySoldier = {}, byCat = {};
       ROZKHID_CATS.forEach(function(c) { byCat[c.key] = []; });
 
       getOrderedSquads().forEach(function(sq) {
         sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; })).forEach(function(s) {
-          let cat = 'in_service';
+          var cat = 'in_service';
           if (dayManual[s.id]) {
             cat = dayManual[s.id] === '__present__' ? 'in_service' : dayManual[s.id];
           } else if (isCleared) {
             cat = 'in_service';
           } else if (schedMap[s.id]) {
             cat = schedMap[s.id];
-          } else if (todayDuty.has(s.id)) {
+          } else if (todayDuty[s.id]) {
             cat = 'n';
-          } else if (yestDuty.has(s.id)) {
+          } else if (yestDuty[s.id]) {
             cat = 'starodobovyi';
-          } else if (PERM_ABSENT_KEYS.has(s.presenceStatus)) {
+          } else if (PERM_ABSENT_KEYS[s.presenceStatus]) {
             cat = s.presenceStatus;
           }
-
           statusBySoldier[s.id] = cat;
           if (byCat[cat]) byCat[cat].push({ soldier: s, reportName: formatReportSurname(s, snCounts) });
         });
       });
 
-      let totalAbsent = 0;
-      const categories = ROZKHID_CATS.map(function(c) {
-        const list = byCat[c.key] || [];
-        const offset = Math.max(0, Number(dayNumeric[c.key] || 0));
-        const count = list.length + offset;
+      var totalAbsent = 0;
+      var categories = ROZKHID_CATS.map(function(c) {
+        var list = byCat[c.key] || [];
+        var offset = Math.max(0, Number(dayNumeric[c.key] || 0));
+        var count = list.length + offset;
         totalAbsent += count;
         return { key: c.key, label: c.label, hint: c.hint, kvEditable: c.kvEditable, soldiers: list, offset: offset, count: count };
       });
 
-      const totalList = state.personnel.length;
+      var totalList = state.personnel.length;
       return { totalList: totalList, presentCount: Math.max(0, totalList - totalAbsent), totalAbsent: totalAbsent, categories: categories, statusBySoldier: statusBySoldier };
     }
 
     function generateRozkhidReport() {
-      const data = computeRozkhid(ui.rozkhidDate);
-      const lines = [(state.groupNumber || '223').trim() || '223', 'З/с - ' + data.totalList, 'Вн - ' + data.presentCount];
+      var data = computeRozkhid(ui.rozkhidDate);
+      var lines = [(state.groupNumber || '223').trim() || '223', 'З/с - ' + data.totalList, 'Вн - ' + data.presentCount];
       data.categories.forEach(function(c) {
         if (ui.rozkhidHideZeros && c.count === 0) return;
-        let line = c.label + ' - ' + c.count;
+        var line = c.label + ' - ' + c.count;
         if (ui.rozkhidShowNames && c.soldiers.length) {
           line += ' (' + c.soldiers.map(function(x) { return x.reportName; }).join(', ') + ')';
         }
@@ -2003,78 +1802,70 @@
     function updateGroupNumber(v) {
       if (!isAdmin()) return;
       state.groupNumber = v.trim();
-      saveLocalState();
-      fbSyncMeta();
-      const pre = document.getElementById('rozkhid-preview'); if (pre) pre.textContent = generateRozkhidReport();
+      scheduleCloudPush();
+      var pre = document.getElementById('rozkhid-preview'); if (pre) pre.textContent = generateRozkhidReport();
     }
     function toggleRozkhidOption(opt, checked) {
       if (opt === 'names') ui.rozkhidShowNames = checked;
       if (opt === 'hideZeros') ui.rozkhidHideZeros = checked;
-      const pre = document.getElementById('rozkhid-preview'); if (pre) pre.textContent = generateRozkhidReport();
+      var pre = document.getElementById('rozkhid-preview'); if (pre) pre.textContent = generateRozkhidReport();
     }
     function adjustRozkhidOffset(k, d) {
       if (!isAdmin()) return;
       if (!state.rozkhidNumeric[ui.rozkhidDate]) state.rozkhidNumeric[ui.rozkhidDate] = {};
-      const next = Math.max(0, (Number(state.rozkhidNumeric[ui.rozkhidDate][k]) || 0) + d);
-      state.rozkhidNumeric[ui.rozkhidDate][k] = next;
-      saveLocalState();
-      fbWrite('/rozkhidNumeric/' + ui.rozkhidDate + '/' + k, next > 0 ? 'PUT' : 'DELETE', next);
+      var next = Math.max(0, (Number(state.rozkhidNumeric[ui.rozkhidDate][k]) || 0) + d);
+      if (next > 0) state.rozkhidNumeric[ui.rozkhidDate][k] = next;
+      else delete state.rozkhidNumeric[ui.rozkhidDate][k];
+      scheduleCloudPush();
       render();
     }
     function promptClearRozkhid() {
       if (!isAdmin()) return;
       showConfirm('Очистити розхід?', 'Усі відсутності на ' + formatHumanDate(ui.rozkhidDate) + ' будуть обнулені (Вн = З/с).', 'Очистити', function() {
-        const dt = ui.rozkhidDate;
+        var dt = ui.rozkhidDate;
         state.rozkhidCleared[dt] = true;
         delete state.rozkhidManual[dt];
         delete state.rozkhidNumeric[dt];
-        saveLocalState();
-        fbWrite('/rozkhidCleared/' + dt, 'PUT', true);
-        fbWrite('/rozkhidManual/' + dt, 'DELETE');
-        fbWrite('/rozkhidNumeric/' + dt, 'DELETE');
+        scheduleCloudPush();
         render(); showToast('Розхід очищено');
       }, true);
     }
     function autoSyncRozkhid() {
       if (!isAdmin()) return;
-      const dt = ui.rozkhidDate;
+      var dt = ui.rozkhidDate;
       delete state.rozkhidCleared[dt];
       delete state.rozkhidManual[dt];
       delete state.rozkhidNumeric[dt];
-      saveLocalState();
-      fbWrite('/rozkhidCleared/' + dt, 'DELETE');
-      fbWrite('/rozkhidManual/' + dt, 'DELETE');
-      fbWrite('/rozkhidNumeric/' + dt, 'DELETE');
+      scheduleCloudPush();
       render(); showToast('Автопідтягнуто з нарядів, планів та складу');
     }
     function toggleUpcomingAccordion() { ui.rozkhidUpcomingOpen = !ui.rozkhidUpcomingOpen; render(); }
 
     function deleteScheduledAbsence(id) {
-      const item = state.scheduledAbsences.find(function(a) { return a.id === id; });
+      var item = state.scheduledAbsences.find(function(a) { return a.id === id; });
       if (!item) return;
       if (!canEditSoldier(getSoldierById(item.soldierId))) { showToast('Немає прав на зміну іншого відділення', 'error'); return; }
       state.scheduledAbsences = state.scheduledAbsences.filter(function(a) { return a.id !== id; });
-      saveLocalState();
-      fbWrite('/scheduledAbsences/' + id, 'DELETE');
+      scheduleCloudPush();
       render(); showToast('Запланований запис видалено');
     }
 
     function renderRozkhidTab() {
-      const data = computeRozkhid(ui.rozkhidDate);
-      const td = todayISO(), tmrw = addDaysISO(td, 1);
+      var data = computeRozkhid(ui.rozkhidDate);
+      var td = todayISO(), tmrw = addDaysISO(td, 1);
 
-      const upcoming = state.scheduledAbsences
+      var upcoming = state.scheduledAbsences
         .filter(function(a) { return (a.endDate || a.startDate) >= td && Boolean(getSoldierById(a.soldierId)); })
         .sort(function(a, b) { return a.startDate.localeCompare(b.startDate); });
 
-      const upcomingHtml = !upcoming.length ? '' : (
+      var upcomingHtml = !upcoming.length ? '' : (
         '<div class="card-flush" style="border-color:rgba(56,189,248,0.35)">' +
           '<div class="acc-header ' + (ui.rozkhidUpcomingOpen ? 'open' : '') + '" onclick="toggleUpcomingAccordion()">' +
             '<div class="row"><span class="chevron">▸</span><span class="section-title" style="color:var(--blue)">Заплановано на майбутні дати (' + upcoming.length + ')</span></div></div>' +
           (ui.rozkhidUpcomingOpen ? '<div class="acc-body" style="padding:10px;display:flex;flex-direction:column;gap:6px">' +
             upcoming.map(function(a) {
-              const s = getSoldierById(a.soldierId), cat = getRozkhidCat(a.category);
-              const dLbl = (a.endDate && a.endDate !== a.startDate) ? (formatDayMonth(a.startDate) + '–' + formatDayMonth(a.endDate)) : formatDayMonth(a.startDate);
+              var s = getSoldierById(a.soldierId), cat = getRozkhidCat(a.category);
+              var dLbl = (a.endDate && a.endDate !== a.startDate) ? (formatDayMonth(a.startDate) + '–' + formatDayMonth(a.endDate)) : formatDayMonth(a.startDate);
               return '<div class="sched-item"><button type="button" class="min0" style="text-align:left" onclick="setRozkhidDate(\'' + a.startDate + '\')">' +
                 '<div class="text-sm fw-bold" style="color:#fff">' + esc(dLbl) + ' — ' + esc(s.fullName) + ' <span class="badge badge-info">' + esc(cat.label) + '</span></div>' +
                 (a.note ? '<div class="text-xs text-muted">' + esc(a.note) + '</div>' : '') + '</button>' +
@@ -2082,9 +1873,9 @@
             }).join('') + '</div>' : '') + '</div>'
       );
 
-      const catRows = data.categories.map(function(c) {
-        const chips = c.soldiers.length ? '<div class="chips-wrap">' + c.soldiers.map(function(x) { return '<span class="name-chip">' + esc(x.reportName) + '</span>'; }).join('') + '</div>' : '';
-        const canPick = isAdmin() || c.kvEditable;
+      var catRows = data.categories.map(function(c) {
+        var chips = c.soldiers.length ? '<div class="chips-wrap">' + c.soldiers.map(function(x) { return '<span class="name-chip">' + esc(x.reportName) + '</span>'; }).join('') + '</div>' : '';
+        var canPick = isAdmin() || c.kvEditable;
         return '<div class="rozkhid-row ' + (c.count > 0 ? 'has-count' : '') + '">' +
           '<div class="row-between"><div class="min0">' +
             '<div class="text-sm fw-bold" style="color:' + (c.count > 0 ? '#fbbf24' : '#fff') + '">' + esc(c.label) + '</div>' +
@@ -2097,7 +1888,7 @@
             '</div></div>' + chips + '</div>';
       }).join('');
 
-      const kvBanner = !isAdmin() ? '<div class="info-banner">Ви можете відмічати відсутності та планувати дати лише для бійців свого відділення (<strong>' + esc(getSquadById(mySquadId()).name) + '</strong>).</div>' : '';
+      var kvBanner = !isAdmin() ? '<div class="info-banner">Ви можете відмічати відсутності та планувати дати лише для свого відділення (<strong>' + esc(getSquadById(mySquadId()).name) + '</strong>).</div>' : '';
 
       return kvBanner +
         '<div class="card stack">' +
@@ -2113,7 +1904,7 @@
               : '<span class="badge badge-info" style="min-height:36px;padding:0 12px;font-size:13px">Гр. ' + esc(state.groupNumber) + '</span>') +
           '</div>' +
           (isAdmin()
-            ? '<div class="grid-3"><button class="btn btn-sm btn-info" onclick="openScheduleAbsenceModal()">Запланувати</button>' +
+            ? '<div class="grid-3"><button class="btn btn-sm btn-info" onclick="openScheduleAbsenceModal()">📅 На дату</button>' +
               '<button class="btn btn-sm btn-secondary" onclick="autoSyncRozkhid()">Автопідтягнути</button>' +
               '<button class="btn btn-sm btn-danger" onclick="promptClearRozkhid()">Очистити</button></div>'
             : '<button class="btn btn-sm btn-info btn-full" onclick="openScheduleAbsenceModal()">📅 Запланувати на майбутню дату (моє відділення)</button>') +
@@ -2138,10 +1929,10 @@
       ui.rozkhidModalCat = catKey;
       ui.rozkhidModalSearch = '';
       ui.rozkhidModalOpenSquads = {};
-      const data = computeRozkhid(ui.rozkhidDate);
-      const squadsList = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
+      var data = computeRozkhid(ui.rozkhidDate);
+      var squadsList = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
       squadsList.forEach(function(sq, idx) {
-        const hasSel = state.personnel.some(function(p) { return p.squadId === sq.id && data.statusBySoldier[p.id] === catKey; });
+        var hasSel = state.personnel.some(function(p) { return p.squadId === sq.id && data.statusBySoldier[p.id] === catKey; });
         ui.rozkhidModalOpenSquads[sq.id] = hasSel || idx === 0;
       });
       renderRozkhidPickerModal();
@@ -2152,56 +1943,52 @@
     function setRozkhidModalSearch(val) {
       ui.rozkhidModalSearch = val;
       renderRozkhidPickerModal();
-      const inp = document.getElementById('rozkhid-search-inp');
+      var inp = document.getElementById('rozkhid-search-inp');
       if (inp) { inp.focus(); inp.setSelectionRange(val.length, val.length); }
     }
 
     function toggleSoldierInRozkhidCat(soldierId, catKey) {
-      const s = getSoldierById(soldierId);
+      var s = getSoldierById(soldierId);
       if (!canEditSoldier(s)) { showToast('Можна відмічати лише своє відділення', 'error'); return; }
-      const dt = ui.rozkhidDate;
-      const data = computeRozkhid(dt);
-      const curCat = data.statusBySoldier[soldierId] || 'in_service';
+      var dt = ui.rozkhidDate;
+      var data = computeRozkhid(dt);
+      var curCat = data.statusBySoldier[soldierId] || 'in_service';
       if (!state.rozkhidManual[dt]) state.rozkhidManual[dt] = {};
 
-      let newVal;
       if (curCat === catKey) {
-        newVal = '__present__';
+        state.rozkhidManual[dt][soldierId] = '__present__';
       } else {
-        newVal = catKey;
+        state.rozkhidManual[dt][soldierId] = catKey;
         if (curCat !== 'in_service') {
           showToast((s ? s.fullName : 'Бійця') + ': перенесено з «' + getRozkhidCat(curCat).label + '» у «' + getRozkhidCat(catKey).label + '»');
         }
       }
-      state.rozkhidManual[dt][soldierId] = newVal;
-      saveLocalState();
-      // Гранулярний PUT лише для одного бійця на цю дату — без конфліктів між КВ!
-      fbWrite('/rozkhidManual/' + dt + '/' + soldierId, 'PUT', newVal);
+      scheduleCloudPush();
       renderRozkhidPickerModal();
       render();
     }
 
     function renderRozkhidPickerModal() {
-      const cat = getRozkhidCat(ui.rozkhidModalCat);
-      const data = computeRozkhid(ui.rozkhidDate);
-      const q = ui.rozkhidModalSearch.trim().toLowerCase();
-      const squadsList = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
+      var cat = getRozkhidCat(ui.rozkhidModalCat);
+      var data = computeRozkhid(ui.rozkhidDate);
+      var q = ui.rozkhidModalSearch.trim().toLowerCase();
+      var squadsList = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
 
-      const accHtml = squadsList.map(function(sq) {
-        const allM = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
-        const members = q ? allM.filter(function(p) { return p.fullName.toLowerCase().indexOf(q) !== -1; }) : allM;
+      var accHtml = squadsList.map(function(sq) {
+        var allM = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
+        var members = q ? allM.filter(function(p) { return p.fullName.toLowerCase().indexOf(q) !== -1; }) : allM;
         if (!members.length) return '';
-        const selCnt = members.filter(function(p) { return data.statusBySoldier[p.id] === cat.key; }).length;
-        const isOpen = q ? true : Boolean(ui.rozkhidModalOpenSquads[sq.id]);
+        var selCnt = members.filter(function(p) { return data.statusBySoldier[p.id] === cat.key; }).length;
+        var isOpen = q ? true : Boolean(ui.rozkhidModalOpenSquads[sq.id]);
 
         return '<div class="card-flush">' +
           '<div class="acc-header ' + (isOpen ? 'open' : '') + '" style="border-left:4px solid ' + sq.color + '" onclick="toggleRozkhidModalSquad(\'' + sq.id + '\')">' +
             '<div class="row"><span class="chevron">▸</span><span class="fw-bold text-sm" style="color:' + sq.color + '">' + esc(sq.name) + '</span></div>' +
             '<span class="badge ' + (selCnt ? 'badge-warn' : 'badge-ok') + '">' + selCnt + ' / ' + members.length + '</span></div>' +
           (isOpen ? '<div class="acc-body">' + members.map(function(s) {
-            const cur = data.statusBySoldier[s.id] || 'in_service';
-            const checked = cur === cat.key;
-            const other = cur !== 'in_service' && !checked;
+            var cur = data.statusBySoldier[s.id] || 'in_service';
+            var checked = cur === cat.key;
+            var other = cur !== 'in_service' && !checked;
             return '<label class="checkbox-row"><div class="min0"><div class="row wrap"><span class="soldier-name">' + esc(s.fullName) + '</span>' +
               (isCmdGroup(sq) ? '<span class="badge badge-kg">★ КГ</span>' : (s.isLeader ? '<span class="badge badge-kv">★ КВ</span>' : '')) +
               (other ? '<span class="badge badge-warn">Вже у: ' + esc(getRozkhidCat(cur).label) + '</span>' : '') + '</div>' +
@@ -2221,19 +2008,19 @@
     }
 
     function openScheduleAbsenceModal(preSoldierId) {
-      const allowedSquads = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
-      const allowedSoldiers = state.personnel.filter(function(p) { return isAdmin() || p.squadId === mySquadId(); });
+      var allowedSquads = isAdmin() ? getOrderedSquads() : [getSquadById(mySquadId())];
+      var allowedSoldiers = state.personnel.filter(function(p) { return isAdmin() || p.squadId === mySquadId(); });
       if (!allowedSoldiers.length) { showToast('У відділенні немає бійців', 'error'); return; }
 
-      const defaultStart = addDaysISO(todayISO(), 1);
-      const soldierOpts = allowedSquads.map(function(sq) {
-        const members = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
+      var defaultStart = addDaysISO(todayISO(), 1);
+      var soldierOpts = allowedSquads.map(function(sq) {
+        var members = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
         if (!members.length) return '';
         return '<optgroup label="' + esc(sq.name) + '">' + members.map(function(s) {
           return '<option value="' + s.id + '" ' + (preSoldierId === s.id ? 'selected' : '') + '>' + esc(s.fullName) + (s.rank ? ' (' + esc(s.rank) + ')' : '') + '</option>';
         }).join('') + '</optgroup>';
       }).join('');
-      const catOpts = ROZKHID_CATS.filter(function(c) { return c.schedulable; }).map(function(c) {
+      var catOpts = ROZKHID_CATS.filter(function(c) { return c.schedulable; }).map(function(c) {
         return '<option value="' + c.key + '">' + esc(c.label) + (c.hint && c.hint !== c.label ? ' — ' + esc(c.hint) : '') + '</option>';
       }).join('');
 
@@ -2253,28 +2040,26 @@
 
     function saveScheduledAbsence(e) {
       e.preventDefault();
-      const soldierId = document.getElementById('sched-soldier').value;
+      var soldierId = document.getElementById('sched-soldier').value;
       if (!canEditSoldier(getSoldierById(soldierId))) { showToast('Немає прав для цього бійця', 'error'); return; }
-      const category = document.getElementById('sched-cat').value;
-      const startDate = document.getElementById('sched-start').value;
-      const endDate = document.getElementById('sched-end').value;
-      const note = document.getElementById('sched-note').value.trim();
+      var category = document.getElementById('sched-cat').value;
+      var startDate = document.getElementById('sched-start').value;
+      var endDate = document.getElementById('sched-end').value;
+      var note = document.getElementById('sched-note').value.trim();
       if (!soldierId || !category || !startDate) return;
       if (endDate && endDate < startDate) { showToast('Дата кінця не може бути раніше початку', 'error'); return; }
-      const obj = { id: genId('sched'), soldierId: soldierId, category: category, startDate: startDate, endDate: endDate || '', note: note };
-      state.scheduledAbsences.push(obj);
-      saveLocalState();
-      fbWrite('/scheduledAbsences/' + obj.id, 'PUT', obj);
+      state.scheduledAbsences.push({ id: genId('sched'), soldierId: soldierId, category: category, startDate: startDate, endDate: endDate || '', note: note });
+      scheduleCloudPush();
       closeModal(); render();
       showToast('Заплановано на ' + formatDotDate(startDate));
     }
 
     // =========================================================================
-    // 10. ВКЛАДКА 4: СКЛАД (ДЛЯ КВ — СВОЄ ВІДДІЛЕННЯ: СТАТУС ПРИСУТНОСТІ + ПЛАНУВАННЯ)
+    // 10. ВКЛАДКА 4: СКЛАД
     // =========================================================================
     function setPersonnelSearch(v) {
       ui.personnelSearch = v; render();
-      const el = document.getElementById('pers-search-inp');
+      var el = document.getElementById('pers-search-inp');
       if (el) { el.focus(); el.setSelectionRange(v.length, v.length); }
     }
     function setPersonnelSquadFilter(id) { ui.personnelSquadFilter = id; render(); }
@@ -2282,48 +2067,43 @@
     function toggleSoldierCard(id) { ui.openSoldiers[id] = !ui.openSoldiers[id]; render(); }
 
     function setSoldierPresence(soldierId, statusKey) {
-      const s = getSoldierById(soldierId);
+      var s = getSoldierById(soldierId);
       if (!canEditSoldier(s)) { showToast('Можна змінювати лише своє відділення', 'error'); return; }
       s.presenceStatus = statusKey;
-      const td = todayISO();
-      if (state.rozkhidManual[td] && state.rozkhidManual[td][soldierId]) {
-        delete state.rozkhidManual[td][soldierId];
-        fbWrite('/rozkhidManual/' + td + '/' + soldierId, 'DELETE');
-      }
-      saveLocalState();
-      fbWrite('/personnel/' + soldierId, 'PATCH', { presenceStatus: statusKey });
+      var td = todayISO();
+      if (state.rozkhidManual[td] && state.rozkhidManual[td][soldierId]) delete state.rozkhidManual[td][soldierId];
+      scheduleCloudPush();
       render();
       showToast(s.fullName + ': ' + getPresenceMeta(statusKey).fullLabel);
     }
 
     function renderPersonnelTab() {
-      const q = ui.personnelSearch.trim().toLowerCase();
-      const ordered = getOrderedSquads();
+      var q = ui.personnelSearch.trim().toLowerCase();
+      var ordered = getOrderedSquads();
 
-      const tabs = '<div class="pills-scroll">' +
+      var tabs = '<div class="pills-scroll">' +
         '<button class="pill ' + (ui.personnelSquadFilter === 'all' ? 'active' : '') + '" onclick="setPersonnelSquadFilter(\'all\')">Усі (' + state.personnel.length + ')</button>' +
         ordered.map(function(sq) {
-          const cnt = state.personnel.filter(function(p) { return p.squadId === sq.id; }).length;
+          var cnt = state.personnel.filter(function(p) { return p.squadId === sq.id; }).length;
           return '<button class="pill ' + (ui.personnelSquadFilter === sq.id ? 'active' : '') + '" onclick="setPersonnelSquadFilter(\'' + sq.id + '\')">' +
             '<span class="dot" style="background:' + sq.color + '"></span><span>' + esc(formatSquadShortTab(sq)) + ' (' + cnt + ')</span></button>';
         }).join('') + '</div>';
 
-      const visibleSquads = ui.personnelSquadFilter === 'all'
-        ? ordered : ordered.filter(function(sq) { return sq.id === ui.personnelSquadFilter; });
+      var visibleSquads = ui.personnelSquadFilter === 'all' ? ordered : ordered.filter(function(sq) { return sq.id === ui.personnelSquadFilter; });
 
-      const squadsHtml = visibleSquads.map(function(sq) {
-        const allM = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
-        const members = q ? allM.filter(function(p) { return p.fullName.toLowerCase().indexOf(q) !== -1 || (p.rank || '').toLowerCase().indexOf(q) !== -1; }) : allM;
-        const isOpen = q ? true : Boolean(ui.openPersonnelSquads[sq.id]);
-        const isOwnSquad = isAdmin() || sq.id === mySquadId();
+      var squadsHtml = visibleSquads.map(function(sq) {
+        var allM = sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; }));
+        var members = q ? allM.filter(function(p) { return p.fullName.toLowerCase().indexOf(q) !== -1 || (p.rank || '').toLowerCase().indexOf(q) !== -1; }) : allM;
+        var isOpen = q ? true : Boolean(ui.openPersonnelSquads[sq.id]);
+        var isOwnSquad = isAdmin() || sq.id === mySquadId();
 
-        const bodyHtml = !members.length
+        var bodyHtml = !members.length
           ? '<div class="empty-state" style="padding:14px">Поки немає військовослужбовців</div>'
           : members.map(function(s) {
-              const sOpen = Boolean(ui.openSoldiers[s.id]);
-              const pm = getPresenceMeta(s.presenceStatus);
-              const up = getUpcomingAbsencesForSoldier(s.id);
-              const st = getSoldierDutyStats(s.id, ui.year, ui.month);
+              var sOpen = Boolean(ui.openSoldiers[s.id]);
+              var pm = getPresenceMeta(s.presenceStatus);
+              var up = getUpcomingAbsencesForSoldier(s.id);
+              var st = getSoldierDutyStats(s.id, ui.year, ui.month);
 
               return '<div style="border-top:1px solid var(--border)">' +
                 '<div class="soldier-row" style="cursor:pointer" onclick="toggleSoldierCard(\'' + s.id + '\')">' +
@@ -2340,15 +2120,15 @@
                   (isOwnSquad ? (
                     '<div><div class="field-label" style="margin-bottom:6px">Статус присутності (Розхід):</div>' +
                     '<div class="presence-grid">' + PRESENCE_STATUSES.map(function(ps) {
-                      const active = (s.presenceStatus || 'in_service') === ps.key;
-                      const cls = active ? (ps.isOk ? 'active-ok' : 'active-warn') : '';
+                      var active = (s.presenceStatus || 'in_service') === ps.key;
+                      var cls = active ? (ps.isOk ? 'active-ok' : 'active-warn') : '';
                       return '<button type="button" class="presence-btn ' + cls + '" onclick="setSoldierPresence(\'' + s.id + '\',\'' + ps.key + '\')">' + esc(ps.fullLabel) + '</button>';
                     }).join('') + '</div></div>' +
                     '<div class="stack-sm">' +
                       '<div class="row-between"><span class="field-label">Заплановано на майбутні дати:</span>' +
-                      '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(\'' + s.id + '\')">+ Запланувати на дату</button></div>' +
+                      '<button type="button" class="btn btn-xs btn-info" onclick="openScheduleAbsenceModal(\'' + s.id + '\')">📅 Запланувати</button></div>' +
                       (up.length ? up.map(function(a) {
-                        const dLbl = (a.endDate && a.endDate !== a.startDate) ? (formatDayMonth(a.startDate) + '–' + formatDayMonth(a.endDate)) : formatDayMonth(a.startDate);
+                        var dLbl = (a.endDate && a.endDate !== a.startDate) ? (formatDayMonth(a.startDate) + '–' + formatDayMonth(a.endDate)) : formatDayMonth(a.startDate);
                         return '<div class="sched-item"><div class="text-xs"><strong style="color:#fff">' + esc(dLbl) + '</strong> — ' + esc(getRozkhidCat(a.category).label) + (a.note ? ' (' + esc(a.note) + ')' : '') + '</div>' +
                           '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteScheduledAbsence(\'' + a.id + '\')">✕</button></div>';
                       }).join('') : '<div class="text-xs text-muted">Немає запланованих подій</div>') + '</div>'
@@ -2376,8 +2156,8 @@
 
     function openSoldierModal(soldierId, preSquadId) {
       if (!isAdmin()) return;
-      const ex = soldierId ? getSoldierById(soldierId) : null;
-      const targetSq = ex ? ex.squadId : (preSquadId || (getOrderedSquads()[0] ? getOrderedSquads()[0].id : 'sq1'));
+      var ex = soldierId ? getSoldierById(soldierId) : null;
+      var targetSq = ex ? ex.squadId : (preSquadId || (getOrderedSquads()[0] ? getOrderedSquads()[0].id : 'sq1'));
       openModal(
         '<div class="modal-header"><div class="modal-title">' + (ex ? 'Редагувати бійця' : 'Додати військовослужбовця') + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<form class="modal-body" onsubmit="saveSoldier(event,\'' + (soldierId || '') + '\')">' +
@@ -2397,64 +2177,54 @@
           '</select></div>' +
           '<button type="submit" class="btn btn-primary btn-full">Зберегти</button></form>'
       );
-      setTimeout(function() { const el = document.getElementById('s-name'); if (el) el.focus(); }, 50);
+      setTimeout(function() { var el = document.getElementById('s-name'); if (el) el.focus(); }, 50);
     }
 
     function saveSoldier(e, soldierId) {
       e.preventDefault();
       if (!isAdmin()) return;
-      const fullName = capitalizePIB(document.getElementById('s-name').value.trim());
-      const rank = document.getElementById('s-rank').value.trim();
-      const squadId = document.getElementById('s-squad').value;
-      const isLeader = document.getElementById('s-leader').checked;
-      const presenceStatus = document.getElementById('s-presence').value;
+      var fullName = capitalizePIB(document.getElementById('s-name').value.trim());
+      var rank = document.getElementById('s-rank').value.trim();
+      var squadId = document.getElementById('s-squad').value;
+      var isLeader = document.getElementById('s-leader').checked;
+      var presenceStatus = document.getElementById('s-presence').value;
       if (!fullName) return;
 
-      let obj;
       if (soldierId) {
-        obj = getSoldierById(soldierId);
+        var obj = getSoldierById(soldierId);
         if (obj) { obj.fullName = fullName; obj.rank = rank; obj.squadId = squadId; obj.isLeader = isLeader; obj.presenceStatus = presenceStatus; }
       } else {
-        obj = { id: genId('p'), fullName: fullName, rank: rank, squadId: squadId, isLeader: isLeader, presenceStatus: presenceStatus };
-        state.personnel.push(obj);
+        state.personnel.push({ id: genId('p'), fullName: fullName, rank: rank, squadId: squadId, isLeader: isLeader, presenceStatus: presenceStatus });
       }
-      saveLocalState();
-      if (obj) fbWrite('/personnel/' + obj.id, 'PUT', obj);
+      scheduleCloudPush();
       closeModal(); render();
       showToast(soldierId ? 'Дані оновлено' : 'Бійця додано');
     }
 
     function promptDeleteSoldier(sid) {
       if (!isAdmin()) return;
-      const s = getSoldierById(sid); if (!s) return;
+      var s = getSoldierById(sid); if (!s) return;
       showConfirm('Видалити ' + s.fullName + '?', 'Бійця, його наряди та заплановані відсутності буде видалено.', 'Видалити', function() {
-        const delDuties = state.duties.filter(function(d) { return d.soldierId === sid; });
-        const delSched = state.scheduledAbsences.filter(function(a) { return a.soldierId === sid; });
         state.personnel = state.personnel.filter(function(p) { return p.id !== sid; });
         state.duties = state.duties.filter(function(d) { return d.soldierId !== sid; });
         state.scheduledAbsences = state.scheduledAbsences.filter(function(a) { return a.soldierId !== sid; });
-        saveLocalState();
-        fbWrite('/personnel/' + sid, 'DELETE');
-        delDuties.forEach(function(d) { fbWrite('/duties/' + d.id, 'DELETE'); });
-        delSched.forEach(function(a) { fbWrite('/scheduledAbsences/' + a.id, 'DELETE'); });
+        scheduleCloudPush();
         render(); showToast('Бійця видалено');
       }, true);
     }
 
     // =========================================================================
-    // 11. ВКЛАДКА 5: НАЛАШТУВАННЯ (FIREBASE, PIN-КОДИ, БЕКАП, CSV)
+    // 11. ВКЛАДКА 5: НАЛАШТУВАННЯ
     // =========================================================================
     function renderSettingsTab() {
-      const fbUrl = getFirebaseUrl();
-      const versionCard =
+      var fbUrl = getFirebaseUrl();
+      var versionCard =
         '<div class="card" style="border-color:rgba(74,222,128,0.45);background:rgba(75,122,61,0.14)">' +
           '<div class="fw-800" style="color:#fff">Версія сайту: ' + APP_VERSION + ' (оновлено ' + APP_UPDATED + ')</div>' +
           '<div class="text-xs text-muted" style="margin-top:3px">Активна роль: <strong style="color:#fff">' + esc(getRoleLabel(sessionRole)) + '</strong>' +
             (lastSyncAt ? ' • Синхронізовано: ' + esc(lastSyncAt) : '') + '</div>' +
-          (lastSyncError ? '<div class="text-xs" style="margin-top:6px;padding:7px 9px;border-radius:8px;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.45);color:#fecaca">' + esc(lastSyncError) + '</div>' : '') +
         '</div>';
 
-      // Спрощене меню для Командира відділення
       if (!isAdmin()) {
         return versionCard +
           '<div class="card stack">' +
@@ -2468,8 +2238,11 @@
           '</div>';
       }
 
-      // Повне меню для Адміна (Командира групи)
-      const pins = state.pins || DEFAULT_PINS;
+      var pins = state.pins || DEFAULT_PINS;
+      var diagHtml = lastSyncDiag
+        ? '<div class="diag-box ' + (lastSyncDiag.type === 'ok' ? 'diag-ok' : (lastSyncDiag.type === 'err' ? 'diag-err' : 'diag-info')) + '">' + esc(lastSyncDiag.text) + '</div>'
+        : '';
+
       return versionCard +
         '<div class="card stack" style="border-color:rgba(56,189,248,0.4)">' +
           '<div class="section-title" style="color:var(--blue)">☁️ Синхронізація Firebase</div>' +
@@ -2477,9 +2250,12 @@
             '<input id="fb-url-input" class="input" type="url" placeholder="https://...-default-rtdb.europe-west1.firebasedatabase.app" value="' + esc(fbUrl) + '" /></div>' +
           '<button class="btn btn-primary btn-full" onclick="connectFirebaseFromInput()">Перевірити та підключити</button>' +
           '<div class="grid-2">' +
-            '<button class="btn btn-sm btn-warn" onclick="pushLocalToCloudPrompt()">☁️ Завантажити мої дані в хмару</button>' +
-            '<button class="btn btn-sm btn-info" onclick="pullCloudToLocal()">⬇️ Завантажити з хмари</button></div>' +
-          '<button class="btn btn-sm btn-secondary btn-full" onclick="copyInviteLinkForKV()">🔗 Скопіювати посилання для КВ</button>' +
+            '<button class="btn btn-sm btn-secondary" onclick="fbTestWrite()">🧪 Тест запису</button>' +
+            '<button class="btn btn-sm btn-warn" onclick="pushLocalToCloudPrompt()">☁️ Завантажити мої дані в хмару</button></div>' +
+          '<div class="grid-2">' +
+            '<button class="btn btn-sm btn-info" onclick="pullCloudToLocal()">⬇️ Завантажити з хмари</button>' +
+            '<button class="btn btn-sm btn-secondary" onclick="copyInviteLinkForKV()">🔗 Скопіювати посилання для КВ</button></div>' +
+          diagHtml +
           '<div class="text-xs text-muted">Посилання для КВ автоматично підключає їхній телефон до вашої бази Firebase — їм залишиться лише ввести свій PIN.</div>' +
         '</div>' +
 
@@ -2498,7 +2274,7 @@
         '<div class="card stack">' +
           '<div class="section-title text-muted">Основні параметри</div>' +
           '<div class="field"><label class="field-label">Номер групи за замовчуванням</label>' +
-          '<input class="input" type="text" value="' + esc(state.groupNumber) + '" onchange="state.groupNumber=this.value.trim()||\'223\';saveLocalState();fbSyncMeta();showToast(\'Номер групи збережено\')" /></div>' +
+          '<input class="input" type="text" value="' + esc(state.groupNumber) + '" onchange="state.groupNumber=this.value.trim()||\'223\';scheduleCloudPush();showToast(\'Номер групи збережено\')" /></div>' +
         '</div>' +
 
         '<div class="card stack">' +
@@ -2542,60 +2318,58 @@
     }
 
     function connectFirebaseFromInput() {
-      const inp = document.getElementById('fb-url-input');
-      const url = cleanFbUrl(inp ? inp.value : '');
+      var inp = document.getElementById('fb-url-input');
+      var url = normalizeFbUrl(inp ? inp.value : '');
       if (inp) inp.value = url;
       if (!url) {
         setFirebaseUrl('');
-        lastSyncError = '';
-        stopLiveSync();
-        setSyncStatus('local');
-        showToast('Перемкнуто на локальний режим');
-        render();
-        return;
+        setDiag('info', '⚪ Перемкнуто на локальний режим');
+        stopLiveSync(); setSyncStatus('local');
+        showToast('Локальний режим'); render(); return;
       }
       if (url.indexOf('https://') !== 0) {
-        showToast('Посилання має починатися з https://', 'error');
-        return;
+        setDiag('err', '❌ Посилання має починатися з https://');
+        showToast('Некоректне посилання', 'error'); render(); return;
       }
       setSyncStatus('syncing');
-      const endpoint = getPlatoonEndpoint(url);
-      fetch(endpoint)
+      setDiag('info', '⏳ Перевірка підключення до ' + url + '...');
+      render();
+      fetch(getPlatoonEndpoint(url))
         .then(function(r) {
-          if (!r.ok) return parseFirebaseError(r).then(function(errMsg) { throw new Error(errMsg); });
-          return r.json();
+          if (!r.ok) return parseFirebaseError(r).then(function(e) { throw new Error(e); });
+          return r.json().then(function(data) { return { status: r.status, data: data }; });
         })
-        .then(function(data) {
+        .then(function(result) {
           setFirebaseUrl(url);
           lastSyncAt = formatDateTimeNow();
-          lastSyncError = '';
           setSyncStatus('online');
-          if (data && typeof data === 'object' && (data.meta || data.personnel)) {
-            applyRemoteSnapshot(data, true);
+          if (result.data && typeof result.data === 'object' && (result.data.meta || result.data.personnel)) {
+            applyRemoteSnapshot(result.data, true);
+            setDiag('ok', '✅ Підключено (HTTP ' + result.status + '). Дані завантажено з хмари');
             showToast('Підключено! Дані завантажено з хмари');
           } else {
-            showToast('Підключено! Натисніть «Завантажити мої дані в хмару»');
+            setDiag('ok', '✅ Підключено (HTTP ' + result.status + '). База порожня — натисніть «Завантажити мої дані в хмару»');
+            showToast('Підключено! Тепер завантажте дані в хмару');
           }
-          startLiveSync();
-          render();
+          startLiveSync(); render();
         })
         .catch(function(err) {
-          lastSyncError = (err && err.message) ? err.message : 'Помилка підключення до Firebase';
+          var msg = (err && err.message) ? err.message : 'Помилка підключення';
           setSyncStatus('offline');
-          showToast(lastSyncError, 'error');
-          render();
+          setDiag('err', '❌ Помилка підключення (' + msg + ')');
+          showToast(msg, 'error'); render();
         });
     }
 
     function pushLocalToCloudPrompt() {
       if (!getFirebaseUrl()) { showToast('Спочатку підключіть посилання Firebase', 'error'); return; }
       showConfirm(
-        'Завантажити локальні дані в Firebase?',
-        'Усі поточні бійці, графік нарядів, задачі, розхід і PIN-коди з цього телефону будуть записані в хмарну базу.',
+        'Завантажити дані в хмару?',
+        'Усі поточні бійці, графік нарядів, задачі, розхід і PIN-коди з цього телефону будуть записані у Firebase.',
         'Завантажити в хмару',
         function() {
           fbPushAll(false).then(function(res) {
-            showToast(res.ok ? 'Усі дані завантажено в Firebase!' : (res.error || 'Помилка завантаження'), res.ok ? 'success' : 'error');
+            showToast(res.ok ? 'Дані успішно завантажено в Firebase!' : ('Помилка: ' + (res.error || '')), res.ok ? 'success' : 'error');
             render();
           });
         },
@@ -2606,32 +2380,30 @@
     function pullCloudToLocal() {
       if (!getFirebaseUrl()) { showToast('Спочатку підключіть посилання Firebase', 'error'); return; }
       fbPullAll(false, true).then(function(res) {
-        showToast(res.ok ? 'Дані завантажено з хмари' : (res.error || 'Не вдалося завантажити'), res.ok ? 'success' : 'error');
+        showToast(res.ok ? 'Дані завантажено з хмари' : ('Помилка: ' + (res.error || '')), res.ok ? 'success' : 'error');
         render();
       });
     }
 
     function copyInviteLinkForKV() {
-      const fbUrl = getFirebaseUrl();
+      var fbUrl = getFirebaseUrl();
       if (!fbUrl) { showToast('Спочатку підключіть базу Firebase', 'error'); return; }
-      const base = window.location.origin + window.location.pathname;
-      const link = base + '?fb=' + encodeURIComponent(fbUrl);
+      var link = window.location.origin + window.location.pathname + '?fb=' + encodeURIComponent(fbUrl);
       copyText(link, 'Посилання для КВ скопійовано!');
     }
 
     function savePinsFromForm() {
-      const pAdmin = (document.getElementById('pin-admin').value || '').trim();
-      const p1 = (document.getElementById('pin-sq1').value || '').trim();
-      const p2 = (document.getElementById('pin-sq2').value || '').trim();
-      const p3 = (document.getElementById('pin-sq3').value || '').trim();
-      const all = [pAdmin, p1, p2, p3];
-      for (let i = 0; i < all.length; i++) {
+      var pAdmin = (document.getElementById('pin-admin').value || '').trim();
+      var p1 = (document.getElementById('pin-sq1').value || '').trim();
+      var p2 = (document.getElementById('pin-sq2').value || '').trim();
+      var p3 = (document.getElementById('pin-sq3').value || '').trim();
+      var all = [pAdmin, p1, p2, p3];
+      for (var i = 0; i < all.length; i++) {
         if (!/^\d{4}$/.test(all[i])) { showToast('Кожен PIN має складатися рівно з 4 цифр', 'error'); return; }
       }
       if (new Set(all).size < 4) { showToast('Усі 4 PIN-коди мають бути різними', 'error'); return; }
       state.pins = { admin: pAdmin, sq1: p1, sq2: p2, sq3: p3 };
-      saveLocalState();
-      fbWrite('/pins', 'PUT', state.pins);
+      scheduleCloudPush();
       showToast('PIN-коди збережено та синхронізовано');
     }
 
@@ -2641,7 +2413,6 @@
         el.classList.toggle('selected', el.getAttribute('data-c') === c);
       });
     }
-
     function renderColorSwatches(selected) {
       tempColor = selected || PALETTE[0];
       return '<div class="color-row">' + PALETTE.map(function(c) {
@@ -2651,7 +2422,7 @@
 
     function openDutyTypeModal(dtId) {
       if (!isAdmin()) return;
-      const ex = dtId ? state.dutyTypes.find(function(x) { return x.id === dtId; }) : null;
+      var ex = dtId ? state.dutyTypes.find(function(x) { return x.id === dtId; }) : null;
       openModal(
         '<div class="modal-header"><div class="modal-title">' + (ex ? 'Редагувати вид наряду' : 'Новий вид наряду') + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<form class="modal-body" onsubmit="saveDutyType(event,\'' + (dtId || '') + '\')">' +
@@ -2666,28 +2437,28 @@
     function saveDutyType(e, dtId) {
       e.preventDefault();
       if (!isAdmin()) return;
-      const shortName = document.getElementById('dt-short').value.trim();
-      const name = document.getElementById('dt-full').value.trim() || shortName;
-      const maxCount = Math.min(10, Math.max(1, Number(document.getElementById('dt-max').value) || 1));
+      var shortName = document.getElementById('dt-short').value.trim();
+      var name = document.getElementById('dt-full').value.trim() || shortName;
+      var maxCount = Math.min(10, Math.max(1, Number(document.getElementById('dt-max').value) || 1));
       if (!shortName) return;
       if (dtId) {
-        const dt = state.dutyTypes.find(function(x) { return x.id === dtId; });
+        var dt = state.dutyTypes.find(function(x) { return x.id === dtId; });
         if (dt) { dt.shortName = shortName; dt.name = name; dt.maxCount = maxCount; dt.color = tempColor; }
       } else {
         state.dutyTypes.push({ id: genId('dt'), shortName: shortName, name: name, maxCount: maxCount, color: tempColor });
       }
-      saveLocalState(); fbSyncMeta(); closeModal(); render(); showToast('Вид наряду збережено');
+      scheduleCloudPush(); closeModal(); render(); showToast('Вид наряду збережено');
     }
 
     function deleteDutyType(dtId) {
       if (!isAdmin() || state.dutyTypes.length <= 1) return;
       state.dutyTypes = state.dutyTypes.filter(function(x) { return x.id !== dtId; });
-      saveLocalState(); fbSyncMeta(); render(); showToast('Вид наряду видалено');
+      scheduleCloudPush(); render(); showToast('Вид наряду видалено');
     }
 
     function openSquadModal(sqId) {
       if (!isAdmin()) return;
-      const ex = sqId ? state.squads.find(function(x) { return x.id === sqId; }) : null;
+      var ex = sqId ? state.squads.find(function(x) { return x.id === sqId; }) : null;
       openModal(
         '<div class="modal-header"><div class="modal-title">' + (ex ? 'Редагувати відділення' : 'Нове відділення') + '</div><button class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button></div>' +
         '<form class="modal-body" onsubmit="saveSquad(event,\'' + (sqId || '') + '\')">' +
@@ -2700,22 +2471,22 @@
     function saveSquad(e, sqId) {
       e.preventDefault();
       if (!isAdmin()) return;
-      const name = document.getElementById('sq-name').value.trim(); if (!name) return;
+      var name = document.getElementById('sq-name').value.trim(); if (!name) return;
       if (sqId) {
-        const sq = state.squads.find(function(x) { return x.id === sqId; });
+        var sq = state.squads.find(function(x) { return x.id === sqId; });
         if (sq) { sq.name = name; sq.color = tempColor; }
       } else {
-        const nid = genId('sq');
+        var nid = genId('sq');
         state.squads.push({ id: nid, name: name, color: tempColor, isCmdGroup: false });
         ui.openPersonnelSquads[nid] = true;
       }
-      saveLocalState(); fbSyncMeta(); closeModal(); render(); showToast('Відділення збережено');
+      scheduleCloudPush(); closeModal(); render(); showToast('Відділення збережено');
     }
 
     function downloadFile(content, filename, mime) {
-      const blob = new Blob([content], { type: mime });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      var blob = new Blob([content], { type: mime });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
       a.href = url; a.download = filename;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
@@ -2728,13 +2499,12 @@
     }
 
     function handleImportJSON(e) {
-      const file = e.target.files && e.target.files[0]; if (!file) return;
-      const r = new FileReader();
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var r = new FileReader();
       r.onload = function(ev) {
         try {
           state = normalizeState(JSON.parse(ev.target.result));
-          saveLocalState();
-          if (getFirebaseUrl() && isAdmin()) fbPushAll();
+          scheduleCloudPush();
           render(); showToast('Дані відновлено з файлу');
         } catch (err) { showToast('Некоректний файл резервної копії', 'error'); }
         finally { e.target.value = ''; }
@@ -2757,27 +2527,26 @@
     }
 
     function restoreFromText() {
-      const raw = (document.getElementById('restore-txt').value || '').trim();
+      var raw = (document.getElementById('restore-txt').value || '').trim();
       try {
         state = normalizeState(JSON.parse(raw));
-        saveLocalState();
-        if (getFirebaseUrl() && isAdmin()) fbPushAll();
+        scheduleCloudPush();
         closeModal(); render(); showToast('Дані успішно відновлено');
       } catch (err) { showToast('Помилка: некоректний формат тексту', 'error'); }
     }
 
     function exportMonthlyCSV() {
-      const rows = [['Відділення', 'ПІБ', 'Звання', 'Статус', 'За ' + MONTHS_UK[ui.month] + ' ' + ui.year, 'Всього', 'Останній наряд']];
+      var rows = [['Відділення', 'ПІБ', 'Звання', 'Статус', 'За ' + MONTHS_UK[ui.month] + ' ' + ui.year, 'Всього', 'Останній наряд']];
       getOrderedSquads().forEach(function(sq) {
         sortSquadPersonnel(state.personnel.filter(function(p) { return p.squadId === sq.id; })).forEach(function(s) {
-          const st = getSoldierDutyStats(s.id, ui.year, ui.month);
+          var st = getSoldierDutyStats(s.id, ui.year, ui.month);
           rows.push([sq.name, s.fullName, s.rank || '', getPresenceMeta(s.presenceStatus).fullLabel, st.monthCount, st.totalCount, st.lastDate ? formatDotDate(st.lastDate) : '']);
         });
       });
-      const csv = '\uFEFF' + rows.map(function(r) {
+      var csv = '\uFEFF' + rows.map(function(r) {
         return r.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';');
       }).join('\r\n');
-      downloadFile(csv, 'oblik_' + ui.year + '_' + String(ui.month + 1).padStart(2, '0') + '.csv', 'text/csv;charset=utf-8;');
+      downloadFile(csv, 'oblik_' + ui.year + '_' + pad2(ui.month + 1) + '.csv', 'text/csv;charset=utf-8;');
       showToast('CSV-файл експортовано');
     }
 
@@ -2785,27 +2554,26 @@
       if (!isAdmin()) return;
       showConfirm('Очистити всі дані? (Крок 1/2)', 'Буде видалено весь особовий склад, графік нарядів, задачі та розхід.', 'Продовжити', function() {
         showConfirm('Точно видалити все? (Крок 2/2)', 'Цю дію неможливо скасувати, якщо у вас немає резервної копії.', 'Так, очистити все', function() {
-          const keepPins = state.pins;
+          var keepPins = state.pins;
           state = createFreshState();
           state.pins = keepPins;
-          saveLocalState();
-          if (getFirebaseUrl()) fbPushAll();
+          scheduleCloudPush();
           render(); showToast('Усі дані очищено');
         }, true);
       }, true);
     }
 
     // =========================================================================
-    // 12. ГОЛОВНИЙ РЕНДЕР ТА ІНІЦІАЛІЗАЦІЯ
+    // 12. ГОЛОВНИЙ РЕНДЕР ТА ЗАПУСК
     // =========================================================================
     function render() {
       if (!sessionRole) return;
       updateSyncPillUI();
       document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-      const act = document.getElementById('nav-' + ui.activeTab);
+      var act = document.getElementById('nav-' + ui.activeTab);
       if (act) act.classList.add('active');
 
-      const main = document.getElementById('main-content');
+      var main = document.getElementById('main-content');
       if (!main) return;
       if (ui.activeTab === 'duties') main.innerHTML = renderDutiesTab();
       else if (ui.activeTab === 'tasks') main.innerHTML = renderTasksTab();
@@ -2817,13 +2585,13 @@
     function boot() {
       initFirebaseUrlFromQuery();
       loadLocalState();
-      const savedRole = getSavedSessionRole();
+      var savedRole = getSavedSessionRole();
       if (savedRole) {
         enterAppWithRole(savedRole);
       } else {
         document.getElementById('pin-screen').classList.remove('hidden');
         renderPinScreen();
-        fbFetchPinsQuick().then(function() { renderPinScreen(); });
+        fbPreloadBeforeLogin().then(function() { renderPinScreen(); });
       }
     }
 
