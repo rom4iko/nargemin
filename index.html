@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.12-tasks-irrelevant-tab</title>
+  <title>Помічник взводу v3.13-tasks-accordion</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -838,6 +838,55 @@
       background: rgba(100, 116, 139, 0.14);
     }
 
+    /* =========================================================================
+       АКОРДЕОН ЗАДАЧ (КОМПАКТНИЙ ЗГОРНУТИЙ ВИГЛЯД + РОЗГОРТАННЯ ДЕТАЛЕЙ)
+       ========================================================================= */
+    .task-acc-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .task-acc-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #fff;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .task-acc-chev {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: transform 0.16s ease, color 0.16s ease;
+    }
+    .task-card.expanded .task-acc-chev {
+      transform: rotate(90deg);
+      color: var(--accent);
+      border-color: rgba(74, 222, 128, 0.4);
+    }
+    .task-acc-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      animation: expandFade 0.18s ease-out;
+    }
+    html:not([data-theme="dark"]):not([data-theme="oled"]) .task-acc-title {
+      color: #0f172a;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -1024,7 +1073,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.12-tasks-irrelevant-tab';
+    var APP_VERSION = 'v3.13-tasks-accordion';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -1444,6 +1493,7 @@
       rozkhidSchedOpen: false,
       tasksFilterRecipient: 'all',
       tasksFilterStatus: 'all',
+      tasksExpanded: {},
       tasksExpandedRemarks: {},
       personnelSearch: '',
       personnelSquadFilter: 'all',
@@ -2762,39 +2812,62 @@
           auditHtml = '<div class="audit-log-box">' + recentLogs + '</div>';
         }
 
-        return '<div class="task-card st-' + esc(t.status) + (t.priority === 'high' ? ' prio-high-card' : '') + '">' +
-          '<div class="row-between wrap">' +
-            '<div class="row wrap" style="gap:5px">' +
-              '<span class="badge badge-warn">' + esc(t.target) + '</span>' +
-              '<span class="prio-badge ' + pm.cls + '">' + esc(pm.short) + '</span>' +
-              photoRequirementBadge +
+        var isOpen = ui.tasksExpanded[t.id] !== undefined
+          ? Boolean(ui.tasksExpanded[t.id])
+          : (t.status === 'pending_review' || t.status === 'failed');
+
+        var accBodyHtml = isOpen ? (
+          '<div class="task-acc-body">' +
+            '<div class="row-between text-xs text-muted">' +
+              '<span>' + (t.author ? ('Поставив: ' + esc(t.author)) : '') + '</span>' +
+              '<span>' + esc(t.createdAt) + '</span>' +
             '</div>' +
-            '<div class="row" style="gap:6px">' + stBadge +
-              (canDelete ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')" title="Видалити повністю">✕</button>' : '') +
-            '</div>' +
-          '</div>' +
-          '<div style="font-size:14.5px;color:#fff;white-space:pre-wrap">' + esc(t.text) + '</div>' +
-          '<div class="row-between text-xs text-muted">' +
-            '<span>' + (t.author ? ('Поставив: ' + esc(t.author)) : '') + '</span>' +
-            '<span>' + esc(t.createdAt) + '</span>' +
-          '</div>' +
-          photoBlockHtml +
-          statusButtonsHtml +
-          (showRemark ? (
-            '<div class="field">' +
-              '<label class="field-label">Зауваження / Причина (обов\'язково для «Не виконано»)</label>' +
-              '<div class="row">' +
-                '<input id="rem-' + t.id + '" class="input" type="text" value="' + esc(t.remark) + '" placeholder="Вкажіть причину або зауваження..." ' + (canUpdate && t.status !== 'irrelevant' ? '' : 'disabled') + ' />' +
-                (canUpdate && t.status !== 'irrelevant' ? '<button type="button" class="btn btn-sm btn-secondary" onclick="saveTaskRemark(\'' + t.id + '\')">Зберегти</button>' : '') +
+            photoBlockHtml +
+            statusButtonsHtml +
+            (showRemark ? (
+              '<div class="field">' +
+                '<label class="field-label">Зауваження / Причина (обов\'язково для «Не виконано»)</label>' +
+                '<div class="row">' +
+                  '<input id="rem-' + t.id + '" class="input" type="text" value="' + esc(t.remark) + '" placeholder="Вкажіть причину або зауваження..." ' + (canUpdate && t.status !== 'irrelevant' ? '' : 'disabled') + ' />' +
+                  (canUpdate && t.status !== 'irrelevant' ? '<button type="button" class="btn btn-sm btn-secondary" onclick="saveTaskRemark(\'' + t.id + '\')">Зберегти</button>' : '') +
+                '</div>' +
+              '</div>'
+            ) : '') +
+            irrelevantActionHtml +
+            auditHtml +
+          '</div>'
+        ) : '';
+
+        return '<div class="task-card st-' + esc(t.status) + (t.priority === 'high' ? ' prio-high-card' : '') + (isOpen ? ' expanded' : '') + '">' +
+          '<div class="task-acc-head" onclick="toggleTaskAccordion(\'' + t.id + '\')">' +
+            '<div class="min0 stack-sm">' +
+              '<div class="row wrap" style="gap:5px">' +
+                '<span class="badge badge-warn">' + esc(t.target) + '</span>' +
+                '<span class="prio-badge ' + pm.cls + '">' + esc(pm.short) + '</span>' +
+                stBadge +
+                (t.photoProof ? '<span class="badge badge-ok">Фото</span>' : (t.requirePhoto ? photoRequirementBadge : '')) +
               '</div>' +
-            '</div>'
-          ) : '') +
-          irrelevantActionHtml +
-          auditHtml +
+              '<div class="task-acc-title">' + esc(t.text) + '</div>' +
+            '</div>' +
+            '<div class="row" style="gap:6px;flex-shrink:0" onclick="event.stopPropagation()">' +
+              (canDelete ? '<button type="button" class="btn-icon btn-icon-sm danger" onclick="deleteTask(\'' + t.id + '\')" title="Видалити повністю">✕</button>' : '') +
+              '<button type="button" class="task-acc-chev" onclick="toggleTaskAccordion(\'' + t.id + '\')" title="Розгорнути / Згорнути">▶</button>' +
+            '</div>' +
+          '</div>' +
+          accBodyHtml +
         '</div>';
       }).join('') : '<div class="card empty-state">Задач за обраним фільтром немає.</div>';
 
       return createForm + recPills + statusPills + copyBtn + cards;
+    }
+
+    function toggleTaskAccordion(taskId) {
+      var t = state.tasks.find(function(x) { return x.id === taskId; });
+      var cur = ui.tasksExpanded[taskId] !== undefined
+        ? Boolean(ui.tasksExpanded[taskId])
+        : Boolean(t && (t.status === 'pending_review' || t.status === 'failed'));
+      ui.tasksExpanded[taskId] = !cur;
+      render();
     }
 
     function createNewTask() {
