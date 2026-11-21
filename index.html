@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Помічник взводу" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M32 10L50 18V32C50 43.5 42.2 52 32 55C21.8 52 14 43.5 14 32V18L32 10Z' fill='%231e293b' stroke='%234ade80' stroke-width='3'/%3E%3Cpath d='M32 20L35.2 27.2L43 28L37 33.2L38.8 41L32 36.8L25.2 41L27 33.2L21 28L28.8 27.2L32 20Z' fill='%23eab308'/%3E%3C/svg%3E" />
-  <title>Помічник взводу v3.18-yib-pill-fix</title>
+  <title>Помічник взводу v3.19-sync-merge-safe</title>
   <style>
     /* =========================================================================
        ТЕМНА ТАКТИЧНА ТЕМА (ОПТИМІЗОВАНА ПІД IPHONE SAFARI / ANDROID CHROME)
@@ -946,6 +946,20 @@
       color: var(--muted);
     }
 
+    .storage-warn-banner {
+      display: none;
+      margin: 10px 14px 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #450a0a;
+      border: 1.5px solid #ef4444;
+      color: #fecaca;
+      font-size: 12.5px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .storage-warn-banner.visible { display: block; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -978,6 +992,7 @@
       </div>
     </header>
 
+    <div id="storage-warn-banner" class="storage-warn-banner"></div>
     <main id="main-content" class="main"></main>
 
     <!-- Нижній фіксований бар прибрано: навігація через Головний екран-хаб та верхню смугу розділу -->
@@ -1132,7 +1147,7 @@
     // =========================================================================
     // 1. КОНСТАНТИ, РОЛІ, ПРАВА ДОСТУПУ ТА ДОВІДНИКИ
     // =========================================================================
-    var APP_VERSION = 'v3.18-yib-pill-fix';
+    var APP_VERSION = 'v3.19-sync-merge-safe';
     var APP_UPDATED = '20.11.2026';
     var STORAGE_KEY = 'pomichnyk_vzvodu_v321';
     var FB_URL_STORAGE_KEY = 'pomichnyk_vzvodu_fb_url';
@@ -1296,8 +1311,34 @@
       }
     }
 
+    var storageQuotaExceeded = false;
+    function setStorageQuotaWarning(isError, detailMsg) {
+      storageQuotaExceeded = Boolean(isError);
+      var el = document.getElementById('storage-warn-banner');
+      if (!el) return;
+      if (!isError) {
+        el.classList.remove('visible');
+        el.textContent = '';
+        return;
+      }
+      el.classList.add('visible');
+      el.textContent = 'Увага: памʼять браузера переповнена! Нові локальні зміни можуть не зберегтися на телефоні. ' + (detailMsg || 'Видаліть старі фотодокази або зробіть бекап.');
+    }
+
     function safeLSGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
-    function safeLSSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+    function safeLSSet(key, val) {
+      try {
+        localStorage.setItem(key, val);
+        if (key === STORAGE_KEY && storageQuotaExceeded) setStorageQuotaWarning(false, '');
+        return true;
+      } catch (e) {
+        if (key === STORAGE_KEY) {
+          setStorageQuotaWarning(true, 'Очистіть старі виконані задачі з фото.');
+          showToast('Переповнена памʼять браузера! Зміни не збережено локально.', true);
+        }
+        return false;
+      }
+    }
     function safeLSRemove(key) { try { localStorage.removeItem(key); } catch (e) {} }
     function safeSSGet(key) { try { return sessionStorage.getItem(key); } catch (e) { return null; } }
     function safeSSSet(key, val) { try { sessionStorage.setItem(key, val); } catch (e) {} }
@@ -1342,6 +1383,7 @@
         scheduledAbsences: [],
         pins: Object.assign({}, DEFAULT_PINS),
         permissions: JSON.parse(JSON.stringify(DEFAULT_PERMISSIONS)),
+        deletedIds: {},
         updatedAt: 0
       };
     }
@@ -1353,6 +1395,21 @@
       if (k === 'sq_2') return 'sq2';
       if (k === 'sq_3') return 'sq3';
       return k || 'sq1';
+    }
+
+    function sanitizeIdStr(rawId, fallbackPrefix) {
+      var cleaned = String(rawId == null ? '' : rawId).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+      return cleaned || genId(fallbackPrefix || 'id');
+    }
+
+    function sanitizePhotoDataUrl(rawUrl) {
+      if (typeof rawUrl !== 'string') return '';
+      var s = rawUrl.trim();
+      if (!s) return '';
+      if (/^data:image\/(?:jpeg|jpg|png|webp);base64,[a-zA-Z0-9+/=]+$/i.test(s)) {
+        return s;
+      }
+      return '';
     }
 
     function normalizeState(raw) {
@@ -1425,6 +1482,7 @@
         scheduledAbsences: rawSched,
         pins: Object.assign({}, DEFAULT_PINS, raw.pins && typeof raw.pins === 'object' ? raw.pins : {}),
         permissions: JSON.parse(JSON.stringify(DEFAULT_PERMISSIONS)),
+        deletedIds: (raw.deletedIds && typeof raw.deletedIds === 'object' && !Array.isArray(raw.deletedIds)) ? raw.deletedIds : {},
         updatedAt: Number(raw.updatedAt) || 0
       };
 
@@ -1454,7 +1512,7 @@
         return p && (String(p.name || p.fullName || '').trim().length > 0);
       }).map(function(p) {
         return {
-          id: String(p.id || genId('p')),
+          id: sanitizeIdStr(p.id, 'p'),
           name: String(p.name || p.fullName || '').trim(),
           rank: String(p.rank || 'курс.').trim(),
           squadId: mapLegacySquadId(p.squadId || 'sq1'),
@@ -1472,7 +1530,7 @@
         });
         var normPrio = (t.priority === 'high' || t.priority === 'low' || t.priority === 'normal') ? t.priority : 'normal';
         return {
-          id: String(t.id || genId('task')),
+          id: sanitizeIdStr(t.id, 'task'),
           text: String(t.text),
           target: t.target || (matchedRec ? matchedRec.label : 'Усім командирам відділень'),
           targetRole: inferredRole || (matchedRec ? matchedRec.targetRole : 'all'),
@@ -1480,7 +1538,7 @@
           author: String(t.author || t.issuer || ''),
           priority: normPrio,
           requirePhoto: Boolean(t.requirePhoto),
-          photoProof: typeof t.photoProof === 'string' ? t.photoProof : '',
+          photoProof: sanitizePhotoDataUrl(t.photoProof),
           photoUpdatedAt: String(t.photoUpdatedAt || ''),
           status: (t.status === 'done' || t.status === 'pending_review' || t.status === 'irrelevant' || t.status === 'failed' || t.status === 'received') ? t.status : 'received',
           remark: String(t.remark || t.note || ''),
@@ -1501,7 +1559,7 @@
         var ids = Array.isArray(w.soldierIds) ? w.soldierIds.map(String).filter(Boolean)
           : (w.soldierIds && typeof w.soldierIds === 'object' ? Object.values(w.soldierIds).map(String).filter(Boolean) : []);
         return {
-          id: String(w.id || genId('yib')),
+          id: sanitizeIdStr(w.id, 'yib'),
           squadId: sqId,
           date: String(w.date || todayISO()),
           workName: String(w.workName || w.title || '').trim(),
@@ -1522,7 +1580,7 @@
         if (catK === 'priyom_shpytal') catK = 'priyom_shp';
         if (catK === 'priyom_lazaret') catK = 'priyom_laz';
         return {
-          id: String(sa.id || genId('sa')),
+          id: sanitizeIdStr(sa.id, 'sa'),
           soldierId: String(sa.soldierId),
           catKey: catK,
           fromDate: fromD,
@@ -1543,6 +1601,15 @@
           else dayObj[dtId] = [];
         });
       });
+
+      var cutoffTs = Date.now() - 30 * 24 * 3600 * 1000;
+      var cleanDeleted = {};
+      Object.keys(s.deletedIds || {}).forEach(function(dk) {
+        var cleanKey = sanitizeIdStr(dk, 'del');
+        var ts = Number(s.deletedIds[dk]) || 0;
+        if (ts > cutoffTs) cleanDeleted[cleanKey] = ts;
+      });
+      s.deletedIds = cleanDeleted;
 
       return s;
     }
@@ -1593,32 +1660,167 @@
       rozkhidModalCollapsed: {}
     };
 
-    // Стан синхронізації Firebase
+    // Стан синхронізації Firebase + черга офлайн-правок + злиття змін
+    var PENDING_SYNC_KEY = 'pomichnyk_vzvodu_pending_sync_v319';
     var fbUrl = safeLSGet(FB_URL_STORAGE_KEY) || '';
     var fbStatus = fbUrl ? 'offline' : 'local'; // 'local' | 'online' | 'offline' | 'syncing'
     var fbDiag = { type: 'info', text: fbUrl ? 'Очікується перевірка підключення...' : 'Хмарну базу ще не підключено.' };
     var fbLastSyncText = '';
     var fbPollTimer = null;
     var fbPushTimer = null;
+    var fbRetryTimer = null;
+    var fbIsPushing = false;
+    var fbPendingSync = safeLSGet(PENDING_SYNC_KEY) === '1';
+    var fbPendingPhotoIds = {};
     var fbPresenceMap = {};
     var fbPresenceTimer = null;
     var PRESENCE_ONLINE_MS = 65000;
 
+    function markTombstone(id) {
+      if (!id) return;
+      if (!state.deletedIds || typeof state.deletedIds !== 'object') state.deletedIds = {};
+      state.deletedIds[sanitizeIdStr(id, 'del')] = Date.now();
+    }
+
+    function setPendingSyncFlag(flag) {
+      fbPendingSync = Boolean(flag);
+      if (fbPendingSync) safeLSSet(PENDING_SYNC_KEY, '1');
+      else safeLSRemove(PENDING_SYNC_KEY);
+      updateSyncPillUI();
+    }
+
     function saveState(immediatePush) {
       state.updatedAt = Date.now();
-      try {
-        safeLSSet(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {}
+      var savedOk = safeLSSet(STORAGE_KEY, JSON.stringify(state));
+      if (!savedOk) {
+        // Спроба звільнити місце: очищаємо локальний кеш старих фото у закритих задачах
+        var freed = false;
+        state.tasks.forEach(function(t) {
+          if ((t.status === 'done' || t.status === 'irrelevant') && t.photoProof) {
+            t.photoProof = '';
+            freed = true;
+          }
+        });
+        if (freed) safeLSSet(STORAGE_KEY, JSON.stringify(state));
+      }
       updateTasksBadge();
       if (fbUrl) {
+        setPendingSyncFlag(true);
         if (immediatePush) {
           clearTimeout(fbPushTimer);
           fbPushAll(true);
         } else {
           clearTimeout(fbPushTimer);
-          fbPushTimer = setTimeout(function() { fbPushAll(true); }, 650);
+          fbPushTimer = setTimeout(function() { fbPushAll(true); }, 600);
         }
       }
+    }
+
+    function mergeByIdArrays(localArr, remoteArr, deletedMap, preferLocal) {
+      var map = {};
+      var order = [];
+      var del = deletedMap || {};
+
+      function ingest(item, isLocal) {
+        if (!item || !item.id) return;
+        var id = String(item.id);
+        if (del[id]) return;
+        if (!map[id]) {
+          map[id] = JSON.parse(JSON.stringify(item));
+          order.push(id);
+          return;
+        }
+        if (isLocal && preferLocal) {
+          var prev = map[id];
+          var merged = JSON.parse(JSON.stringify(item));
+          // Зберігаємо фотодоказ із будь-якої сторони, якщо він є
+          if (!merged.photoProof && prev.photoProof) {
+            merged.photoProof = prev.photoProof;
+            merged.photoUpdatedAt = prev.photoUpdatedAt || merged.photoUpdatedAt;
+          }
+          // Обʼєднуємо журнал аудиту задач без дублів
+          if (Array.isArray(prev.auditTrail) || Array.isArray(merged.auditTrail)) {
+            var seenAudit = {};
+            var combinedAudit = [];
+            (prev.auditTrail || []).concat(merged.auditTrail || []).forEach(function(a) {
+              if (!a) return;
+              var sig = (a.by || '') + '|' + (a.at || '') + '|' + (a.action || '');
+              if (!seenAudit[sig]) { seenAudit[sig] = true; combinedAudit.push(a); }
+            });
+            merged.auditTrail = combinedAudit.slice(-15);
+          }
+          map[id] = merged;
+        }
+      }
+
+      if (preferLocal) {
+        (remoteArr || []).forEach(function(x) { ingest(x, false); });
+        (localArr || []).forEach(function(x) { ingest(x, true); });
+      } else {
+        (localArr || []).forEach(function(x) { ingest(x, true); });
+        (remoteArr || []).forEach(function(x) { ingest(x, false); });
+      }
+      return order.map(function(id) { return map[id]; });
+    }
+
+    function mergeStates(localRaw, remoteRaw, preferLocal) {
+      var loc = normalizeState(localRaw);
+      var rem = normalizeState(remoteRaw);
+      var mergedDel = Object.assign({}, rem.deletedIds || {}, loc.deletedIds || {});
+
+      var merged = {
+        groupNumber: preferLocal ? (loc.groupNumber || rem.groupNumber) : (rem.groupNumber || loc.groupNumber),
+        squads: mergeByIdArrays(loc.squads, rem.squads, mergedDel, preferLocal),
+        dutyTypes: mergeByIdArrays(loc.dutyTypes, rem.dutyTypes, mergedDel, preferLocal),
+        personnel: mergeByIdArrays(loc.personnel, rem.personnel, mergedDel, preferLocal),
+        duties: {},
+        tasks: mergeByIdArrays(loc.tasks, rem.tasks, mergedDel, preferLocal),
+        yibashka: mergeByIdArrays(loc.yibashka, rem.yibashka, mergedDel, preferLocal),
+        rozkhid: {},
+        scheduledAbsences: mergeByIdArrays(loc.scheduledAbsences, rem.scheduledAbsences, mergedDel, preferLocal),
+        pins: preferLocal ? Object.assign({}, rem.pins, loc.pins) : Object.assign({}, loc.pins, rem.pins),
+        permissions: preferLocal ? Object.assign({}, rem.permissions, loc.permissions) : Object.assign({}, loc.permissions, rem.permissions),
+        deletedIds: mergedDel,
+        updatedAt: Math.max(Number(loc.updatedAt) || 0, Number(rem.updatedAt) || 0, Date.now())
+      };
+
+      // Злиття графіку нарядів по датах і видах нарядів
+      var allDutyDates = {};
+      Object.keys(rem.duties || {}).forEach(function(d) { allDutyDates[d] = true; });
+      Object.keys(loc.duties || {}).forEach(function(d) { allDutyDates[d] = true; });
+      Object.keys(allDutyDates).forEach(function(dk) {
+        var rDay = (rem.duties && rem.duties[dk]) || {};
+        var lDay = (loc.duties && loc.duties[dk]) || {};
+        var dayOut = {};
+        merged.dutyTypes.forEach(function(dt) {
+          var srcIds = (preferLocal && lDay[dt.id] !== undefined)
+            ? lDay[dt.id]
+            : (rDay[dt.id] !== undefined ? rDay[dt.id] : (lDay[dt.id] || []));
+          dayOut[dt.id] = (srcIds || []).filter(function(sid) { return !mergedDel[sid]; });
+        });
+        merged.duties[dk] = dayOut;
+      });
+
+      // Злиття розходу по датах
+      var allRozDates = {};
+      Object.keys(rem.rozkhid || {}).forEach(function(d) { allRozDates[d] = true; });
+      Object.keys(loc.rozkhid || {}).forEach(function(d) { allRozDates[d] = true; });
+      Object.keys(allRozDates).forEach(function(dk) {
+        var primary = preferLocal ? (loc.rozkhid[dk] || rem.rozkhid[dk]) : (rem.rozkhid[dk] || loc.rozkhid[dk]);
+        var secondary = preferLocal ? (rem.rozkhid[dk] || {}) : (loc.rozkhid[dk] || {});
+        var outDay = {};
+        ROZKHID_CATS.forEach(function(c) {
+          var pCat = (primary && primary[c.key]) || (secondary && secondary[c.key]) || { count: 0, ids: [] };
+          var cleanIds = (pCat.ids || []).filter(function(sid) { return !mergedDel[sid]; });
+          outDay[c.key] = {
+            ids: cleanIds,
+            count: Math.max(Number(pCat.count) || 0, cleanIds.length)
+          };
+        });
+        merged.rozkhid[dk] = outDay;
+      });
+
+      return normalizeState(merged);
     }
 
     // Хелпери прав доступу
@@ -1652,7 +1854,7 @@
       return false;
     }
 
-    // Чітка перевірка видимості задач для кожної ролі (ВИПРАВЛЕНО)
+    // Чітка перевірка видимості задач для кожної ролі
     function isTaskVisibleForRole(task, role) {
       if (!task) return false;
       var r = role || currentRole;
@@ -1680,12 +1882,11 @@
     }
 
     // =========================================================================
-    // 4. FIREBASE REALTIME DATABASE REST API (НОРМАЛІЗАЦІЯ + ОЧИЩЕННЯ КЛЮЧІВ)
+    // 4. FIREBASE REALTIME DATABASE REST API (MERGE + ОФЛАЙН-ЧЕРГА + ФОТО-ВУЗОЛ)
     // =========================================================================
     function normalizeFirebaseBaseUrl(raw) {
       var str = String(raw || '').trim();
       if (!str) return '';
-      // Якщо випадково вставили подвійне посилання типу "Https://a](https://a"
       var match = str.match(/https?:\/\/[a-zA-Z0-9._-]+(?:\.firebaseio\.com|\.firebasedatabase\.app)/i);
       if (match && match[0]) {
         str = match[0];
@@ -1735,10 +1936,15 @@
       pill.className = 'sync-pill ' + (fbStatus === 'online' ? 'online' : fbStatus === 'offline' ? 'offline' : fbStatus === 'syncing' ? 'syncing' : '');
       if (fbStatus === 'online') {
         var onlineCnt = getOnlineRolesList().length;
-        pill.innerHTML = '<span class="status-dot online"></span> ' + (onlineCnt > 0 ? (onlineCnt + ' онлайн') : 'Онлайн');
-      } else if (fbStatus === 'offline') pill.innerHTML = '<span class="status-dot offline"></span> Офлайн';
-      else if (fbStatus === 'syncing') pill.innerHTML = ico('refresh', 13, 'spin') + ' Синхр...';
-      else pill.innerHTML = '<span class="status-dot local"></span> Локально';
+        var pendingMark = fbPendingSync ? ' • черга' : '';
+        pill.innerHTML = '<span class="status-dot online"></span> ' + (onlineCnt > 0 ? (onlineCnt + ' онлайн') : 'Онлайн') + pendingMark;
+      } else if (fbStatus === 'offline') {
+        pill.innerHTML = '<span class="status-dot offline"></span> ' + (fbPendingSync ? 'Офлайн (в черзі)' : 'Офлайн');
+      } else if (fbStatus === 'syncing') {
+        pill.innerHTML = ico('refresh', 13, 'spin') + ' Синхр...';
+      } else {
+        pill.innerHTML = '<span class="status-dot local"></span> Локально';
+      }
     }
 
     function fbSendPresenceHeartbeat() {
@@ -1877,10 +2083,42 @@
     function applyRemoteSnapshot(remoteData, forceApply) {
       if (!remoteData || typeof remoteData !== 'object') return false;
       var remoteTs = Number(remoteData.updatedAt) || 0;
-      if (!forceApply && remoteTs <= (Number(state.updatedAt) || 0)) return false;
-      state = normalizeState(remoteData);
-      try { safeLSSet(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+      if (!forceApply && !fbPendingSync && remoteTs <= (Number(state.updatedAt) || 0)) return false;
+
+      if (fbPendingSync) {
+        // Якщо є локальні невідправлені правки — зливаємо їх з хмарними, а не затираємо
+        state = mergeStates(state, remoteData, true);
+      } else {
+        state = normalizeState(remoteData);
+      }
+      safeLSSet(STORAGE_KEY, JSON.stringify(state));
       return true;
+    }
+
+    // Легка перевірка мітки часу перед завантаженням усього JSON (економія трафіку)
+    function fbCheckMetaAndPull(silent) {
+      var base = normalizeFirebaseBaseUrl(fbUrl);
+      if (!base) return Promise.resolve();
+      if (fbPendingSync) {
+        return fbPushAll(true);
+      }
+      return fbFetchJSON(base + '/platoon_meta/updatedAt.json', { method: 'GET', cache: 'no-store' }).then(function(metaRes) {
+        if (!metaRes.ok) {
+          fbStatus = 'offline';
+          updateSyncPillUI();
+          return;
+        }
+        fbStatus = 'online';
+        updateSyncPillUI();
+        var remoteMetaTs = Number(metaRes.data) || 0;
+        var localTs = Number(state.updatedAt) || 0;
+        // Якщо мітки часу збігаються і база не порожня — не тягнемо весь JSON з фото
+        if (remoteMetaTs > 0 && remoteMetaTs === localTs) {
+          fbLastSyncText = fmtTimeNow();
+          return;
+        }
+        return fbPullAll(false, silent);
+      });
     }
 
     function fbPullAll(forceApply, silent) {
@@ -1915,42 +2153,117 @@
           updateTasksBadge();
           if (!isUserActivelyEditing()) render();
         }
+        if (fbPendingSync) {
+          fbPushAll(true);
+        }
         if (!silent && forceApply) showToast('Дані завантажено з хмари');
         return res;
       });
     }
 
-    function fbPushAll(silent) {
+    // Надійний запис із попереднім злиттям, перевіркою після PUT та автоматичним повтором при обриві
+    function fbPushAll(silent, retryAttempt) {
       var base = normalizeFirebaseBaseUrl(fbUrl);
       if (!base) {
         if (!silent) showToast('Спочатку вкажіть посилання Firebase', true);
         return Promise.resolve({ ok: false, message: 'URL не задано' });
       }
+      if (fbIsPushing) {
+        setPendingSyncFlag(true);
+        return Promise.resolve({ ok: true, message: 'Queued' });
+      }
+      fbIsPushing = true;
+      var attempt = Number(retryAttempt) || 0;
+
       if (!silent) {
         fbStatus = 'syncing';
         updateSyncPillUI();
       }
-      var payload = sanitizeForFirebase(state);
-      return fbFetchJSON(base + '/platoon_data.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(function(res) {
-        if (!res.ok) {
+
+      // Крок 1: Спершу зчитуємо актуальний стан з хмари, щоб злити одночасні зміни інших ролей
+      return fbFetchJSON(base + '/platoon_data.json', { method: 'GET', cache: 'no-store' }).then(function(getRes) {
+        if (!getRes.ok) {
+          fbIsPushing = false;
           fbStatus = 'offline';
-          updateSyncPillUI();
-          setFbDiag('err', 'Помилка запису — ' + res.message);
-          if (!silent) showToast('Помилка запису: ' + res.message, true);
-          return res;
+          setPendingSyncFlag(true);
+          scheduleOfflineRetry();
+          setFbDiag('err', 'Немає звʼязку — зміни збережено в черзі та відправляться автоматично.');
+          if (!silent) showToast('Немає мережі — зміни в черзі на відправку', true);
+          return getRes;
         }
-        fbStatus = 'online';
-        fbLastSyncText = fmtTimeNow();
-        updateSyncPillUI();
-        setFbDiag('ok', 'Завантажено в хмару (HTTP ' + res.status + ') • ' + fbLastSyncText);
-        if (!silent) showToast('Дані успішно завантажено в хмару');
-        return res;
+
+        if (getRes.data && typeof getRes.data === 'object') {
+          state = mergeStates(state, getRes.data, true);
+        }
+        var writeTs = Date.now();
+        state.updatedAt = writeTs;
+        safeLSSet(STORAGE_KEY, JSON.stringify(state));
+
+        var payload = sanitizeForFirebase(state);
+
+        // Крок 2: Записуємо злитий стан у /platoon_data.json та оновлюємо мітку /platoon_meta/updatedAt.json
+        return fbFetchJSON(base + '/platoon_data.json', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function(putRes) {
+          if (!putRes.ok) {
+            fbIsPushing = false;
+            fbStatus = 'offline';
+            setPendingSyncFlag(true);
+            scheduleOfflineRetry();
+            setFbDiag('err', 'Помилка запису — ' + putRes.message + ' (повтор автоматично)');
+            if (!silent) showToast('Помилка запису — повторимо автоматично', true);
+            return putRes;
+          }
+
+          // Оновлюємо легку мітку часу
+          fbFetchJSON(base + '/platoon_meta.json', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updatedAt: writeTs })
+          }).catch(function() {});
+
+          // Крок 3: Перевірка після запису — чи не перезаписав базу хтось інший у ту саму мілісекунду
+          return fbFetchJSON(base + '/platoon_data/updatedAt.json', { method: 'GET', cache: 'no-store' }).then(function(verRes) {
+            fbIsPushing = false;
+            var serverTs = verRes.ok ? (Number(verRes.data) || 0) : writeTs;
+            if (verRes.ok && serverTs > writeTs && attempt < 2) {
+              // Хтось встиг записати паралельно — повторюємо злиття ще раз
+              return fbPushAll(true, attempt + 1);
+            }
+
+            fbStatus = 'online';
+            fbLastSyncText = fmtTimeNow();
+            setPendingSyncFlag(false);
+            setFbDiag('ok', 'Синхронізовано та перевірено (HTTP ' + putRes.status + ') • ' + fbLastSyncText);
+            if (!silent) showToast('Дані успішно синхронізовано');
+            return putRes;
+          });
+        });
       });
     }
+
+    function scheduleOfflineRetry() {
+      if (fbRetryTimer) return;
+      fbRetryTimer = setInterval(function() {
+        if (!fbUrl || !fbPendingSync) {
+          clearInterval(fbRetryTimer);
+          fbRetryTimer = null;
+          return;
+        }
+        if (navigator.onLine !== false && !fbIsPushing) {
+          fbPushAll(true);
+        }
+      }, 8000);
+    }
+
+    window.addEventListener('online', function() {
+      if (fbUrl) {
+        if (fbPendingSync) fbPushAll(true);
+        else fbCheckMetaAndPull(true);
+      }
+    });
 
     function fbConnectFromSettings() {
       var input = document.getElementById('set-fb-url');
@@ -1958,6 +2271,7 @@
       if (!clean) {
         fbUrl = '';
         safeLSRemove(FB_URL_STORAGE_KEY);
+        setPendingSyncFlag(false);
         fbStatus = 'local';
         updateSyncPillUI();
         setFbDiag('info', 'Хмарну синхронізацію вимкнено (локальний режим).');
@@ -1980,14 +2294,15 @@
         showToast('Підключіть Firebase у Налаштуваннях');
         return;
       }
-      fbPullAll(true, false);
+      if (fbPendingSync) fbPushAll(false);
+      else fbPullAll(true, false);
     }
 
     function startFbPolling() {
       if (fbPollTimer) clearInterval(fbPollTimer);
       if (!fbUrl) return;
       fbPollTimer = setInterval(function() {
-        if (fbUrl && !document.hidden) fbPullAll(false, true);
+        if (fbUrl && !document.hidden) fbCheckMetaAndPull(true);
       }, 15000);
     }
 
@@ -2126,18 +2441,20 @@
         }
       });
 
-      // 2. Сьогоднішні наряди -> Н
+      // 2. Сьогоднішні наряди -> Н (повна перебудова за графіком наряду)
       var todayDuties = getDutyIdsForDate(iso);
+      day.n.ids = [];
       todayDuties.forEach(function(sid) {
         removeSoldierFromAllRozkhidCats(iso, sid, 'n');
         if (day.n.ids.indexOf(sid) === -1) {
           day.n.ids.push(sid);
         }
       });
-      day.n.count = Math.max(day.n.count, day.n.ids.length);
+      day.n.count = day.n.ids.length;
 
-      // 3. Вчорашні наряди -> Стародобовий (якщо не заступив сьогодні знову)
+      // 3. Вчорашні наряди -> Стародобовий (повна перебудова за графіком наряду)
       var yestDuties = getDutyIdsForDate(shiftISO(iso, -1));
+      day.starodob.ids = [];
       yestDuties.forEach(function(sid) {
         if (todayDuties.indexOf(sid) !== -1) return;
         removeSoldierFromAllRozkhidCats(iso, sid, 'starodob');
@@ -2145,7 +2462,7 @@
           day.starodob.ids.push(sid);
         }
       });
-      day.starodob.count = Math.max(day.starodob.count, day.starodob.ids.length);
+      day.starodob.count = day.starodob.ids.length;
 
       saveState();
       if (showFeedback) {
@@ -2441,6 +2758,9 @@
       if (!canEditDuties()) return;
       if (!state.duties[iso] || !state.duties[iso][dtId]) return;
       state.duties[iso][dtId] = state.duties[iso][dtId].filter(function(x) { return x !== sid; });
+      if (state.rozkhid[iso]) applyScheduledAndDutiesToRozkhid(iso, false);
+      var nextIso = shiftISO(iso, 1);
+      if (state.rozkhid[nextIso]) applyScheduledAndDutiesToRozkhid(nextIso, false);
       saveState();
       render();
     }
@@ -2519,6 +2839,9 @@
     function saveAssignDutyModal(dtId) {
       if (!state.duties[ui.selectedDate]) state.duties[ui.selectedDate] = {};
       state.duties[ui.selectedDate][dtId] = ui.dutyModalSelection.slice();
+      if (state.rozkhid[ui.selectedDate]) applyScheduledAndDutiesToRozkhid(ui.selectedDate, false);
+      var nextIso = shiftISO(ui.selectedDate, 1);
+      if (state.rozkhid[nextIso]) applyScheduledAndDutiesToRozkhid(nextIso, false);
       saveState(true);
       closeModal();
       showToast('Наряд збережено');
@@ -2641,7 +2964,7 @@
         var img = new Image();
         img.onload = function() {
           try {
-            var maxSide = 960;
+            var maxSide = 720;
             var w = img.width || 1;
             var h = img.height || 1;
             if (w > maxSide || h > maxSide) {
@@ -2654,7 +2977,7 @@
             var ctx = canvas.getContext('2d');
             if (!ctx) { showToast('Не вдалося обробити фото', true); return; }
             ctx.drawImage(img, 0, 0, w, h);
-            var dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+            var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
             var t = state.tasks.find(function(x) { return x.id === tid; });
             if (t) {
               t.photoProof = dataUrl;
@@ -2681,6 +3004,16 @@
       };
       reader.onerror = function() { showToast('Помилка читання файлу', true); };
       reader.readAsDataURL(file);
+    }
+
+    function confirmRemoveTaskPhoto(taskId) {
+      if (!canUpdateTasks()) return;
+      openConfirmModal(
+        'Видалити фотодоказ?',
+        'Ви дійсно хочете видалити прикріплене фото підтвердження?',
+        'Видалити фото',
+        'removeTaskPhoto(\'' + taskId + '\')'
+      );
     }
 
     function removeTaskPhoto(taskId) {
@@ -3085,11 +3418,27 @@
       render();
     }
 
+    function confirmDeleteTask(taskId) {
+      if (!canDeleteTaskCompletely()) {
+        showToast('Видаляти задачу повністю може лише Адмін', true);
+        return;
+      }
+      var t = state.tasks.find(function(x) { return x.id === taskId; });
+      if (!t) return;
+      openConfirmModal(
+        'Видалити задачу?',
+        'Ви дійсно хочете назавжди видалити задачу <b>«' + esc(t.text.slice(0, 80)) + '»</b>?',
+        'Видалити',
+        'deleteTask(\'' + taskId + '\')'
+      );
+    }
+
     function deleteTask(taskId) {
       if (!canDeleteTaskCompletely()) {
         showToast('Видаляти задачу повністю може лише Адмін', true);
         return;
       }
+      markTombstone(taskId);
       state.tasks = state.tasks.filter(function(x) { return x.id !== taskId; });
       saveState(true);
       showToast('Задачу видалено');
@@ -3467,9 +3816,21 @@
       render();
     }
 
+    function confirmDeleteYibRecord(recId) {
+      var rec = state.yibashka.find(function(x) { return x.id === recId; });
+      if (!rec || !canManageYibRecord(rec)) return;
+      openConfirmModal(
+        'Видалити запис роботи?',
+        'Ви дійсно хочете видалити запис <b>«' + esc(rec.workName) + '»</b> (' + fmtUA(rec.date) + ') з обліку «Їбашка»?',
+        'Видалити',
+        'deleteYibRecord(\'' + recId + '\')'
+      );
+    }
+
     function deleteYibRecord(recId) {
       var rec = state.yibashka.find(function(x) { return x.id === recId; });
       if (!rec || !canManageYibRecord(rec)) return;
+      markTombstone(recId);
       state.yibashka = state.yibashka.filter(function(x) { return x.id !== recId; });
       saveState(true);
       showToast('Запис видалено');
@@ -3806,7 +4167,19 @@
       render();
     }
 
+    function confirmDeleteScheduledAbsence(saId) {
+      var sa = state.scheduledAbsences.find(function(x) { return x.id === saId; });
+      var s = sa ? getSoldierById(sa.soldierId) : null;
+      openConfirmModal(
+        'Видалити заплановану відсутність?',
+        'Видалити запис для <b>' + esc(s ? s.name : 'військовослужбовця') + '</b>?',
+        'Видалити',
+        'deleteScheduledAbsence(\'' + saId + '\')'
+      );
+    }
+
     function deleteScheduledAbsence(saId) {
+      markTombstone(saId);
       state.scheduledAbsences = state.scheduledAbsences.filter(function(x) { return x.id !== saId; });
       saveState(true);
       showToast('Запис видалено');
@@ -3982,7 +4355,33 @@
     }
 
     function deleteSoldier(sid) {
+      markTombstone(sid);
       state.personnel = state.personnel.filter(function(p) { return p.id !== sid; });
+      // Очищаємо з нарядів
+      Object.keys(state.duties || {}).forEach(function(iso) {
+        var day = state.duties[iso] || {};
+        Object.keys(day).forEach(function(dtId) {
+          day[dtId] = (day[dtId] || []).filter(function(x) { return x !== sid; });
+        });
+      });
+      // Очищаємо з розходу (і зменшуємо ручний лічильник count, якщо людина була в списку ids)
+      Object.keys(state.rozkhid || {}).forEach(function(iso) {
+        var rDay = state.rozkhid[iso] || {};
+        ROZKHID_CATS.forEach(function(c) {
+          var entry = rDay[c.key];
+          if (entry && Array.isArray(entry.ids) && entry.ids.indexOf(sid) !== -1) {
+            entry.ids = entry.ids.filter(function(x) { return x !== sid; });
+            entry.count = Math.max(entry.ids.length, (Number(entry.count) || 1) - 1);
+          }
+        });
+      });
+      // Очищаємо із запланованих відсутностей та «Їбашки»
+      state.scheduledAbsences = state.scheduledAbsences.filter(function(sa) { return sa.soldierId !== sid; });
+      state.yibashka.forEach(function(w) {
+        if (Array.isArray(w.soldierIds)) {
+          w.soldierIds = w.soldierIds.filter(function(x) { return x !== sid; });
+        }
+      });
       saveState(true);
       closeModal();
       showToast('Видалено зі складу');
@@ -4230,10 +4629,29 @@
       render();
     }
 
+    function confirmDeleteDutyType(dtId) {
+      if (!isAdmin() || state.dutyTypes.length <= 1) return;
+      var dt = getDutyTypeById(dtId);
+      if (!dt) return;
+      openConfirmModal(
+        'Видалити вид наряду?',
+        'Ви дійсно хочете видалити вид наряду <b>«' + esc(dt.shortName) + ' — ' + esc(dt.name) + '»</b> та очистити всі його призначення в календарі?',
+        'Видалити',
+        'deleteDutyType(\'' + dtId + '\')'
+      );
+    }
+
     function deleteDutyType(dtId) {
       if (!isAdmin() || state.dutyTypes.length <= 1) return;
+      markTombstone(dtId);
       state.dutyTypes = state.dutyTypes.filter(function(x) { return x.id !== dtId; });
+      Object.keys(state.duties || {}).forEach(function(iso) {
+        if (state.duties[iso] && state.duties[iso][dtId] !== undefined) {
+          delete state.duties[iso][dtId];
+        }
+      });
       saveState(true);
+      showToast('Вид наряду видалено, призначення очищено');
       render();
     }
 
@@ -4264,10 +4682,34 @@
       render();
     }
 
+    function confirmDeleteSquad(sqId) {
+      if (!isAdmin()) return;
+      var sq = getSquadById(sqId);
+      if (!sq) return;
+      var members = state.personnel.filter(function(p) { return p.squadId === sqId; });
+      if (members.length > 0) {
+        showToast('Не можна видалити відділення, у якому є люди (' + members.length + ' ос.). Спочатку переведіть або видаліть їх.', true);
+        return;
+      }
+      openConfirmModal(
+        'Видалити відділення?',
+        'Ви дійсно хочете видалити відділення <b>«' + esc(sq.name) + '»</b>?',
+        'Видалити',
+        'deleteSquad(\'' + sqId + '\')'
+      );
+    }
+
     function deleteSquad(sqId) {
       if (!isAdmin()) return;
+      var members = state.personnel.filter(function(p) { return p.squadId === sqId; });
+      if (members.length > 0) {
+        showToast('Не можна видалити відділення з бійцями', true);
+        return;
+      }
+      markTombstone(sqId);
       state.squads = state.squads.filter(function(x) { return x.id !== sqId; });
       saveState(true);
+      showToast('Відділення видалено');
       render();
     }
 
@@ -4381,6 +4823,22 @@
     // =========================================================================
     // 13. МОДАЛКИ, БЕЙДЖ ЗАДАЧ, ГОЛОВНИЙ РЕНДЕР ТА ЗАПУСК
     // =========================================================================
+    function openConfirmModal(title, message, confirmLabel, onConfirmCallJs) {
+      openModal(
+        '<div class="modal-header">' +
+          '<div class="modal-title">' + esc(title) + '</div>' +
+          '<button type="button" class="btn-icon btn-icon-sm" onclick="closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<div class="text-sm">' + message + '</div>' +
+          '<div class="grid-2">' +
+            '<button type="button" class="btn btn-secondary" onclick="closeModal()">Скасувати</button>' +
+            '<button type="button" class="btn btn-danger" onclick="closeModal();' + onConfirmCallJs + '">' + esc(confirmLabel || 'Видалити') + '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
     function openModal(html) {
       var box = document.getElementById('modal-box');
       var root = document.getElementById('modal-root');
@@ -4429,9 +4887,16 @@
       }).length;
     }
 
-    function openSection(tabName) {
+    function openSection(tabName, fromPopState) {
+      var wasHub = ui.screen === 'hub';
       ui.tab = tabName;
       ui.screen = 'section';
+      if (!fromPopState && window.history && window.history.pushState) {
+        try {
+          if (wasHub) window.history.pushState({ screen: 'section', tab: tabName }, '');
+          else window.history.replaceState({ screen: 'section', tab: tabName }, '');
+        } catch (e) {}
+      }
       render();
       var main = document.getElementById('main-content');
       if (main) {
@@ -4442,8 +4907,13 @@
       window.scrollTo(0, 0);
     }
 
-    function goToHub() {
+    function goToHub(fromPopState) {
       ui.screen = 'hub';
+      if (!fromPopState && window.history && window.history.replaceState) {
+        try {
+          window.history.replaceState({ screen: 'hub' }, '');
+        } catch (e) {}
+      }
       render();
       var main = document.getElementById('main-content');
       if (main) {
@@ -4453,6 +4923,18 @@
       }
       window.scrollTo(0, 0);
     }
+
+    window.addEventListener('popstate', function() {
+      var modalRoot = document.getElementById('modal-root');
+      if (modalRoot && modalRoot.classList.contains('open')) {
+        closeModal();
+        try { window.history.pushState({ screen: ui.screen, tab: ui.tab }, ''); } catch (e) {}
+        return;
+      }
+      if (currentRole && ui.screen === 'section') {
+        goToHub(true);
+      }
+    });
 
     function renderHubScreen() {
       var dNow = new Date();
@@ -4617,9 +5099,20 @@
         }
       } catch (e) {}
 
+      try {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({ screen: 'hub' }, '');
+        }
+      } catch (e) {}
+
       if (fbUrl) {
         startFbPolling();
-        fbPullAll(false, true);
+        if (fbPendingSync) {
+          scheduleOfflineRetry();
+          fbPushAll(true);
+        } else {
+          fbPullAll(false, true);
+        }
       }
 
       var savedRole = safeSSGet(SESSION_ROLE_KEY) || safeLSGet(SESSION_ROLE_KEY);
